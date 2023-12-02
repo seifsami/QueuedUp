@@ -1,0 +1,32 @@
+.home-page {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Roboto', sans-serif;
+    padding: 20px;
+  }
+  
+  .home-page h1, .home-page h2, .home-page h3 {
+    color: var(--primary-color);
+  }
+  
+  .content-section {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #FFFFFF; /* Clear white for content areas */
+    border-left: 5px solid var(--accent-color); /* Accent border */
+  }
+  
+  .content-section h2 {
+    margin-bottom: 15px;
+  }
+  
+  .content-section p {
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    .home-page {
+      padding: 10px;
+    }
+  }
+  
