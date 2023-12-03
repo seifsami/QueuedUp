@@ -1,28 +1,58 @@
 import React from 'react';
-import { Tabs, TabList, Tab, Box, useColorModeValue } from '@chakra-ui/react';
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from '@chakra-ui/react';
 
 const ContentToggle = () => {
-  const tabSelectedStyle = {
-    bg: useColorModeValue('teal.500', 'teal.200'), // For light mode: teal.500; for dark mode: teal.200
-    color: 'white',
-    p: 3,
-    borderRadius: 'md',
-    fontWeight: 'semibold',
-    _hover: {
-      boxShadow: 'md', // Optional: adds a shadow on hover
-    },
-  };
-
   return (
-    <Box>
-      <Tabs variant="soft-rounded" colorScheme="teal" align="center" isFitted>
-        <TabList>
-          <Tab _selected={tabSelectedStyle}>TV Shows</Tab>
-          <Tab _selected={tabSelectedStyle}>Movies</Tab>
-          <Tab _selected={tabSelectedStyle}>Books</Tab>
-        </TabList>
-      </Tabs>
-    </Box>
+    <Tabs isFitted variant="enclosed" w="full">
+      <TabList mb="1em">
+      <Tab
+        _selected={{ color: 'white', bg: 'teal.600', borderBottom: '4px solid', borderColor: 'teal.700' }}
+        _hover={{ 
+          bg: 'teal.50', 
+          color: 'teal.700',
+          _selected: {
+            bg: 'teal.600', // Keep the background the same for the active tab on hover
+            color: 'white',
+          }
+        }}
+        borderRadius="md"
+        p={3}
+      >
+          TV Shows
+        </Tab>
+        <Tab
+          _selected={{ color: 'white', bg: 'teal.600', borderBottom: '4px solid', borderColor: 'teal.700' }}
+          _hover={{ 
+            bg: 'teal.50', 
+            color: 'teal.700',
+            _selected: {
+              bg: 'teal.600', // Keep the background the same for the active tab on hover
+              color: 'white',
+            }
+          }}
+          borderRadius="md"
+          p={3}
+        >
+          Movies
+        </Tab>
+        <Tab
+          _selected={{ color: 'white', bg: 'teal.600', borderBottom: '4px solid', borderColor: 'teal.700' }}
+          _hover={{ 
+            bg: 'teal.50', 
+            color: 'teal.700',
+            _selected: {
+              bg: 'teal.600', // Keep the background the same for the active tab on hover
+              color: 'white',
+            }
+          }}
+          borderRadius="md"
+          p={3}
+        >
+          Books
+        </Tab>
+      </TabList>
+      
+    </Tabs>
   );
 };
 

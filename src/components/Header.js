@@ -1,36 +1,52 @@
 import React from 'react';
-import { Flex, HStack, Text, Button, IconButton, useColorMode, useColorModeValue } from '@chakra-ui/react';
-import { FaSun, FaMoon } from 'react-icons/fa';
+import { Flex, Box, InputGroup, Input, InputLeftElement, Icon, IconButton, useColorMode, Text } from '@chakra-ui/react';
+import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
+import SearchBar from './SearchBar';
 
 const Header = () => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const bg = useColorModeValue('brand.100', 'gray.700');
-  const color = useColorModeValue('white', 'white');
 
   return (
-    // Using `mx` to set the margin on the x-axis to '-mx' (negative max value of margin)
-    // to effectively cancel out any inherited margin from parent elements.
-    <Flex bg={bg} justifyContent="space-between" alignItems="center" p={4} wrap="wrap">
-      <HStack spacing={2}>
-        <Text fontSize="2xl" fontWeight="bold" color={color}>
+    <Flex
+      as="header"
+      p={4}
+      bg="brand.100"
+      color="white"
+      align="center"
+      justify="space-between"
+      wrap="wrap"
+    >
+      {/* Logo and Title */}
+      <Box flexShrink={0}>
+        <Text fontSize="2xl" fontWeight="bold">
           QueuedUp
         </Text>
-        <Text fontSize="md" color={color} opacity="0.8">
-          -- Your personalized release radar
-        </Text>
-      </HStack>
-      <HStack spacing={2}>
-        <Button colorScheme="teal">Login</Button>
-        <Button colorScheme="orange">Register</Button>
-        <IconButton
-          size="lg"
-          variant="ghost"
-          color={color}
-          onClick={toggleColorMode}
-          icon={colorMode === 'light' ? <FaMoon /> : <FaSun />}
-          aria-label={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`}
-        />
-      </HStack>
+      </Box>
+
+      {/* Search Bar */}
+      <Flex flex={1} minW={0} mx={4}> {/* This Flex wrapper allows the search bar to grow */}
+        <InputGroup>
+          <InputLeftElement pointerEvents="none">
+            <Icon as={FaSearch} color="gray.300" />
+          </InputLeftElement>
+          <Input
+            type="text"
+            placeholder="Search for TV shows, movies, books..."
+            variant="filled"
+            _placeholder={{ color: 'gray.500' }}
+          />
+        </InputGroup>
+      </Flex>
+
+      {/* Theme Toggle Button */}
+      <IconButton
+        size="lg"
+        variant="ghost"
+        color="white"
+        onClick={toggleColorMode}
+        icon={colorMode === 'light' ? <FaMoon /> : <FaSun />}
+        aria-label={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`}
+      />
     </Flex>
   );
 };
