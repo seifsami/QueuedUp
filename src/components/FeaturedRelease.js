@@ -1,13 +1,16 @@
 import React from 'react';
 import { Box, Image, Flex, Heading, Text, Button } from '@chakra-ui/react';
 
+
+
 const FeaturedRelease = ({ item }) => {
+  
   return (
     <Flex
       direction={{ base: 'column', md: 'row' }}
       align="center"
       justify={{ md: 'space-between' }} // Spread content on desktop
-      my={{ base: 6, md: 4 }}
+      my={{ base: 4, md: 2 }}
       textAlign={{ base: 'center', md: 'left' }} // Center text on mobile
     >
       <Box
@@ -23,6 +26,7 @@ const FeaturedRelease = ({ item }) => {
           alt="featured release"
           maxWidth="100%" // Ensure image is not bigger than its container
           height="auto"
+          maxHeight={{ md: "350px" }}
           objectFit="contain"
         />
       </Box>
@@ -34,7 +38,7 @@ const FeaturedRelease = ({ item }) => {
         <Heading as="h3" size="lg" mb={2}>
           Featured Release
         </Heading>
-        <Text fontSize="md" noOfLines={{ base: 4, md: 6 }}>
+        <Text fontSize="md" noOfLines={{ base: 3, md: 6 }}>
           {"The portrayal of Stephen Dedalus's Dublin childhood and youth, his quest for identity through art and his gradual emancipation from the claims of family, religion and Ireland itself, is also an oblique self-portrait of the young James Joyce and a universal testament to the artist's 'eternal imagination'. Both an insight into Joyce's life and childhood, and a unique work of modernist fiction, A Portrait of the Artist as a Young Man is a novel of sexual awakening, religious rebellion and the essential search for voice and meaning that every nascent artist must face in order to blossom fully into themselves."}
         </Text>
         <Flex

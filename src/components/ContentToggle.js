@@ -4,7 +4,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from '@chakra-ui/react';
 const ContentToggle = () => {
   return (
     <Tabs isFitted variant="enclosed" w="full">
-      <TabList mb="1em">
+      <TabList >
       <Tab
         _selected={{ color: 'white', bg: 'teal.600', borderBottom: '4px solid', borderColor: 'teal.700' }}
         _hover={{ 
