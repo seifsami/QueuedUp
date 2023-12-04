@@ -4,8 +4,12 @@ import { FaEye } from 'react-icons/fa';
 import Countdown from 'react-countdown';
 
 const MediaCard = ({ item }) => {
-  const cardHeight = '494px'; // Adjust to match your current card height
+  const cardHeight = '500px'; // Adjust to match your current card height
   const imageContainerHeight = '338px'; 
+  
+
+  
+
   return (
     <Box
       borderWidth="1px"
@@ -41,11 +45,11 @@ const MediaCard = ({ item }) => {
         </Box>
       </Box>
 
-      <VStack align="start" p={4}>
-        <Text fontWeight="bold" noOfLines={2}>{item.title}</Text> // Text wrapping enabled
+      <VStack align="start" p={2} spacing="1">
+        <Text fontWeight="bold" noOfLines={2} h="3rem">{item.title} </Text> // Text wrapping enabled
         <Text fontSize="sm">{new Date(item.releaseDate).toLocaleDateString()}</Text>
         <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
-        <HStack justifyContent="space-between" width="full">
+        <HStack justifyContent="space-between" width="full" >
           <Button colorScheme="teal" size="sm" flex={2}>Notify Me</Button>
           <Button variant="outline" colorScheme="teal" size="sm" flex={2}>View Details</Button>
         </HStack>

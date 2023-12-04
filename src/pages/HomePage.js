@@ -33,13 +33,13 @@ const HomePage = () => {
     ];
 
     const trendingData = [
-        { id: 1, title: "Breaking Boundaries", releaseDate:  new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg` },
-        { id: 2, title: "Extraction", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}71RY4785nIL._AC_UF1000,1000_QL80_.jpg`},
-        { id: 3, title: "Sweeny Todd", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),image:`${process.env.PUBLIC_URL}510g2SGySaL.jpg`} ,
-        { id: 4, title: "Stranger Things", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}tomorrow.jpeg` },
-        { id: 5, title: "Fleet foot", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}rothfuss.webp` },
-        { id: 6, title: "Extraction", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}master.jpeg` },
-        { id: 7, title: "Extraction2", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}hitchikers.jpeg`},
+        { id: 1, title: "Tress Of The Emerald Sea", releaseDate:  new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg` },
+        { id: 2, title: "Mother Night", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}71RY4785nIL._AC_UF1000,1000_QL80_.jpg`},
+        { id: 3, title: "East Of Eden", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),image:`${process.env.PUBLIC_URL}510g2SGySaL.jpg`} ,
+        { id: 4, title: "Tomorrow, and tomorrow, and tomorrow", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}tomorrow.jpeg` },
+        { id: 5, title: "Name of The Wind", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}rothfuss.webp` },
+        { id: 6, title: "Master and Margarita", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}master.jpeg` },
+        { id: 7, title: "Hitchikers Guide To The Galaxy", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}hitchikers.jpeg`},
     ];
 
     const watchlistData = [
