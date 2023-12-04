@@ -20,7 +20,7 @@ const MediaCard = ({ item }) => {
       >
         <Box position="relative">
           <Image
-            src={`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`} // Replace with the correct image path
+            src={item.image} // Replace with the correct image path
             alt={item.title}
             objectFit="scale-down"
             w="100%" // Image will scale to fit width

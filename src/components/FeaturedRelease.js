@@ -26,7 +26,7 @@ const FeaturedRelease = ({ item }) => {
           alt="featured release"
           maxWidth="100%" // Ensure image is not bigger than its container
           height="auto"
-          maxHeight={{ md: "350px" }}
+          maxHeight={{ base: "300px", md: "350px" }}
           objectFit="contain"
         />
       </Box>
