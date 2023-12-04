@@ -29,6 +29,54 @@ const HomePage = () => {
             releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
             image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`
           },
+          {
+            id: 3,
+            title: "Sweeney Todd",
+            releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+            image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`
+          },
+          {
+            id: 3,
+            title: "Sweeney Todd",
+            releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+            image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`
+          },
+          {
+            id: 3,
+            title: "Sweeney Todd",
+            releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+            image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`
+          },
+          {
+            id: 3,
+            title: "Sweeney Todd",
+            releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+            image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`
+          },
+          {
+            id: 3,
+            title: "Sweeney Todd",
+            releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+            image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`
+          },
+          {
+            id: 3,
+            title: "Sweeney Todd",
+            releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+            image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`
+          },
+          {
+            id: 3,
+            title: "Sweeney Todd",
+            releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+            image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`
+          },
+          {
+            id: 3,
+            title: "Sweeney Todd",
+            releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+            image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`
+          },
         // ... more items
     ];
 
@@ -64,7 +112,8 @@ const HomePage = () => {
         </Box>
         </Box>
         <Box px={4} py={1} >
-          <UpcomingReleases releases={upcomingReleasesData} />
+        <Text fontSize="2xl" fontWeight="bold" mb={4}>Upcoming Releases</Text>
+        <Carousel items={upcomingReleasesData} />
           <Text fontSize="2xl" fontWeight="bold" mb={4}>Trending</Text>
           <Carousel items={trendingData} />
           <WatchlistPreview watchlist={watchlistData} />
