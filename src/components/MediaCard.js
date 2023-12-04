@@ -4,28 +4,34 @@ import { FaEye } from 'react-icons/fa';
 import Countdown from 'react-countdown';
 
 const MediaCard = ({ item }) => {
-    return (
-        <Box
-        w="220px" // Standard width for all cards
-        h="auto" // Height will adjust dynamically
-        borderWidth="1px"
-        borderRadius="lg"
-        overflow="hidden"
-        bg="white"
-        boxShadow="sm"
-        transition="0.3s"
-        _hover={{ boxShadow: 'md' }}
-        mx={1}
-        my={2} // Adjusted margin between cards
+  const cardHeight = '494px'; // Adjust to match your current card height
+  const imageContainerHeight = '338px'; 
+  return (
+    <Box
+      borderWidth="1px"
+      borderRadius="lg"
+      overflow="hidden"
+      bg="white"
+      boxShadow="sm"
+      transition="0.3s"
+      _hover={{ boxShadow: 'md' }}
+      w="220px" // Width of the card
+      h={cardHeight} // Fixed height for the card
+      m="0 8px" // Margin for spacing between cards
+    >
+      <Box 
+        height={imageContainerHeight}
+        position="relative"
+        borderBottom="1px solid" // Border at the bottom of the image container
+        borderColor="gray.200" // Border color
       >
-        <Box position="relative">
-          <Image
-            src={item.image} // Replace with the correct image path
-            alt={item.title}
-            objectFit="scale-down"
-            w="100%" // Image will scale to fit width
-            h="auto" // Height will be automatic to maintain aspect ratio
-          />
+        <Image
+          src={item.image}
+          alt={item.title}
+          objectFit="cover" // Cover the area, maintaining aspect ratio
+          width="100%" // Use full width of the container
+          height="100%" // Use full height of the container
+        />
         {/* Tracking count overlay */}
         <Box position="absolute" top="2" right="2" p="2" bg="rgba(255, 255, 255, 0.6)" borderRadius="full">
           <HStack>
