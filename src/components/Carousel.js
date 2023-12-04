@@ -7,6 +7,7 @@ const Carousel = ({ items }) => {
   const scrollContainer = useRef(null);
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
+  const imageHeight = 338
 
   const checkScrollPosition = () => {
     if (scrollContainer.current) {
@@ -36,18 +37,11 @@ const Carousel = ({ items }) => {
     }
   };
 
+ 
+  
   return (
-    <Flex alignItems="center" my={4}>
-      {!isAtStart && (
-        <IconButton
-          onClick={() => scroll(-1)}
-          aria-label="Scroll left"
-          icon={<Icon as={FaChevronLeft} />}
-          mr={2}
-        />
-      )}
-
-      <Box ref={scrollContainer} overflowX="scroll" flex="1" mx={-2}>
+    <Flex alignItems="center" my={4} pos="relative"> {/* Add relative positioning */}
+      <Box ref={scrollContainer} overflowX="scroll" flex="1">
         <Flex>
           {items.map((item, index) => (
             <Box key={item.id} width="220px" minW="220px" mx="8px">
@@ -57,12 +51,36 @@ const Carousel = ({ items }) => {
         </Flex>
       </Box>
 
+      {!isAtStart && (
+        <IconButton
+          onClick={() => scroll(-1)}
+          aria-label="Scroll left"
+          icon={<FaChevronLeft size="24px" />} // Adjust size as needed
+          position="absolute" // Absolute positioning
+          left="0" // Align to the left edge
+          top={`calc(${imageHeight / 2}px - 12px)`} // Half of the image height minus half of the icon size
+          transform="translateX(-50%)" // Center horizontally
+          zIndex={2} // Ensure it's above other content
+          bg="rgba(255, 255, 255, 0.5)" // Slightly transparent background
+          _hover={{ bg: 'rgba(255, 255, 255, 0.8)' }} // More opaque on hover
+          size="lg" // Larger button size
+        />
+      )}
+
       {!isAtEnd && (
         <IconButton
           onClick={() => scroll(1)}
           aria-label="Scroll right"
-          icon={<Icon as={FaChevronRight} />}
-          ml={2}
+          icon={<FaChevronRight size="24px" />} // Adjust size as needed
+          position="absolute" // Absolute positioning
+          right="0" // Align to the right edge
+          top={`calc(${imageHeight / 2}px - 12px)`} // Half of the image height minus half of the icon size
+          transform="translateX(50%)" // Center horizontally
+          zIndex={2} // Ensure it's above other content
+          bg="rgba(255, 255, 255, 0.5)" // Slightly transparent background
+          _hover={{ bg: 'rgba(255, 255, 255, 0.8)' }} // More opaque on hover
+          size="lg" // Larger button size
+          p={1}
         />
       )}
     </Flex>
