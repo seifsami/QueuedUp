@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Text } from '@chakra-ui/react';
+import { Box, Container, Text, background } from '@chakra-ui/react';
 import Header from '../components/Header';
 import ContentToggle from '../components/ContentToggle';
 import SearchBar from '../components/SearchBar';
@@ -91,8 +91,8 @@ const HomePage = () => {
     ];
 
     const watchlistData = [
-        { id: 1, title: "Stranger Things", status: "2 episodes left" },
-        { id: 2, title: "The Witcher", status: "5 episodes left" },
+        { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString()},
         // ... more items
     ];
       
@@ -106,8 +106,8 @@ const HomePage = () => {
       {/* Apply max width directly to the Box and use auto margins for horizontal centering */}
       <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
       <ContentToggle />
-      <Box bg="#32B992">
-        <Box bg="#32B992">
+      <Box bg='brand.100'>
+        <Box bg='brand.100'>
           <FeaturedRelease />
         </Box>
         </Box>
