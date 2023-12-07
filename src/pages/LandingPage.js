@@ -5,7 +5,6 @@ import Header from '../components/Header'; // Assuming you have a Header compone
 const LandingPage = () => {
     return (
         <>
-            <Header />
             <Flex direction="column" align="center" justify="center" minHeight="100vh" bg="white" px={4}>
                 <Box maxW={{ xl: "1200px" }} width="full">
                     <Text fontSize="5xl" fontWeight="bold" textAlign="center" mb={6}>
