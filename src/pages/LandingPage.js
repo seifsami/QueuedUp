@@ -1,15 +1,23 @@
 import React from 'react';
 import { Text, Button, Flex, VStack } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-import './LandingPage.css'; // Import the CSS file
+import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
+import './LandingPage.css';
 
 const MotionButton = motion(Button);
 
 const LandingPage = () => {
     // Define your animation variants
+    const navigate = useNavigate(); // Initialize the navigate function using the useNavigate hook
+
+    // Define your animation variants
     const variants = {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }
+    };
+
+    const navigateToHomePage = () => {
+        navigate('/homepage'); // Navigate to HomePage
     };
 
     return (
@@ -32,6 +40,7 @@ const LandingPage = () => {
                         whileHover={{ scale: 1.05 }}
                         whileFocus={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
+                        onClick={navigateToHomePage} // Set the onClick handler
                     >
                         Browse
                     </MotionButton>
