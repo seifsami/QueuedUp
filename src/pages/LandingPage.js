@@ -1,9 +1,8 @@
 import React from 'react';
-import { Box, Text, Button, Flex, VStack } from '@chakra-ui/react';
+import { Text, Button, Flex, VStack } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 
 // Create a motion component
-const MotionBox = motion(Box);
 const MotionButton = motion(Button);
 
 const LandingPage = () => {
@@ -26,32 +25,23 @@ const LandingPage = () => {
                 bgSize="cover"
             >
                 <VStack spacing={6} maxW={{ xl: "1200px" }} width="full" px={4} p={6}>
-                    <MotionBox
-                        bg="rgba(255, 255, 255, 0.6)"
-                        borderRadius="md"
-                        p={1}
-                        initial="hidden"
-                        animate="visible"
-                        variants={variants}
-                        transition={{ duration: 0.8, delay: 0.3 }}
+                    <Text 
+                        fontSize="6xl" 
+                        fontWeight="extrabold" 
+                        textAlign="center" 
+                        color="white"
+                        textShadow="0 0 8px black, 0 0 10px black, 0 0 12px black" // More pronounced shadow
                     >
-                        <Text fontSize="6xl" fontWeight="bold" textAlign="center" color="black">
-                            QueuedUp
-                        </Text>
-                    </MotionBox>
-                    <MotionBox
-                        bg="rgba(255, 255, 255, 0.6)"
-                        borderRadius="md"
-                        p={1}
-                        initial="hidden"
-                        animate="visible"
-                        variants={variants}
-                        transition={{ duration: 0.8, delay: 0.6 }}
+                        QueuedUp
+                    </Text>
+                    <Text 
+                        fontSize="2xl" 
+                        textAlign="center" 
+                        color="white"
+                        textShadow="0 0 8px black, 0 0 10px black, 0 0 12px black" // More pronounced shadow
                     >
-                        <Text fontSize="2xl" textAlign="center" color="black">
-                            Get notified when your favorite books, movies, and TV shows are available.
-                        </Text>
-                    </MotionBox>
+                        Get notified when your favorite books, movies, and TV shows are available.
+                    </Text>
                     <MotionButton
                         colorScheme="blue"
                         size="lg"
