@@ -3,6 +3,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';  // Your HomePage component
 import './App.css';
+import WatchlistPage from './pages/WatchlistPage'; // Your WatchlistPage component
+
 // Import other pages and components as needed
 
 const App = () => {
@@ -10,7 +12,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        {/* Define other routes and components here */}
+        <Route path="/watchlist" element={<WatchlistPage />} />
       </Routes>
     </Router>
   );

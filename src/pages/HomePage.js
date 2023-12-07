@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Text, background } from '@chakra-ui/react';
+import { Box, Container, Text, background, Button, Link } from '@chakra-ui/react';
 import Header from '../components/Header';
 import ContentToggle from '../components/ContentToggle';
 import SearchBar from '../components/SearchBar';
