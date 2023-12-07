@@ -24,7 +24,7 @@ const LandingPage = () => {
                 </Box>
                 <Spacer />
                 <Box maxW={{ xl: "1200px" }} width="full">
-                    <Image src={`${process.env.PUBLIC_URL}/landing-page-image.jpg`} alt="Landing Page" />
+                    <Image src={`${process.env.PUBLIC_URL}/landing.jpg`} alt="Landing Page" />
                 </Box>
             </Flex>
         </>
