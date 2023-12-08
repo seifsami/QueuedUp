@@ -10,6 +10,8 @@ import WatchlistPreview from '../components/WatchlistPreview';
 import Carousel from '../components/Carousel';
 
 const HomePage = () => {
+
+    
     const upcomingReleasesData = [
         {
           id: 1,
@@ -108,7 +110,7 @@ const HomePage = () => {
       <ContentToggle />
       <Box bg='brand.100'>
         <Box bg='brand.100'>
-          <FeaturedRelease />
+          <FeaturedRelease/>
         </Box>
         </Box>
         <Box px={4} py={1} >

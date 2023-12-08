@@ -1,10 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Flex, Box, InputGroup, Input, InputLeftElement, Icon, IconButton, useColorMode, Text } from '@chakra-ui/react';
 import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
 import SearchBar from './SearchBar';
 
+
 const Header = () => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const [mediaType, setMediaType] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+
+  const dummyData = [
+    // ... your dummy data for search suggestions
+  ];
+
+  const handleSearchChange = (query) => {
+    setSearchQuery(query);
+    // Filter for suggestions based on the query
+    if (query.length > 0) {
+      const searchSuggestions = dummyData.filter((item) =>
+        item.title.toLowerCase().includes(query.toLowerCase())
+      );
+      setSuggestions(searchSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
 
   return (
     <Flex
@@ -24,19 +46,13 @@ const Header = () => {
       </Box>
 
       {/* Search Bar */}
-      <Flex flex={1} minW={0} mx={4}> {/* This Flex wrapper allows the search bar to grow */}
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <Icon as={FaSearch} color="gray.300" />
-          </InputLeftElement>
-          <Input
-            type="text"
-            placeholder="Search for TV shows, movies, books..."
-            variant="filled"
-            _placeholder={{ color: 'gray.500' }}
-          />
-        </InputGroup>
-      </Flex>
+      <SearchBar
+        mediaType={mediaType}
+        setMediaType={setMediaType}
+        searchQuery={searchQuery}
+        setSearchQuery={handleSearchChange}
+        suggestions={suggestions}
+      />
 
       {/* Theme Toggle Button */}
       <IconButton
