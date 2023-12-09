@@ -53,7 +53,14 @@ const FeaturesSection = () => {
           bg={feature.bgColor || bgColor} 
           p={6} 
           borderRadius="md"
-          _hover={{ bg: 'gray.600', transform: 'scale(1.05)', cursor: 'pointer' }}  // Hover effect on the entire card
+          border="1px solid gray" // Adding a border
+          boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)" // Adding a box shadow
+          _hover={{ 
+            bg: 'gray.600', 
+            transform: 'scale(1.05)', 
+            cursor: 'pointer',
+            boxShadow: '0px 6px 15px rgba(0, 0, 0, 0.2)' // Enhanced hover effect with shadow
+          }}  
         >
           <Flex alignItems="center" color="white">
             <Icon as={feature.icon} w={10} h={10} mr={2} />
