@@ -4,10 +4,10 @@ import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
 import SearchBar from './SearchBar';
 
 
-const Header = () => {
+const Header = ({ searchQuery: initialSearchQuery }) => {
   const { colorMode, toggleColorMode } = useColorMode();
   const [mediaType, setMediaType] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
   const [suggestions, setSuggestions] = useState([]);
 
   const dummyData = [

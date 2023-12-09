@@ -9,18 +9,23 @@ import {
   Select,
   Button,
   Box,
-  Text
+  Text,
+  useBreakpointValue
 } from '@chakra-ui/react';
 import { FaSearch } from 'react-icons/fa';
 import WatchlistPreviewCard from './WatchlistPreviewCard';
 
 const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, suggestions }) => {
+  const inputPaddingLeft = useBreakpointValue({ base: "25px", md: "150px" });
+  const iconLeftPosition = useBreakpointValue({ base: "-20px", md: "100px" });
   const [showDropdown, setShowDropdown] = React.useState(false); // Only declare the state you need here
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  
+ 
 
-
-
+  
+  
   const dummyPreviewData = [
     { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
     { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
@@ -95,8 +100,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
   return (
     
     <Flex flex={1} minW={0} mx={4} position={'relative'} ref={searchRef}>
-      <InputGroup>
-        {/* Dropdown for media type selection */}
+      <InputGroup >
         <Select
           w="100px"
           borderRightRadius={0}
@@ -106,6 +110,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
           left="0"
           zIndex="2" // Ensure dropdown is above other content
           color={'gray.500'}
+          display={{ base: 'none', md: 'block' }}
           onChange={(e) => {
             setMediaType(e.target.value.toLowerCase()); // Convert to lowercase to match your groupedData keys
             setShowDropdown(true);
@@ -116,16 +121,20 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
           <option value="tv">TV</option>
           <option value="movie">Movies</option>
         </Select>
-        <InputLeftElement pointerEvents="none" left="100px" ml={3}>
+        <InputLeftElement pointerEvents="none" left={iconLeftPosition} ml={3} >
           <Icon as={FaSearch} color="gray.300" />
         </InputLeftElement>
         <Input
           type="text"
           placeholder="Search for TV shows, movies, books..."
           variant="filled"
-          pl="150px" // Adjust padding to account for the media type dropdown
+          pl={inputPaddingLeft}
+           // Adjust padding to account for the media type dropdown
           _placeholder={{ color: 'gray.500' }}
           value={searchQuery}
+          _focus={{ bg: 'white'}}
+          color="black"
+          flex={1}
           onChange={(e) => {
             setSearchQuery(e.target.value);
             setShowDropdown(true); // Open dropdown when typing
@@ -135,6 +144,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
       </InputGroup>
       {showDropdown && searchQuery && ( // Only show this if showDropdown is true and searchQuery is not empty
        <Box
+       display={{ base: 'none', md: 'block' }}
           style={{
             position: 'absolute',
             top: '100%',
@@ -145,6 +155,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
             zIndex: 1000,
             overflow: 'hidden',
             color: 'black'
+            
           }}
         >
           
