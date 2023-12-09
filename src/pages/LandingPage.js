@@ -3,6 +3,7 @@ import { Text, Button, Flex, VStack } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
 import './LandingPage.css';
+import FeaturesSection from '../components/FeaturesSection';
 
 const MotionButton = motion(Button);
 
@@ -42,8 +43,9 @@ const LandingPage = () => {
                         whileTap={{ scale: 0.95 }}
                         onClick={navigateToHomePage} // Set the onClick handler
                     >
-                        Browse
+                        Sign Up
                     </MotionButton>
+                    <FeaturesSection />
                 </VStack>
             </Flex>
         </>
