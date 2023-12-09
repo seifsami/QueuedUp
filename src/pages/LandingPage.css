@@ -1,0 +1,46 @@
+.landing-page-flex {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.landing-page-vstack {
+    max-width: 1200px;
+    width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.title-text {
+    font-size: 3.75rem; /* Equivalent to 6xl in Chakra UI */
+    font-weight: 800; /* extrabold */
+    text-align: center;
+    color: white;
+    text-shadow: 0 0 10px black, 0 0 12px black, 0 0 14px black;
+}
+
+.subtitle-text {
+    font-size: 1.5rem; /* Equivalent to 2xl in Chakra UI */
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    text-shadow: 0 0 10px black, 0 0 12px black, 0 0 18px black;
+    margin-bottom: 10px;
+}
+
+.motion-button {
+    background-color: black;
+    color: white;
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.5);
+    border-radius: 4px; /* md */
+    /* Add other styles if needed */
+}
