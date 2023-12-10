@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Flex,
@@ -15,12 +15,13 @@ import {
 import { FaSearch } from 'react-icons/fa';
 import WatchlistPreviewCard from './WatchlistPreviewCard';
 
-const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, suggestions }) => {
+const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, suggestions, onFocusChange }) => {
   const inputPaddingLeft = useBreakpointValue({ base: "25px", md: "150px" });
   const iconLeftPosition = useBreakpointValue({ base: "-20px", md: "100px" });
   const [showDropdown, setShowDropdown] = React.useState(false); // Only declare the state you need here
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  const [isFocused, setIsFocused] = useState(false);
   
  
 
@@ -139,12 +140,20 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
             setSearchQuery(e.target.value);
             setShowDropdown(true); // Open dropdown when typing
           }}
+          onFocus={() => {
+            setIsFocused(true);
+            onFocusChange(true); // Use onFocusChange here
+          }}
+          onBlur={() => {
+            setIsFocused(false);
+            onFocusChange(false); // And here
+          }}
           onKeyDown={handleSearch}
         />
       </InputGroup>
-      {showDropdown && searchQuery && ( // Only show this if showDropdown is true and searchQuery is not empty
+      {showDropdown && searchQuery && isFocused && ( // Only show this if showDropdown is true and searchQuery is not empty
        <Box
-       display={{ base: 'none', md: 'block' }}
+       display={{ base: 'block', md: 'block' }}
           style={{
             position: 'absolute',
             top: '100%',

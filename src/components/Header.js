@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flex, Box, InputGroup, Input, InputLeftElement, Icon, IconButton, useColorMode, Text } from '@chakra-ui/react';
+import { Flex, Box, InputGroup, Input, InputLeftElement, Icon, IconButton, useColorMode, Text, useBreakpointValue } from '@chakra-ui/react';
 import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
 import SearchBar from './SearchBar';
 
@@ -9,6 +9,12 @@ const Header = ({ searchQuery: initialSearchQuery }) => {
   const [mediaType, setMediaType] = useState('all');
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
   const [suggestions, setSuggestions] = useState([]);
+  const [isSearchBarFocused, setSearchBarFocused] = useState(false);
+  const isMobile = useBreakpointValue({ base: true, md: false });
+
+  const handleSearchBarFocusChange = (isFocused) => {
+    setSearchBarFocused(isFocused);
+  };
 
   const dummyData = [
     // ... your dummy data for search suggestions
@@ -38,23 +44,26 @@ const Header = ({ searchQuery: initialSearchQuery }) => {
       justify="space-between"
       wrap="wrap"
     >
-      {/* Logo and Title */}
+       {(!isSearchBarFocused || !isMobile) && (
       <Box flexShrink={0}>
         <Text fontSize="2xl" fontWeight="bold">
           QueuedUp
         </Text>
       </Box>
+    )}
 
-      {/* Search Bar */}
-      <SearchBar
-        mediaType={mediaType}
-        setMediaType={setMediaType}
-        searchQuery={searchQuery}
-        setSearchQuery={handleSearchChange}
-        suggestions={suggestions}
-      />
+    {/* Search Bar */}
+    <SearchBar
+      mediaType={mediaType}
+      setMediaType={setMediaType}
+      searchQuery={searchQuery}
+      setSearchQuery={handleSearchChange}
+      suggestions={suggestions}
+      onFocusChange={handleSearchBarFocusChange}
+    />
 
-      {/* Theme Toggle Button */}
+    {/* Conditionally render Theme Toggle Button based on focus and device type */}
+    {(!isSearchBarFocused || !isMobile) && (
       <IconButton
         size="lg"
         variant="ghost"
@@ -63,7 +72,8 @@ const Header = ({ searchQuery: initialSearchQuery }) => {
         icon={colorMode === 'light' ? <FaMoon /> : <FaSun />}
         aria-label={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`}
       />
-    </Flex>
+    )}
+  </Flex>
   );
 };
 
