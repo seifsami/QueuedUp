@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, Button, Flex, VStack } from '@chakra-ui/react';
+import { Text, Button, Flex, VStack, Box, Divider } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
 import './LandingPage.css';
@@ -22,32 +22,93 @@ const LandingPage = () => {
     };
 
     return (
+        
         <>
-            <Flex className="landing-page-flex" bgImage={`${process.env.PUBLIC_URL}/landing.jpg`}>
-                <VStack className="landing-page-vstack">
-                    <Text className="title-text">
-                        QueuedUp
+        <Box
+            w="100%"
+            bg="brand.100" // Use your theme color
+            p={4}
+            color="white"
+            textAlign="center"
+            >
+            <Text fontSize="3xl" fontWeight="bold">
+                QueuedUp
+            </Text>
+        </Box>
+            <Flex className="landing-page-flex" bgImage={`${process.env.PUBLIC_URL}/landing.jpg`} 
+             position="relative"
+             minHeight={{ base: "80vh", md: "70vh" }}
+            
+
+            >
+            <Box
+                position="absolute"
+                top="50%"
+                left="50%"
+                transform="translate(-50%, -50%)"
+                bg="blackAlpha.600" // Adjust the transparency
+                borderRadius="lg"
+                width={{ base: "90%", md: "80%", lg: "60%" }}
+                p={6}
+               // Set a max-width if necessary
+                maxWidth="3xl" // Example max-width
+            >
+                <VStack spacing={4}>
+                    <Text color="white" fontSize="5xl" fontWeight="bold" letterSpacing="wide" textAlign="center">
+                    Never Miss A Release!
                     </Text>
-                    <Text className="subtitle-text">
-                        Get notified when your favorite books, movies, and TV shows are available.
+                    <Text color="white" fontSize="xl">
+                    Get notified when your favorite books, movies, and TV shows are available.
                     </Text>
                     <MotionButton
-                        className="motion-button"
-                        size="lg"
-                        initial="hidden"
-                        animate="visible"
-                        variants={variants}
-                        transition={{ duration: 0.2, delay: 0.3 }}
-                        whileHover={{ scale: 1.05 }}
-                        whileFocus={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={navigateToHomePage} // Set the onClick handler
+                    className="motion-button"
+                    size="lg"
+                    initial="hidden"
+                    animate="visible"
+                    variants={variants}
+                    transition={{ duration: 0.2, delay: 0.3 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileFocus={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={navigateToHomePage}
+                    color="white"
+                    bg="brand.100"
+                    width="auto"
+                    px={10} // Increase padding on the sides for a wider button
                     >
-                        Sign Up
+                    Sign Up
                     </MotionButton>
-                    <FeaturesSection />
                 </VStack>
+                </Box>
             </Flex>
+            <div className="gradient-divider"></div> 
+            <Box bg="white" p={0}>
+            <FeaturesSection />
+            </Box>
+            <div className="gradient-divider"></div> 
+            <Box
+            textAlign="center"
+            pb={12}
+            pt={0} 
+            bg="white" // Soft background color
+            >
+            <Text fontSize="3xl" fontWeight="bold" mb={4}>
+                Don't Let the Story End
+            </Text>
+            <Text fontSize="xl" mb={6}>
+                Let us remind you when your favorite book, movie, or TV series continues.
+            </Text>
+            <Button
+                size="lg"
+                px={10} // Larger button
+                bg="brand.100"
+                color="white"
+                fontSize="md" // Bigger font size
+                // ... other styles
+            >
+                Get Started Now
+            </Button>
+            </Box>
         </>
     );
 };

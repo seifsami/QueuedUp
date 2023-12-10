@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: 70vh;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -44,3 +44,8 @@
     border-radius: 4px; /* md */
     /* Add other styles if needed */
 }
+
+.gradient-divider {
+    height: 50px; /* adjust the height as needed */
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff);
+  }
