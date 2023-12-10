@@ -57,7 +57,12 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
   }, []);
   
 
-  const viewAllResults = () => {
+  const viewAllResults = (e) => {
+    // Stop the click event from propagating to the onBlur event
+    e.preventDefault();
+    e.stopPropagation();
+  
+    setShowDropdown(false); // Close the dropdown when navigating
     navigate(`/search?query=${searchQuery}&type=${mediaType}`);
   };
 
@@ -66,6 +71,16 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
       <WatchlistPreviewCard key={item.id} item={item} />
     ));
   };
+
+  const handleBlur = () => {
+    // Delay hiding the dropdown to allow button click to process
+    setTimeout(() => {
+      if (!isFocused) {
+        setShowDropdown(false);
+      }
+    }, 200); // Delay of 200ms
+  };
+  
 
   const renderGroupedPreviews = () => {
     // If the mediaType is 'all', show grouped data by type
@@ -144,10 +159,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
             setIsFocused(true);
             onFocusChange(true); // Use onFocusChange here
           }}
-          onBlur={() => {
-            setIsFocused(false);
-            onFocusChange(false); // And here
-          }}
+          onBlur={handleBlur}
           onKeyDown={handleSearch}
         />
       </InputGroup>
@@ -171,7 +183,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
           {renderGroupedPreviews()}
           <Flex justifyContent="center" p="4">
           <Button
-            onClick={viewAllResults}
+            onClick={(e) => viewAllResults(e)}
             colorScheme="teal"
             width="full"
             variant="outline"
