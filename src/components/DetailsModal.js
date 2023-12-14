@@ -35,15 +35,15 @@ const DetailsModal = ({ isOpen, onClose, item }) => {
               />
             </Box>
             <Box flex="1" px={{ base: 2, md: 4 }}>
-              <Text fontSize="lg" fontWeight="bold" mt = {{base:"0", md:"15px"}} mb={2} textAlign={{ base: "center", md: "left" }}>
+              <Text fontSize="2xl" fontWeight="bold" mt = {{base:"0", md:"15px"}} mb={2} textAlign={{ base: "center", md: "left" }}>
                 {item.title}
               </Text>
               {item.author && (
-                <Text fontSize="md" mb={2} textAlign={{ base: "center", md: "left" }}>
+                <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
                   Author: {item.author}
                 </Text>
               )}
-              <Text fontSize="md" mb={2} textAlign={{ base: "center", md: "left" }}>
+              <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
                 Release Date: {new Date(item.releaseDate).toLocaleDateString()}
               </Text>
               {item.description && (
