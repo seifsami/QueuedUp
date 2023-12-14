@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Box, Container, Text, background, Button, Link } from '@chakra-ui/react';
 import Header from '../components/Header';
 import ContentToggle from '../components/ContentToggle';
@@ -8,8 +8,22 @@ import UpcomingReleases from '../components/UpcomingReleases';
 import TrendingNow from '../components/TrendingNow';
 import WatchlistPreview from '../components/WatchlistPreview';
 import Carousel from '../components/Carousel';
+import DetailsModal from '../components/DetailsModal';
 
 const HomePage = () => {
+
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [isModalOpen, setModalOpen] = useState(false);
+
+    const openModalWithItem = (item) => {
+      setSelectedItem(item);
+      setModalOpen(true);
+    };
+
+    const closeModal = () => {
+      setModalOpen(false);
+      setSelectedItem(null);
+    };
 
     
     const upcomingReleasesData = [
@@ -115,11 +129,19 @@ const HomePage = () => {
         </Box>
         <Box px={4} py={1} >
         <Text fontSize="2xl" fontWeight="bold" mb={4}>Upcoming Releases</Text>
-        <Carousel items={upcomingReleasesData} />
+        <Carousel 
+          items={upcomingReleasesData} 
+          onOpenModal={openModalWithItem} 
+        />
           <Text fontSize="2xl" fontWeight="bold" mb={4}>Trending</Text>
           <Carousel items={trendingData} />
           <WatchlistPreview watchlist={watchlistData} />
         </Box>
+        <DetailsModal 
+          isOpen={isModalOpen} 
+          onClose={closeModal} 
+          item={selectedItem} 
+        />
       </Box>
     </>
   );

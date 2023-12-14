@@ -3,7 +3,7 @@ import { Box, Image, Text, Button, VStack, HStack, Icon } from '@chakra-ui/react
 import { FaEye } from 'react-icons/fa';
 import Countdown from 'react-countdown';
 
-const MediaCard = ({ item }) => {
+const MediaCard = ({ item, onOpenModal }) => {
   const cardHeight = '500px'; // Adjust to match your current card height
   const imageContainerHeight = '338px'; 
   
@@ -51,7 +51,7 @@ const MediaCard = ({ item }) => {
         <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
         <HStack justifyContent="space-between" width="full" >
           <Button colorScheme="teal" size="sm" flex={2}>Notify Me</Button>
-          <Button variant="outline" colorScheme="teal" size="sm" flex={2}>View Details</Button>
+          <Button variant="outline" colorScheme="teal" size="sm" flex={2} onClick={() => onOpenModal(item)}>View Details</Button>
         </HStack>
       </VStack>
     </Box>
