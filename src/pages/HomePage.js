@@ -144,7 +144,7 @@ const HomePage = () => {
       {/* Apply max width directly to the Box and use auto margins for horizontal centering */}
       <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
       <ContentToggle />
-      <Box bg='brand.100'>
+      <Box bg='brand.100' mt={-4}>
         <Box bg='brand.100'>
           <FeaturedRelease/>
         </Box>
