@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { Flex, Box, InputGroup, Input, InputLeftElement, Icon, IconButton, useColorMode, Text, useBreakpointValue } from '@chakra-ui/react';
-import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
+import { Flex, Box, InputGroup, Input, Link,  Button, InputLeftElement, Icon, IconButton, useColorMode, Text, useBreakpointValue } from '@chakra-ui/react';
+import {FaSearch, FaUser, } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import SearchBar from './SearchBar';
+import ProfilePage from '../pages/ProfilePage';
 
 
 const Header = ({ searchQuery: initialSearchQuery }) => {
-  const { colorMode, toggleColorMode } = useColorMode();
+  const navigate = useNavigate();
   const [mediaType, setMediaType] = useState('all');
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
   const [suggestions, setSuggestions] = useState([]);
   const [isSearchBarFocused, setSearchBarFocused] = useState(false);
   const isMobile = useBreakpointValue({ base: true, md: false });
+
+  const handleProfileClick = () => {
+    navigate('/profile'); // Navigate to the profile page
+  };
 
   const handleSearchBarFocusChange = (isFocused) => {
     setSearchBarFocused(isFocused);
@@ -62,19 +68,27 @@ const Header = ({ searchQuery: initialSearchQuery }) => {
       onFocusChange={handleSearchBarFocusChange}
     />
 
-    {/* Conditionally render Theme Toggle Button based on focus and device type */}
-    {(!isSearchBarFocused || !isMobile) && (
-      <IconButton
+    {/* Profile Icon */}
+    <IconButton
+      icon={<FaUser />}
+      variant="ghost"
+      aria-label="Profile"
+      size="lg"
+      color="white"
+      onClick={handleProfileClick}
+    />
+      
+  </Flex>
+  );
+};
+
+export default Header;
+
+/*<IconButton
         size="lg"
         variant="ghost"
         color="white"
         onClick={toggleColorMode}
         icon={colorMode === 'light' ? <FaMoon /> : <FaSun />}
         aria-label={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`}
-      />
-    )}
-  </Flex>
-  );
-};
-
-export default Header;
+      />*/
