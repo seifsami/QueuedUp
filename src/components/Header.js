@@ -6,6 +6,7 @@ import SearchBar from './SearchBar';
 import ProfilePage from '../pages/ProfilePage';
 
 
+
 const Header = ({ searchQuery: initialSearchQuery }) => {
   const navigate = useNavigate();
   const [mediaType, setMediaType] = useState('all');
@@ -16,6 +17,10 @@ const Header = ({ searchQuery: initialSearchQuery }) => {
 
   const handleProfileClick = () => {
     navigate('/profile'); // Navigate to the profile page
+  };
+
+  const handleHomeClick = () => {
+    navigate('/homepage'); // Navigate to the home page
   };
 
   const handleSearchBarFocusChange = (isFocused) => {
@@ -52,9 +57,17 @@ const Header = ({ searchQuery: initialSearchQuery }) => {
     >
        {(!isSearchBarFocused || !isMobile) && (
       <Box flexShrink={0}>
-        <Text fontSize="2xl" fontWeight="bold">
+        <Button 
+          fontSize="2xl" 
+          fontWeight="bold" 
+          variant="ghost" 
+          color="white" 
+          onClick={handleHomeClick}
+          _hover={{ bg: 'transparent' }} 
+          _active={{ bg: 'transparent' }}
+        >
           QueuedUp
-        </Text>
+        </Button>
       </Box>
     )}
 
