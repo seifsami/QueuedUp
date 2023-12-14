@@ -134,7 +134,10 @@ const HomePage = () => {
           onOpenModal={openModalWithItem} 
         />
           <Text fontSize="2xl" fontWeight="bold" mb={4}>Trending</Text>
-          <Carousel items={trendingData} />
+          <Carousel 
+          items={upcomingReleasesData} 
+          onOpenModal={openModalWithItem} 
+        />
           <WatchlistPreview watchlist={watchlistData} />
         </Box>
         <DetailsModal 

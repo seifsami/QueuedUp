@@ -7,7 +7,7 @@ const DetailsModal = ({ isOpen, onClose, item }) => {
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "md", md: "lg" }}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>{item.title}</ModalHeader>
@@ -16,8 +16,8 @@ const DetailsModal = ({ isOpen, onClose, item }) => {
           <Image
             src={item.image}
             alt={item.title}
-            width="100%"
-            height="auto"
+            width="50vh"
+            height="50vh"
             marginBottom="20px"
             objectFit="contain"
           />
@@ -25,7 +25,7 @@ const DetailsModal = ({ isOpen, onClose, item }) => {
           {/* Add more details as needed */}
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="blue" onClick={onClose}>
+            <Button  colorScheme="teal" size="sm" flex={2} onClick={onClose}>
             Close
           </Button>
         </ModalFooter>
