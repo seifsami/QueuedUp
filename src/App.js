@@ -9,10 +9,12 @@ import { ModalProvider } from './ModalContext'
 import OnboardingModal from './components/OnboardingModal';
 import firebase from './firebaseConfig'; 
 
-// Import other pages and components as needed
+
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
+  
+
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(user => {
       console.log("Auth state changed, user:", user);

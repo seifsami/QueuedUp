@@ -7,7 +7,6 @@ import { FaUserCircle } from 'react-icons/fa';
 
 
 const Header = ({ searchQuery: initialSearchQuery, user }) => {
-  console.log("Current user: ", user);
   const { openModal } = useModal();
   const { colorMode, toggleColorMode } = useColorMode();
   const [mediaType, setMediaType] = useState('all');
@@ -15,6 +14,7 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isSearchBarFocused, setSearchBarFocused] = useState(false);
   const isMobile = useBreakpointValue({ base: true, md: false });
+  
 
   const handleSearchBarFocusChange = (isFocused) => {
     setSearchBarFocused(isFocused);
@@ -79,16 +79,9 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
     {/* Conditionally render Theme Toggle Button based on focus and device type */}
     {(!isSearchBarFocused || !isMobile) && (
   user ? (
-    <IconButton
-      icon={<FaUserCircle />}
-      onClick={handleProfileClick}
-      size="lg"
-      variant="ghost"
-      color="white"
-      aria-label="User profile"
-    />
+    <Avatar bg={"brand.500"} color={"white"}  name='Seif Sami' src='none' />
   ) : (
-    <Button onClick={handleLoginClick}>Sign Up / Log In</Button>
+    <Button onClick={handleLoginClick} size="sm">Sign In </Button>
   )
 )}
   </Flex>

@@ -3,8 +3,7 @@ import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody,
 import firebase from '../firebaseConfig';
 import { useModal } from '../ModalContext';
 import { FaGoogle, FaArrowLeft, FaInfoCircle} from 'react-icons/fa';
-import OnboardingSearchBar from './OnboardingSearchBar';
-import WatchlistPreviewCard from './WatchlistPreviewCard';
+
 
 
 
@@ -25,8 +24,7 @@ function OnboardingModal() {
   const [notificationPreference, setNotificationPreference] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [phoneError, setPhoneError] = useState('');
-  const [selectedItems, setSelectedItems] = useState(new Set());
-  const [groupedResults, setGroupedResults] = useState({});
+  
   
 
   const handleGoBack = () => {
@@ -47,7 +45,7 @@ function OnboardingModal() {
           isClosable: true,
         });
       }
-      console.log('Selected items:', Array.from(selectedItems));
+      
       closeModal(); // Close the modal after successful authentication
     };
 
@@ -252,17 +250,7 @@ function OnboardingModal() {
         }
       }, [notificationPreference, phoneNumber]);
 
-      const handleSelectItem = (item) => {
-        setSelectedItems(prev => {
-          const newSelection = new Set(prev);
-          if (newSelection.has(item.id)) {
-            newSelection.delete(item.id);
-          } else {
-            newSelection.add(item.id);
-          }
-          return newSelection;
-        });
-      };
+     
     
     
 
@@ -411,38 +399,6 @@ function OnboardingModal() {
               </>
               
             )}
-           {currentStep === 3 && (
-      <Fade in={true}>
-        <ModalBody>
-          <OnboardingSearchBar
-            onSelectItem={handleSelectItem}
-            selectedItems={selectedItems}
-          />
-          {/* Scrollable container for selected items */}
-          <Box maxHeight="300px" overflowY="auto">
-            {Array.from(selectedItems).map(itemId => {
-              const item = groupedResults.find(item => item.id === itemId); // Find item by ID
-              return (
-                <WatchlistPreviewCard
-                  key={item.id}
-                  item={item}
-                  // Optional: onClick to deselect
-                />
-              );
-            })}
-          </Box>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            colorScheme="teal"
-            isDisabled={selectedItems.size === 0}
-            onClick={handleSuccessfulAuth} // Your function to finalize creation
-          >
-            Add Selected Items
-          </Button>
-        </ModalFooter>
-      </Fade>
-        )}
           </ModalContent>
         </Modal>
       );

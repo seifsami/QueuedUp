@@ -63,7 +63,7 @@ const MediaCard = ({ item }) => {
         <Text fontSize="sm">{new Date(item.releaseDate).toLocaleDateString()}</Text>
         <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
         <HStack justifyContent="space-between" width="full" >
-        <NotifyMeButton item={placeholderItem} />
+        <NotifyMeButton item={placeholderItem}/>
           <Button variant="outline" colorScheme="teal" size="sm" flex={2}>View Details</Button>
         </HStack>
       </VStack>
