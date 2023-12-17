@@ -9,7 +9,7 @@ import TrendingNow from '../components/TrendingNow';
 import WatchlistPreview from '../components/WatchlistPreview';
 import Carousel from '../components/Carousel';
 
-const HomePage = () => {
+const HomePage = ({ user }) => {
 
     
     const upcomingReleasesData = [
@@ -104,7 +104,7 @@ const HomePage = () => {
 
     return (
       <>
-      <Header/>
+      <Header user={user}/>
       {/* Apply max width directly to the Box and use auto margins for horizontal centering */}
       <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
       <ContentToggle />

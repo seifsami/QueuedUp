@@ -10,7 +10,7 @@ const FeaturedRelease = ({ item }) => {
       direction={{ base: 'column', md: 'row' }}
       align="center"
       justify={{ md: 'space-between' }} // Spread content on desktop
-      my={{ base: 4, md: 2 }}
+      my={{ base: 4, md: 0 }}
       textAlign={{ base: 'center', md: 'left' }} // Center text on mobile
     >
       <Box
