@@ -3,20 +3,24 @@ import { Box, Image, Text, Button, VStack, HStack, Icon } from '@chakra-ui/react
 import { FaEye } from 'react-icons/fa';
 import Countdown from 'react-countdown';
 import { useModal } from '../ModalContext'
+import NotifyMeButton from './NotifyMeButton';
 
 const MediaCard = ({ item }) => {
   const cardHeight = '500px'; // Adjust to match your current card height
   const imageContainerHeight = '338px'; 
   const isLoggedIn = false;
-  const { openModal } = useModal();
+
+  const placeholderItem = {
+    title: "Test Movie",
+    id: "test-movie-123",
+    // Include other relevant properties for the item
+  };
+  
+  
   
 
   const handleNotifyClick = () => {
-    if (!isLoggedIn) { // Replace with your logic to check if user is logged in
-      openModal();
-    } else {
-      // Logic to add the item to the watchlist
-    }
+    console.log("clicked")
   };
 
   return (
@@ -59,7 +63,7 @@ const MediaCard = ({ item }) => {
         <Text fontSize="sm">{new Date(item.releaseDate).toLocaleDateString()}</Text>
         <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
         <HStack justifyContent="space-between" width="full" >
-          <Button onClick={handleNotifyClick} colorScheme="teal" size="sm" flex={2}>Notify Me</Button>
+        <NotifyMeButton item={placeholderItem} />
           <Button variant="outline" colorScheme="teal" size="sm" flex={2}>View Details</Button>
         </HStack>
       </VStack>

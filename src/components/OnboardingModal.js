@@ -3,13 +3,16 @@ import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody,
 import firebase from '../firebaseConfig';
 import { useModal } from '../ModalContext';
 import { FaGoogle, FaArrowLeft, FaInfoCircle} from 'react-icons/fa';
+import OnboardingSearchBar from './OnboardingSearchBar';
+import WatchlistPreviewCard from './WatchlistPreviewCard';
 
 
 
 
 
-function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeholder" } }) {
-  const { isModalOpen, closeModal } = useModal();
+
+function OnboardingModal() {
+  const { isModalOpen, closeModal, itemToAdd } = useModal();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const toast = useToast();
@@ -22,6 +25,8 @@ function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeho
   const [notificationPreference, setNotificationPreference] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [phoneError, setPhoneError] = useState('');
+  const [selectedItems, setSelectedItems] = useState(new Set());
+  const [groupedResults, setGroupedResults] = useState({});
   
 
   const handleGoBack = () => {
@@ -42,6 +47,7 @@ function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeho
           isClosable: true,
         });
       }
+      console.log('Selected items:', Array.from(selectedItems));
       closeModal(); // Close the modal after successful authentication
     };
 
@@ -56,7 +62,16 @@ function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeho
             duration: 5000,
             isClosable: true,
           });
-          // Perform any additional sign-in tasks here, if necessary
+          if (itemToAdd) {
+            console.log('Item added:', itemToAdd.title);
+            toast({
+              title: 'Success!',
+              description: `Success! ${itemToAdd.title} has been added`,
+              status: 'success',
+              duration: 5000,
+              isClosable: true,
+            });
+        }
           closeModal();// Close the modal after successful login
         } catch (error) {
           // Handle errors during sign-in
@@ -125,12 +140,25 @@ function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeho
             setCurrentStep(2);
           
           } else {
-            closeModal();
+            if (itemToAdd) {
+                console.log('Item added:', itemToAdd.title);
+                toast({
+                  title: 'Success!',
+                  description: `Success! ${itemToAdd.title} has been added`,
+                  status: 'success',
+                  duration: 5000,
+                  isClosable: true,
+                });
+            
+        }
+        closeModal();
           }
         } catch (error) {
           // Handle errors
         }
       };
+
+      
 
       
       const switchToSignUp = () => {
@@ -166,19 +194,54 @@ function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeho
       };
       
       const handlePersonalizationComplete = () => {
+        // Validate phone number if mobile notifications are selected
         if (notificationPreference.includes('mobile') && !phoneNumber) {
-            setPhoneError('A phone number is required for mobile notifications.');
+          setPhoneError('A phone number is required for mobile notifications.');
+          toast({
+            title: "Phone Number Required",
+            description: "You must provide a phone number to receive SMS notifications.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+          return; // Exit the function to prevent closing the modal
+        }
+      
+        // Clear any phone error
+        setPhoneError('');
+      
+        // Handle different scenarios based on itemToAdd
+        if (itemToAdd) {
+          // Scenario when an item is to be added
+          console.log('Item added:', itemToAdd.title);
+          toast({
+            title: 'Success!',
+            description: `Success! Account Created`,
+            status: 'success',
+            duration: 10000,
+            isClosable: true,
+          });
+          toast({
+            title: 'Success!',
+            description: `Success! ${itemToAdd.title} has been added`,
+            status: 'success',
+            duration: 10000,
+            isClosable: true,
+          });
+          closeModal(); // Close the modal after adding the item
+        } else {
             toast({
-              title: "Phone Number Required",
-              description: "You must provide a phone number to receive SMS notifications.",
-              status: "error",
-              duration: 5000,
-              isClosable: true,
+                title: 'Success!',
+                description: `Success! Account Created`,
+                status: 'success',
+                duration: 10000,
+                isClosable: true,
             });
-            return; // Exit the function to prevent closing the modal
-          }
-        console.log("succesfully completed"); // Now you can close the modal
+            closeModal()
+        
+        }
       };
+      
 
       useEffect(() => {
         const requiresPhoneNumber = notificationPreference.includes('mobile');
@@ -188,7 +251,19 @@ function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeho
           setPhoneError('');
         }
       }, [notificationPreference, phoneNumber]);
-      
+
+      const handleSelectItem = (item) => {
+        setSelectedItems(prev => {
+          const newSelection = new Set(prev);
+          if (newSelection.has(item.id)) {
+            newSelection.delete(item.id);
+          } else {
+            newSelection.add(item.id);
+          }
+          return newSelection;
+        });
+      };
+    
     
 
       return (
@@ -212,10 +287,12 @@ function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeho
     {currentStep === 1 ? (
       <Box flex="1"  fontSize="lg" fontWeight="bold">
         {isLogin ? 'Sign In' : 'Sign Up'}
+        
       </Box>
     ) : (
+    
       <Box width="auto" fontSize="lg" fontWeight="bold">
-        Personalize Your Experience
+       {currentStep === 2 ? 'Personalize Your Experience' : 'Add Your First Item'}
       </Box>
     )}
     {currentStep === 1 && (
@@ -285,7 +362,7 @@ function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeho
                 </ModalBody>
               </Fade>
             )}
-            {currentStep > 1 && (
+            {currentStep ===2  && (
               <>
                 <Fade in={true}>
                 <ModalBody>
@@ -325,13 +402,47 @@ function OnboardingModal({ itemToAdd = { title: "Placeholder Item", id: "placeho
                         onClick={handlePersonalizationComplete}
                         isDisabled={phoneError !== ''}
                     >
-                        Continue
+                      Finish
                     </Button>
                     </VStack>
           </ModalBody>
                 </Fade>
+            
               </>
+              
             )}
+           {currentStep === 3 && (
+      <Fade in={true}>
+        <ModalBody>
+          <OnboardingSearchBar
+            onSelectItem={handleSelectItem}
+            selectedItems={selectedItems}
+          />
+          {/* Scrollable container for selected items */}
+          <Box maxHeight="300px" overflowY="auto">
+            {Array.from(selectedItems).map(itemId => {
+              const item = groupedResults.find(item => item.id === itemId); // Find item by ID
+              return (
+                <WatchlistPreviewCard
+                  key={item.id}
+                  item={item}
+                  // Optional: onClick to deselect
+                />
+              );
+            })}
+          </Box>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            colorScheme="teal"
+            isDisabled={selectedItems.size === 0}
+            onClick={handleSuccessfulAuth} // Your function to finalize creation
+          >
+            Add Selected Items
+          </Button>
+        </ModalFooter>
+      </Fade>
+        )}
           </ModalContent>
         </Modal>
       );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flex, Box, InputGroup, Input, InputLeftElement, Icon, IconButton, useColorMode, Text, useBreakpointValue, Button, Avatar } from '@chakra-ui/react';
+import { Flex, Box, InputGroup, Input, InputLeftElement, Icon, IconButton, useColorMode, Text, useBreakpointValue, Button, Avatar, useRadioGroup } from '@chakra-ui/react';
 import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
 import SearchBar from './SearchBar';
 import { useModal } from '../ModalContext'
