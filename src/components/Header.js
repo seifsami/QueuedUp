@@ -1,21 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Flex, Box, InputGroup, Input, InputLeftElement, Icon, IconButton, useColorMode, Text, useBreakpointValue, Button, Avatar, useRadioGroup } from '@chakra-ui/react';
-import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
+import { Flex, Box, InputGroup, Input, Link,  Button, InputLeftElement, Icon, IconButton, useColorMode, Text, useBreakpointValue, Button, Avatar, useRadioGroup } from '@chakra-ui/react';
+import {FaSearch, FaUser, } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import { useModal } from '../ModalContext'
 import { FaUserCircle } from 'react-icons/fa';
+import ProfilePage from '../pages/ProfilePage';
+
 
 
 const Header = ({ searchQuery: initialSearchQuery, user }) => {
   const { openModal, currentUser } = useModal();
   console.log("Current User in Header:", currentUser);
-  const { colorMode, toggleColorMode } = useColorMode();
+  const navigate = useNavigate();
   const [mediaType, setMediaType] = useState('all');
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
   const [suggestions, setSuggestions] = useState([]);
   const [isSearchBarFocused, setSearchBarFocused] = useState(false);
   const isMobile = useBreakpointValue({ base: true, md: false });
   
+
+  const handleProfileClick = () => {
+    navigate('/profile'); // Navigate to the profile page
+  };
+
+  const handleHomeClick = () => {
+    navigate('/homepage'); // Navigate to the home page
+  };
 
   const handleSearchBarFocusChange = (isFocused) => {
     setSearchBarFocused(isFocused);
@@ -61,9 +72,17 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
     >
        {(!isSearchBarFocused || !isMobile) && (
       <Box flexShrink={0}>
-        <Text fontSize="2xl" fontWeight="bold">
+        <Button 
+          fontSize="2xl" 
+          fontWeight="bold" 
+          variant="ghost" 
+          color="white" 
+          onClick={handleHomeClick}
+          _hover={{ bg: 'transparent' }} 
+          _active={{ bg: 'transparent' }}
+        >
           QueuedUp
-        </Text>
+        </Button>
       </Box>
     )}
 

@@ -5,7 +5,7 @@ import Countdown from 'react-countdown';
 import { useModal } from '../ModalContext'
 import NotifyMeButton from './NotifyMeButton';
 
-const MediaCard = ({ item }) => {
+const MediaCard = ({ item, onOpenModal }) => {
   const cardHeight = '500px'; // Adjust to match your current card height
   const imageContainerHeight = '338px'; 
   const isLoggedIn = false;
@@ -64,7 +64,7 @@ const MediaCard = ({ item }) => {
         <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
         <HStack justifyContent="space-between" width="full" >
         <NotifyMeButton item={placeholderItem}/>
-          <Button variant="outline" colorScheme="teal" size="sm" flex={2}>View Details</Button>
+        <Button variant="outline" colorScheme="teal" size="sm" flex={2} onClick={() => onOpenModal(item)}>View Details</Button>
         </HStack>
       </VStack>
     </Box>

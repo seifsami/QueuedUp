@@ -5,6 +5,7 @@ import LandingPage from './pages/LandingPage';
 import './App.css';
 import WatchlistPage from './pages/WatchlistPage'; 
 import SearchResultsPage from './pages/SearchResultsPage';
+import ProfilePage from './pages/ProfilePage';
 import { ModalProvider } from './ModalContext'
 import OnboardingModal from './components/OnboardingModal';
 import firebase from './firebaseConfig'; 
@@ -40,8 +41,9 @@ const App = () => {
         <Route path="/homepage" element={<HomePage user={currentUser} />} />
         <Route path="/watchlist" element={<WatchlistPage user={currentUser} />} />
         <Route path="/search" element={<SearchResultsPage  user={currentUser}/>} /> 
+        <Route path="/profile" element={<ProfilePage user={currentUser}/>} /> 
       </Routes>
-    </Router>e
+    </Router>
    </ModalProvider>
   );
 };
