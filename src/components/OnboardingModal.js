@@ -32,6 +32,20 @@ function OnboardingModal() {
     setCurrentStep(currentStep => currentStep - 1);
   };
 
+  const resetModalState = () => {
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setUsername('');
+    setPhoneNumber('');
+    setNotificationPreference([]);
+    setCurrentStep(1);
+    setPasswordError('');
+    setPhoneError('');
+    setIsLogin(true);
+    // Any other states that you need to reset
+  };
+
   const handleEmailChange = (e) => setEmail(e.target.value);
   const handlePasswordChange = (e) => setPassword(e.target.value);
   const handleSuccessfulAuth = () => {
@@ -70,6 +84,7 @@ function OnboardingModal() {
               isClosable: true,
             });
         }
+          resetModalState()
           closeModal();// Close the modal after successful login
         } catch (error) {
           // Handle errors during sign-in
@@ -128,8 +143,8 @@ function OnboardingModal() {
           const result = await firebase.auth().signInWithPopup(provider);
           const isNewUser = result.additionalUserInfo.isNewUser;
           toast({
-            title: isNewUser ? "Welcome!" : "Welcome back!",
-            description: isNewUser ? "Let's personalize your experience." : "You have successfully signed in!",
+            title: "Welcome back!",
+            description:  "You have successfully signed in!",
             status: "success",
             duration: 5000,
             isClosable: true,
@@ -149,6 +164,7 @@ function OnboardingModal() {
                 });
             
         }
+        resetModalState()
         closeModal();
           }
         } catch (error) {
@@ -226,6 +242,7 @@ function OnboardingModal() {
             duration: 10000,
             isClosable: true,
           });
+          resetModalState()
           closeModal(); // Close the modal after adding the item
         } else {
             toast({
@@ -235,6 +252,7 @@ function OnboardingModal() {
                 duration: 10000,
                 isClosable: true,
             });
+            resetModalState()
             closeModal()
         
         }

@@ -116,7 +116,10 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
     <MenuList p={0}  >
       <MenuItem color={"black"} onClick={() => navigate('/profile')}>View Profile</MenuItem>
       <MenuDivider p={0} m={0} />
+      <MenuItem color={"black"} onClick={() => navigate('/watchlist')}>View Watchlist</MenuItem>
+      <MenuDivider p={0} m={0} />
       <MenuItem color={"black"} onClick={handleLogout}>Logout</MenuItem>
+
     </MenuList>
   </Menu>) : (
     <Button onClick={handleLoginClick} size="sm">Sign In </Button>

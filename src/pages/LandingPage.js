@@ -82,7 +82,7 @@ const LandingPage = () => {
                 </Box>
             </Flex>
             <div className="gradient-divider"></div> 
-            <Box bg="white" py={0} px={10}>
+            <Box bg="white" py={0} px= {10}>
             <FeaturesSection />
             </Box>
             <div className="gradient-divider"></div> 
