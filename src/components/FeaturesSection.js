@@ -39,7 +39,7 @@ const FeatureCard = ({ icon, title, description }) => (
     borderWidth="1px"
     rounded="lg"
     p={5}
-    align="center"
+    alignItems="center"
     bg="white"
     shadow="xl" // Apply a larger shadow for more depth
     _hover={{ shadow: "2xl" }} // Optional: Increase shadow on hover for an interactive effect
@@ -47,6 +47,7 @@ const FeatureCard = ({ icon, title, description }) => (
     // Add any other hover effects you want here
     width="100%"
     minH="200px" // Adjust to your preference
+    
   >
     <Icon as={icon} boxSize={10} color="brand.100" />
     <Text fontWeight="bold" fontSize="lg">{title}</Text>
@@ -55,13 +56,14 @@ const FeatureCard = ({ icon, title, description }) => (
 );
 return (
   <Box pb={10} pt={5}>
-    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 5, md: 10 }}>
+    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 5, md: 10 }} >
       {featureItems.map((feature, index) => (
         <FeatureCard
           key={index}
           icon={feature.icon}
           title={feature.title}
           description={feature.description}
+          
         />
       ))}
     </SimpleGrid>
