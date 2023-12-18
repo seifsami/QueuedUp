@@ -75,11 +75,19 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
   const handleBlur = () => {
     // Delay hiding the dropdown to allow button click to process
     setTimeout(() => {
-      if (!isFocused) {
+      
         setShowDropdown(false);
-      }
+        setIsFocused(false);
+        onFocusChange(false); // Notify the Header that the search bar has lost focus
+      
     }, 200); // Delay of 200ms
   };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+    onFocusChange(true);// Notify the Header that the search bar is focused
+  };
+  
   
 
   const renderGroupedPreviews = () => {
@@ -155,10 +163,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
             setSearchQuery(e.target.value);
             setShowDropdown(true); // Open dropdown when typing
           }}
-          onFocus={() => {
-            setIsFocused(true);
-            onFocusChange(true); // Use onFocusChange here
-          }}
+          onFocus={handleFocus}
           onBlur={handleBlur}
           onKeyDown={handleSearch}
         />

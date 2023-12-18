@@ -104,7 +104,7 @@ const HomePage = ({ user }) => {
 
     return (
       <>
-      <Header user={user}/>
+      <Header/>
       {/* Apply max width directly to the Box and use auto margins for horizontal centering */}
       <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
       <ContentToggle />

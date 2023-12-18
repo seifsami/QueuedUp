@@ -4,13 +4,14 @@ import { Button } from '@chakra-ui/react';
 import { useModal } from '../ModalContext'; // Adjust the import path as necessary
 
 export const NotifyMeButton = ({ item, user }) => {
-  const { openModalWithItem } = useModal();
+    const { currentUser, openModalWithItem } = useModal();
+
 
   
 
   const handleNotifyClick = () => {
     console.log("Current user on click: ", user);
-    if (!user) {
+    if (!currentUser) {
         // If no user is logged in, open the sign-in modal
         openModalWithItem(item);
       } else {

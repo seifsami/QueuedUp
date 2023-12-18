@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Flex, Box, InputGroup, Input, InputLeftElement, Icon, IconButton, useColorMode, Text, useBreakpointValue, Button, Avatar, useRadioGroup } from '@chakra-ui/react';
 import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
 import SearchBar from './SearchBar';
@@ -7,7 +7,8 @@ import { FaUserCircle } from 'react-icons/fa';
 
 
 const Header = ({ searchQuery: initialSearchQuery, user }) => {
-  const { openModal } = useModal();
+  const { openModal, currentUser } = useModal();
+  console.log("Current User in Header:", currentUser);
   const { colorMode, toggleColorMode } = useColorMode();
   const [mediaType, setMediaType] = useState('all');
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
@@ -78,7 +79,7 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
 
     {/* Conditionally render Theme Toggle Button based on focus and device type */}
     {(!isSearchBarFocused || !isMobile) && (
-  user ? (
+  currentUser ? (
     <Avatar bg={"brand.500"} color={"white"}  name='Seif Sami' src='none' />
   ) : (
     <Button onClick={handleLoginClick} size="sm">Sign In </Button>
@@ -87,5 +88,6 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
   </Flex>
   );
 };
+
 
 export default Header;
