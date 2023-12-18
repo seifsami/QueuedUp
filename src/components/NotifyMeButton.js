@@ -15,7 +15,7 @@ export const NotifyMeButton = ({ item, user }) => {
         // If no user is logged in, open the sign-in modal
         openModalWithItem(item);
       } else {
-    console.log('clicked')
+    console.log('clicked'+item)
     
   };
   }

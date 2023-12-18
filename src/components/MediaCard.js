@@ -19,9 +19,7 @@ const MediaCard = ({ item, onOpenModal }) => {
   
   
 
-  const handleNotifyClick = () => {
-    console.log("clicked")
-  };
+  
 
   return (
     <Box
@@ -63,7 +61,7 @@ const MediaCard = ({ item, onOpenModal }) => {
         <Text fontSize="sm">{new Date(item.releaseDate).toLocaleDateString()}</Text>
         <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
         <HStack justifyContent="space-between" width="full" >
-        <NotifyMeButton item={placeholderItem}/>
+        <NotifyMeButton item={item}/>
         <Button variant="outline" colorScheme="teal" size="sm" flex={2} onClick={() => onOpenModal(item)}>View Details</Button>
         </HStack>
       </VStack>
