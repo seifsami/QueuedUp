@@ -23,10 +23,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
   const navigate = useNavigate();
   const [isFocused, setIsFocused] = useState(false);
   
- 
 
-  
-  
   const dummyPreviewData = [
     { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
     { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
@@ -81,8 +78,6 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
     setIsFocused(true);
     onFocusChange(true);// Notify the Header that the search bar is focused
   };
-  
-  
 
   const renderGroupedPreviews = () => {
     // If the mediaType is 'all', show grouped data by type
@@ -199,7 +194,5 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
     </Flex>
   );
 };
-  
-
 
 export default SearchBar;

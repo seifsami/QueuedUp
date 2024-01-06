@@ -3,7 +3,6 @@ import { SimpleGrid, Box, Text  } from '@chakra-ui/react';
 import MediaCard from './MediaCard';
 
 const TrendingNow = ({ trending }) => {
-    // ...similar structure for TrendingNow
     return (
         
         <Box my={4}>

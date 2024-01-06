@@ -4,10 +4,7 @@ import { Button } from '@chakra-ui/react';
 import { useModal } from '../ModalContext'; // Adjust the import path as necessary
 
 export const NotifyMeButton = ({ item, user }) => {
-    const { currentUser, openModalWithItem } = useModal();
-
-
-  
+  const { currentUser, openModalWithItem } = useModal();
 
   const handleNotifyClick = () => {
     console.log("Current user on click: ", user);
