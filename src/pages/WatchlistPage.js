@@ -38,16 +38,12 @@ const sortOptions = {
 };
 
   
-const WatchlistPage = () => {
-    const [watchlistData, setWatchlistData] = useState(initialWatchlistData);
+const WatchlistPage = () => { 
+    const [watchlistData] = useState(initialWatchlistData); //Replace with: const [watchlistData, setWatchlistData] = useState(initialWatchlistData);
     const [tabIndex, setTabIndex] = useState(0);
     const [sortCriterion, setSortCriterion] = useState('dateAdded');
     const [releaseStatus, setReleaseStatus] = useState('upcoming');
 
-    
-  
-    
-    
     const handleReleaseStatusChange = (status) => {
         setReleaseStatus(status);
     };

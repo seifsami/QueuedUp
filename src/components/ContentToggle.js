@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, TabList, Tab, TabPanels, TabPanel } from '@chakra-ui/react';
+import { Tabs, TabList, Tab} from '@chakra-ui/react';
 
 const ContentToggle = () => {
   return (

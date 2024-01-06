@@ -1,9 +1,8 @@
 import React from 'react';
-import { Grid, GridItem, Box, Icon, Text, Flex, useColorModeValue, SimpleGrid, VStack } from '@chakra-ui/react';
-import { ViewIcon, StarIcon, HeartIcon, ChatIcon, CalendarIcon, ListIcon } from '@chakra-ui/icons';
+import {Box, Icon, Text, SimpleGrid, VStack } from '@chakra-ui/react';
+import { ViewIcon, StarIcon } from '@chakra-ui/icons';
 
 const FeaturesSection = () => {
-
 
 const featureItems = [
   {
@@ -44,9 +43,8 @@ const FeatureCard = ({ icon, title, description }) => (
     shadow="xl" // Apply a larger shadow for more depth
     _hover={{ shadow: "2xl" }} // Optional: Increase shadow on hover for an interactive effect
     transition="shadow 0.2s" // Smooth transition for the shadow on hover
-    // Add any other hover effects you want here
     width="100%"
-    minH="200px" // Adjust to your preference
+    minH="200px"
     
   >
     <Icon as={icon} boxSize={10} color="brand.100" />

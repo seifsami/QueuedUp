@@ -1,5 +1,5 @@
 // SearchResultsPage.js
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
 import { Box, Flex, VStack, Heading, useBreakpointValue, Text} from '@chakra-ui/react';
 import Header from '../components/Header';
 import WatchlistPreviewCard from '../components/WatchlistPreviewCard';
@@ -22,33 +22,38 @@ const SearchResultsPage = ({ searchQuery }) => {
         'tv': 'TV Shows',
         'book': 'Books',
       };
-   
-  
+
+     // Dummy data for demonstration purposes
+     const dummyResults = useMemo(() => [
+        
+      { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
+      { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
+      {id: 5, title: "Oppenheimer", series: "N/A",  type: "tv", image:`${process.env.PUBLIC_URL}oppenheimer.jpeg`, creator: "Christopher Nolan", releaseDate: '2024-12-30', dateAdded:'2023-12-05'}
+      
+      ], []);
+    
+      // Wrap filterResults in useCallback
+    const filterResults = useCallback((type) => {
+      if (type === 'all') {
+        return dummyResults;
+      } else {
+        return dummyResults.filter(item => item.type === type);
+      }
+    }, [dummyResults]); // Add dependencies if needed
+
     useEffect(() => {
-        // When selectedFilter changes, we filter the dummyResults
+      setFilteredResults(filterResults(typeFromParams || 'All'));
+    }, [typeFromParams, filterResults]); 
+
+      useEffect(() => {
         setFilteredResults(filterResults(typeFromParams || 'All'));
-      }, [typeFromParams]); 
-
-    
-
-    
-
-      
-      
-      const filterResults = (type) => {
-        if (type === 'all') {
-          return dummyResults;
-        } else {
-          return dummyResults.filter(item => item.type === type);
-        }
-      };
+      }, [typeFromParams, filterResults]); 
       
         
 
       useEffect(() => {
-        // When selectedFilter changes, we filter the dummyResults again
-        setFilteredResults(filterResults(selectedFilter));
-      }, [selectedFilter]);
+        setFilteredResults(filterResults(typeFromParams || 'All'));
+      }, [typeFromParams, filterResults]);
 
       const updateFilter = (filter) => {
         setSelectedFilter(filter);
@@ -59,14 +64,7 @@ const SearchResultsPage = ({ searchQuery }) => {
       
 
  
-  // Dummy data for demonstration purposes
-  const dummyResults = [
-    
-     { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
-    { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
-    {id: 5, title: "Oppenheimer", series: "N/A",  type: "tv", image:`${process.env.PUBLIC_URL}oppenheimer.jpeg`, creator: "Christopher Nolan", releaseDate: '2024-12-30', dateAdded:'2023-12-05'}
-    
-  ];
+ 
 
   const RenderRequestPrompt = () => (
     <Box

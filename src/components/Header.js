@@ -6,8 +6,6 @@ import { useModal } from '../ModalContext'
 import firebase from '../firebaseConfig'; 
 
 
-
-
 const Header = ({ searchQuery: initialSearchQuery, user }) => {
   const { openModal, currentUser } = useModal();
   console.log("Current User in Header:", currentUser);
@@ -58,9 +56,6 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
       // Handle any errors here, such as showing an error message to the user
     }
   };
-
-  
-
 
   return (
     <Flex
