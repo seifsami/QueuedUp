@@ -2,7 +2,6 @@ import React from 'react';
 import { Box, Image, Flex, Heading, Text, Button } from '@chakra-ui/react';
 
 
-
 const FeaturedRelease = ({ item }) => {
   
   return (

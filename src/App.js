@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ModalProvider } from './ModalContext'
+import firebase from './firebaseConfig'; 
+import './App.css';
+
+import OnboardingModal from './components/OnboardingModal';
 import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';
-import './App.css';
 import WatchlistPage from './pages/WatchlistPage'; 
 import SearchResultsPage from './pages/SearchResultsPage';
 import ProfilePage from './pages/ProfilePage';
-import { ModalProvider } from './ModalContext'
-import OnboardingModal from './components/OnboardingModal';
-import firebase from './firebaseConfig'; 
-
 
 
 const App = () => {
