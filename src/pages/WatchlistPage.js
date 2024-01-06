@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Box,
-  Flex,
   Heading,
   Select,
   ButtonGroup,
@@ -13,16 +11,11 @@ import {
   Tabs,
   TabList,
   Tab,
-  TabPanels,
-  TabPanel
 } from '@chakra-ui/react';
 import Header from '../components/Header';
 import WatchlistPreviewCard from '../components/WatchlistPreviewCard';
 
-
-
-// Here you would include your dummy data or fetch it from a state management store or API
-
+// Dummy data
 const initialWatchlistData = [
     { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"tv", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30', dateAdded:'2023-12-01'},
     { id: 2, title: "American Dad Season 12", series: "American Dad",  type: "tv", image:`${process.env.PUBLIC_URL}Americandad.jpeg`, creator: "Seleem Seleem ", releaseDate: '2024-09-30', dateAdded:'2023-12-02'},
