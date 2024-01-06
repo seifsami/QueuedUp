@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Flex, Box, InputGroup, Input, Link,  InputLeftElement, Icon, IconButton, useColorMode, Text, useBreakpointValue, Button, Avatar, useRadioGroup, Menu, MenuButton, MenuList, MenuItem, background, MenuDivider } from '@chakra-ui/react';
-import {FaSearch, FaUser, } from 'react-icons/fa';
+import React, {useState} from 'react';
+import { Flex, Box, useBreakpointValue, Button, Avatar, Menu, MenuButton, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import { useModal } from '../ModalContext'
-import { FaUserCircle } from 'react-icons/fa';
-import ProfilePage from '../pages/ProfilePage';
 import firebase from '../firebaseConfig'; 
 
 
@@ -20,11 +17,6 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isSearchBarFocused, setSearchBarFocused] = useState(false);
   const isMobile = useBreakpointValue({ base: true, md: false });
-  
-
-  const handleProfileClick = () => {
-    navigate('/profile'); // Navigate to the profile page
-  };
 
   const handleHomeClick = () => {
     navigate('/homepage'); // Navigate to the home page
