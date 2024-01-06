@@ -145,9 +145,6 @@ function OnboardingModal() {
         }
       };
 
-      
-
-      
       const switchToSignUp = () => {
         setIsLogin(false); // Switch to the sign-up view
         setCurrentStep(1); // Stay on the first step for the sign-up view
@@ -241,51 +238,47 @@ function OnboardingModal() {
         }
       }, [notificationPreference, phoneNumber]);
 
-     
-    
-    
-
       return (
         <Modal isOpen={isModalOpen} onClose={closeModal} isCentered size="lg">
           <ModalOverlay />
           <ModalContent borderRadius="md" m="4" p="4">
             
             <ModalHeader>
-  <Flex justifyContent="space-between"  alignItems="center" >
-    {currentStep > 1 && (
-      <IconButton
-      
-        icon={<FaArrowLeft />}
-        variant="ghost"
-        onClick={handleGoBack}
-        aria-label="Back"
-        isRound // Optional: for a round button
-        ml={-7}
-      />
-    )}
-    {currentStep === 1 ? (
-      <Box flex="1"  fontSize="lg" fontWeight="bold">
-        {isLogin ? 'Sign In' : 'Sign Up'}
-        
-      </Box>
-    ) : (
-    
-      <Box width="auto" fontSize="lg" fontWeight="bold">
-       {currentStep === 2 ? 'Personalize Your Experience' : 'Add Your First Item'}
-      </Box>
-    )}
-    {currentStep === 1 && (
-      <Button
-        variant="link"
-        onClick={isLogin ? switchToSignUp : switchToSignIn}
-        color={"brand.100"}
-      >
-        {isLogin ? "I don't have an account" : "I have an account"}
-      </Button>
-    )}
-    {currentStep > 1 && <Box />} {/* This empty Box acts as a spacer */}
-  </Flex>
-</ModalHeader>
+              <Flex justifyContent="space-between"  alignItems="center" >
+                {currentStep > 1 && (
+                  <IconButton
+                  
+                    icon={<FaArrowLeft />}
+                    variant="ghost"
+                    onClick={handleGoBack}
+                    aria-label="Back"
+                    isRound // Optional: for a round button
+                    ml={-7}
+                  />
+                )}
+                {currentStep === 1 ? (
+                  <Box flex="1"  fontSize="lg" fontWeight="bold">
+                    {isLogin ? 'Sign In' : 'Sign Up'}
+                    
+                  </Box>
+                ) : (
+                
+                  <Box width="auto" fontSize="lg" fontWeight="bold">
+                  {currentStep === 2 ? 'Personalize Your Experience' : 'Add Your First Item'}
+                  </Box>
+                )}
+                {currentStep === 1 && (
+                  <Button
+                    variant="link"
+                    onClick={isLogin ? switchToSignUp : switchToSignIn}
+                    color={"brand.100"}
+                  >
+                    {isLogin ? "I don't have an account" : "I have an account"}
+                  </Button>
+                )}
+                {currentStep > 1 && <Box />} {/* This empty Box acts as a spacer */}
+              </Flex>
+            </ModalHeader>
             
             {currentStep === 1 && (
               <Fade in={true}>

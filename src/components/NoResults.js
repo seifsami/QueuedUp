@@ -1,6 +1,6 @@
 // NoResults.js
 import React from 'react';
-import { Box, Heading, Text, Button } from '@chakra-ui/react';
+import { Box, Heading, Text } from '@chakra-ui/react';
 import RequestNowButton from './RequestNowButton';
 
 const NoResults = () => {

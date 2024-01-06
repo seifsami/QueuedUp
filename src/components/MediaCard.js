@@ -2,24 +2,22 @@ import React from 'react';
 import { Box, Image, Text, Button, VStack, HStack, Icon } from '@chakra-ui/react';
 import { FaEye } from 'react-icons/fa';
 import Countdown from 'react-countdown';
-import { useModal } from '../ModalContext'
 import NotifyMeButton from './NotifyMeButton';
 
 const MediaCard = ({ item, onOpenModal }) => {
   const cardHeight = '500px'; // Adjust to match your current card height
   const imageContainerHeight = '338px'; 
-  const isLoggedIn = false;
 
-  const placeholderItem = {
-    title: "Test Movie",
-    id: "test-movie-123",
-    // Include other relevant properties for the item
+  // Custom renderer for countdown
+  const renderer = ({ days, hours, minutes, completed }) => {
+    if (completed) {
+      return <Text fontSize="sm">Released!</Text>;
+    } else {
+      return (
+        <Text fontSize="sm">{days}d {hours}h {minutes}m left</Text> // Format can be adjusted as needed
+      );
+    }
   };
-  
-  
-  
-
-  
 
   return (
     <Box
@@ -30,7 +28,7 @@ const MediaCard = ({ item, onOpenModal }) => {
       boxShadow="sm"
       transition="0.3s"
       _hover={{ boxShadow: 'md' }}
-      w="220px" // Width of the card
+      w="220px"
       h={cardHeight} // Fixed height for the card
       m="0 8px" // Margin for spacing between cards
     >
@@ -57,7 +55,7 @@ const MediaCard = ({ item, onOpenModal }) => {
       </Box>
 
       <VStack align="start" p={2} spacing="1">
-        <Text fontWeight="bold" noOfLines={2} h="3rem">{item.title} </Text> // Text wrapping enabled
+        <Text fontWeight="bold" noOfLines={2} h="3rem">{item.title} </Text>
         <Text fontSize="sm">{new Date(item.releaseDate).toLocaleDateString()}</Text>
         <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
         <HStack justifyContent="space-between" width="full" >
@@ -67,17 +65,6 @@ const MediaCard = ({ item, onOpenModal }) => {
       </VStack>
     </Box>
   );
-};
-
-// Custom renderer for countdown
-const renderer = ({ days, hours, minutes, completed }) => {
-  if (completed) {
-    return <Text fontSize="sm">Released!</Text>;
-  } else {
-    return (
-      <Text fontSize="sm">{days}d {hours}h {minutes}m left</Text> // Format can be adjusted as needed
-    );
-  }
 };
 
 export default MediaCard;
