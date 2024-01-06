@@ -5,7 +5,6 @@ import Countdown from 'react-countdown';
 import NotifyMeButton from './NotifyMeButton';
 
 const MediaCard = ({ item, onOpenModal }) => {
-  const cardHeight = '500px'; // Adjust to match your current card height
   const imageContainerHeight = '338px'; 
 
   // Custom renderer for countdown
@@ -29,21 +28,21 @@ const MediaCard = ({ item, onOpenModal }) => {
       transition="0.3s"
       _hover={{ boxShadow: 'md' }}
       w="220px"
-      h={cardHeight} // Fixed height for the card
-      m="0 8px" // Margin for spacing between cards
+      h="500px"
+      m="0 8px"
     >
       <Box 
         height={imageContainerHeight}
         position="relative"
-        borderBottom="1px solid" // Border at the bottom of the image container
-        borderColor="gray.200" // Border color
+        borderBottom="1px solid"
+        borderColor="gray.200"
       >
         <Image
           src={item.image}
           alt={item.title}
           objectFit="cover" // Cover the area, maintaining aspect ratio
-          width="100%" // Use full width of the container
-          height="100%" // Use full height of the container
+          width="100%"
+          height="100%"
         />
         {/* Tracking count overlay */}
         <Box position="absolute" top="2" right="2" p="2" bg="rgba(255, 255, 255, 0.6)" borderRadius="full">
