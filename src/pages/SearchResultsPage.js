@@ -1,6 +1,6 @@
 // SearchResultsPage.js
 import React, {useState, useEffect} from 'react';
-import { Box, Flex, VStack, Heading, useBreakpointValue, Text, Button } from '@chakra-ui/react';
+import { Box, Flex, VStack, Heading, useBreakpointValue, Text} from '@chakra-ui/react';
 import Header from '../components/Header';
 import WatchlistPreviewCard from '../components/WatchlistPreviewCard';
 import NoResults from '../components/NoResults';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Box, Flex, Avatar, Text, VStack, Heading, SimpleGrid, GridItem,
-  Button, Select, Switch, FormLabel, FormControl, useColorModeValue,
+  Box, Flex, Avatar, Text, VStack, Heading, SimpleGrid,
+  Button, Select, FormLabel, FormControl, useColorModeValue,
 } from '@chakra-ui/react';
 import Header from '../components/Header';
 

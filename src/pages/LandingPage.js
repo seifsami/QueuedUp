@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, Button, Flex, VStack, Box, Divider } from '@chakra-ui/react';
+import { Text, Button, Flex, VStack, Box} from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
 import './LandingPage.css';

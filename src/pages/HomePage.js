@@ -1,14 +1,10 @@
 import React, {useState} from 'react';
-import { Box, Container, Text, background, Button, Link } from '@chakra-ui/react';
+import { Box, Text} from '@chakra-ui/react';
 import Header from '../components/Header';
 import ContentToggle from '../components/ContentToggle';
-import SearchBar from '../components/SearchBar';
 import FeaturedRelease from '../components/FeaturedRelease';
-import UpcomingReleases from '../components/UpcomingReleases';
-import TrendingNow from '../components/TrendingNow';
 import WatchlistPreview from '../components/WatchlistPreview';
 import Carousel from '../components/Carousel';
-import { useModal } from '../ModalContext'
 import DetailsModal from '../components/DetailsModal';
 
 const HomePage = ({ user }) => {
