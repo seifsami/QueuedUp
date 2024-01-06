@@ -1,21 +1,14 @@
 import React, { useState,useEffect } from 'react';
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, Button, useToast, ModalCloseButton, FormLabel, Input, FormControl, Flex, Box, VStack, Text,Fade, background, CheckboxGroup, Checkbox, HStack, IconButton, Progress, Tooltip, Icon, FormErrorMessage} from '@chakra-ui/react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, Button, useToast, FormLabel, Input, FormControl, Flex, Box, VStack, Text,Fade, CheckboxGroup, Checkbox, HStack, IconButton, Tooltip, Icon, FormErrorMessage} from '@chakra-ui/react';
 import firebase from '../firebaseConfig';
 import { useModal } from '../ModalContext';
 import { FaGoogle, FaArrowLeft, FaInfoCircle} from 'react-icons/fa';
-
-
-
-
-
-
 
 function OnboardingModal() {
   const { isModalOpen, closeModal, itemToAdd } = useModal();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const toast = useToast();
-  const onClose={closeModal}
   const [isLogin, setIsLogin] = useState(true);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -24,11 +17,8 @@ function OnboardingModal() {
   const [notificationPreference, setNotificationPreference] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [phoneError, setPhoneError] = useState('');
-  
-  
 
   const handleGoBack = () => {
-    // Logic to go back a step
     setCurrentStep(currentStep => currentStep - 1);
   };
 
@@ -43,25 +33,10 @@ function OnboardingModal() {
     setPasswordError('');
     setPhoneError('');
     setIsLogin(true);
-    // Any other states that you need to reset
   };
 
   const handleEmailChange = (e) => setEmail(e.target.value);
   const handlePasswordChange = (e) => setPassword(e.target.value);
-  const handleSuccessfulAuth = () => {
-    if (itemToAdd) {
-        // Logic to add the item to the user's watchlist
-        toast({
-          title: "Item added to your watchlist",
-          description: `${itemToAdd.title} has been added to your watchlist.`,
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-      
-      closeModal(); // Close the modal after successful authentication
-    };
 
     const handleEmailSignIn = async () => {
         try {
@@ -119,10 +94,8 @@ function OnboardingModal() {
         }
         try {
           // Try to create a new account with the provided email and password.
-          const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-          
+          // Not currently being used: const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
           setCurrentStep(2);
-          
         } catch (error) {
           // Handle errors for account creation, like weak password.
           toast({
