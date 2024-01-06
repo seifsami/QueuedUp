@@ -52,8 +52,6 @@ const WatchlistPage = () => {
         setSortCriterion(e.target.value);
     };
 
-  
-
   // Filter and sort logic
   const filteredData = watchlistData
   .filter((item) => {
@@ -78,7 +76,6 @@ const WatchlistPage = () => {
       }
       return 0;
     });
-
     
   
     return (

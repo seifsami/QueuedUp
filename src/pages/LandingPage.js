@@ -1,16 +1,15 @@
 import React from 'react';
 import { Text, Button, Flex, VStack, Box} from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
+import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 import FeaturesSection from '../components/FeaturesSection';
 
 const MotionButton = motion(Button);
 
 const LandingPage = () => {
-    // Define your animation variants
     const navigate = useNavigate(); // Initialize the navigate function using the useNavigate hook
-
+    
     // Define your animation variants
     const variants = {
         hidden: { opacity: 0, y: 20 },
@@ -22,7 +21,6 @@ const LandingPage = () => {
     };
 
     return (
-        
         <>
         <Box
             w="100%"

@@ -9,20 +9,19 @@ import DetailsModal from '../components/DetailsModal';
 
 const HomePage = ({ user }) => {
   const [selectedItem, setSelectedItem] = useState(null);
-    const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
 
-    const openModalWithItem = (item) => {
-      setSelectedItem(item);
-      setModalOpen(true);
-    };
+  const openModalWithItem = (item) => {
+    setSelectedItem(item);
+    setModalOpen(true);
+  };
 
-    const closeModal = () => {
-      setModalOpen(false);
-      setSelectedItem(null);
-    };
-
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedItem(null);
+  };
     
-    const upcomingReleasesData = [
+  const upcomingReleasesData = [
       {
         id: 1,
         title: "The Great Escape",
@@ -125,46 +124,43 @@ const HomePage = ({ user }) => {
   ];
 
 
-    const watchlistData = [
-        { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
-        { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
-        // ... more items
-    ];
-      
+  const watchlistData = [
+      { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
+      { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
+      // ... more items
+  ];
+  
 
-      
-      
-
-    return (
-      <>
-      <Header/>
-      {/* Apply max width directly to the Box and use auto margins for horizontal centering */}
-      <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
-      <ContentToggle />
+  return (
+    <>
+    <Header/>
+    {/* Apply max width directly to the Box and use auto margins for horizontal centering */}
+    <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
+    <ContentToggle />
+    <Box bg='brand.100'>
       <Box bg='brand.100'>
-        <Box bg='brand.100'>
-          <FeaturedRelease/>
-        </Box>
-        </Box>
-        <Box px={4} py={1} >
-        <Text fontSize="2xl" fontWeight="bold" mb={4}>Upcoming Releases</Text>
-        <Carousel items={upcomingReleasesData} 
-          onOpenModal={openModalWithItem} />
-          <Text fontSize="2xl" fontWeight="bold" mb={4}>Trending</Text>
-          <Carousel 
-          items={trendingData}
-          onOpenModal={openModalWithItem} 
-        />
-          <WatchlistPreview watchlist={watchlistData} />
-        </Box>
-        <DetailsModal 
-          isOpen={isModalOpen} 
-          onClose={closeModal} 
-          item={selectedItem} 
-        />
+        <FeaturedRelease/>
       </Box>
-    </>
+      </Box>
+      <Box px={4} py={1} >
+      <Text fontSize="2xl" fontWeight="bold" mb={4}>Upcoming Releases</Text>
+      <Carousel items={upcomingReleasesData} 
+        onOpenModal={openModalWithItem} />
+        <Text fontSize="2xl" fontWeight="bold" mb={4}>Trending</Text>
+        <Carousel 
+        items={trendingData}
+        onOpenModal={openModalWithItem} 
+      />
+        <WatchlistPreview watchlist={watchlistData} />
+      </Box>
+      <DetailsModal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        item={selectedItem} 
+      />
+    </Box>
+  </>
   );
-    };
+};
     
-    export default HomePage;
+export default HomePage;

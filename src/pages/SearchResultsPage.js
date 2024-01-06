@@ -23,14 +23,14 @@ const SearchResultsPage = ({ searchQuery }) => {
         'book': 'Books',
       };
 
-     // Dummy data for demonstration purposes
-     const dummyResults = useMemo(() => [
-        
-      { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
-      { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
-      {id: 5, title: "Oppenheimer", series: "N/A",  type: "tv", image:`${process.env.PUBLIC_URL}oppenheimer.jpeg`, creator: "Christopher Nolan", releaseDate: '2024-12-30', dateAdded:'2023-12-05'}
+    // Dummy data for demonstration purposes
+    const dummyResults = useMemo(() => [
       
-      ], []);
+    { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
+    { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
+    {id: 5, title: "Oppenheimer", series: "N/A",  type: "tv", image:`${process.env.PUBLIC_URL}oppenheimer.jpeg`, creator: "Christopher Nolan", releaseDate: '2024-12-30', dateAdded:'2023-12-05'}
+    
+    ], []);
     
       // Wrap filterResults in useCallback
     const filterResults = useCallback((type) => {
@@ -45,42 +45,34 @@ const SearchResultsPage = ({ searchQuery }) => {
       setFilteredResults(filterResults(typeFromParams || 'All'));
     }, [typeFromParams, filterResults]); 
 
-      useEffect(() => {
-        setFilteredResults(filterResults(typeFromParams || 'All'));
-      }, [typeFromParams, filterResults]); 
-      
-        
+    useEffect(() => {
+      setFilteredResults(filterResults(typeFromParams || 'All'));
+    }, [typeFromParams, filterResults]); 
 
-      useEffect(() => {
-        setFilteredResults(filterResults(typeFromParams || 'All'));
-      }, [typeFromParams, filterResults]);
 
-      const updateFilter = (filter) => {
-        setSelectedFilter(filter);
-        const newFilteredResults = filterResults(filter);
-        setFilteredResults(newFilteredResults);
-      };
+    useEffect(() => {
+      setFilteredResults(filterResults(typeFromParams || 'All'));
+    }, [typeFromParams, filterResults]);
 
-      
+    const updateFilter = (filter) => {
+      setSelectedFilter(filter);
+      const newFilteredResults = filterResults(filter);
+      setFilteredResults(newFilteredResults);
+    };
 
- 
- 
-
-  const RenderRequestPrompt = () => (
-    <Box
-    mt={1} // Reducing top margin
-    p={2} // Adjust padding as needed
-    textAlign={{ base: "center", md: "left" }} // Set text alignment to left for all devices
-  >
-      <Text mb={2}>Can't find what you're looking for?</Text>
-      <RequestNowButton />
-    </Box>
-  );
+    const RenderRequestPrompt = () => (
+      <Box
+      mt={1} // Reducing top margin
+      p={2} // Adjust padding as needed
+      textAlign={{ base: "center", md: "left" }} // Set text alignment to left for all devices
+    >
+        <Text mb={2}>Can't find what you're looking for?</Text>
+        <RequestNowButton />
+      </Box>
+    );
 
   
-  
 
-  // Layout for the page
   return (
     <Box bg="gray.100" minHeight="100vh">
       <Header searchQuery={query} />
