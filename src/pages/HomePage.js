@@ -31,7 +31,7 @@ const HomePage = ({ user }) => {
         id: 1,
         title: "The Great Escape",
         releaseDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), 
-        image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`,
+        image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,
         author:'John Sturges',
         description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
       },
@@ -87,7 +87,7 @@ const HomePage = ({ user }) => {
           id: 3,
           title: "Sweeney Todd",
           releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`${process.env.PUBLIC_URL}9780143108245.jpeg`,
+          image:`https://image.tmdb.org/t/p/w500/v77WjVsTMPKTpXZoW2RVNegappO.jpg`,
           author:'John Sturges',
           description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
         },
