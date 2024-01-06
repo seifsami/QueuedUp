@@ -66,12 +66,6 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
     navigate(`/search?query=${searchQuery}&type=${mediaType}`);
   };
 
-  const renderPreviewCards = () => {
-    return dummyPreviewData.map(item => (
-      <WatchlistPreviewCard key={item.id} item={item} />
-    ));
-  };
-
   const handleBlur = () => {
     // Delay hiding the dropdown to allow button click to process
     setTimeout(() => {
@@ -129,7 +123,6 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
           w="100px"
           borderRightRadius={0}
           value={mediaType}
-          onChange={(e) => setMediaType(e.target.value)}
           position="absolute"
           left="0"
           zIndex="2" // Ensure dropdown is above other content

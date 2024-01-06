@@ -1,6 +1,6 @@
 // RequestNowButton.js
 import React from 'react';
-import { Box, Text, Button } from '@chakra-ui/react';
+import {Button } from '@chakra-ui/react';
 
 const RequestNowButton = () => {
   // Handler for the "Request Now" button
