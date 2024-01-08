@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 
+
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb+srv://seifsami:beesknees@queuedupdbnew.lsrfn46.mongodb.net/?retryWrites=true&w=majority"
 
@@ -20,11 +21,10 @@ def test_mongodb():
 
 @app.route('/search')
 def search():
-    query = request.args.get('query')  # or request.json['query']
+    query = request.args.get('query')
 
     try:
-        # Adjust with your actual database name
-        db = mongo.cx.queuedupdb
+        db = mongo.cx.QueuedUpDB
 
         # Search in movies collection
         movies_results = db.movies.aggregate([
@@ -32,7 +32,7 @@ def search():
                 "$search": {
                     "text": {
                         "query": query,
-                        "path": ["title", "description", "original_title", "director"]  # adjust fields as necessary
+                        "path": {"wildcard": "*"}
                     }
                 }
             }
@@ -44,13 +44,19 @@ def search():
                 "$search": {
                     "text": {
                         "query": query,
-                        "path": ["title", "description", "original_name", "network_name"]  # adjust fields as necessary
+                        "path": {"wildcard": "*"}
                     }
                 }
             }
         ])
 
-        combined_results = list(movies_results) + list(tv_results)
+        # Function to convert ObjectId to string
+        def convert_objectid(doc):
+            doc['_id'] = str(doc['_id'])
+            return doc
+
+        # Apply conversion to each document
+        combined_results = [convert_objectid(doc) for doc in list(movies_results)] + [convert_objectid(doc) for doc in list(tv_results)]
         return jsonify(combined_results)
     except Exception as e:
         return jsonify({"error": str(e)})
