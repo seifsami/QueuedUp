@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb+srv://seifsami:beesknees@queuedupdb.nfinrya.mongodb.net/?retryWrites=true&w=majority"
+app.config["MONGO_URI"] = "mongodb+srv://seifsami:beesknees@queuedupdbnew.lsrfn46.mongodb.net/?retryWrites=true&w=majority"
 
 mongo = PyMongo(app)
 
@@ -24,7 +24,7 @@ def search():
 
     try:
         # Adjust with your actual database name
-        db = mongo.cx.queuedupdb
+        db = mongo.cx.queuedupdbnew
 
         # Search in movies collection
         movies_results = db.movies.aggregate([
