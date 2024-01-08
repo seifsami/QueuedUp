@@ -24,7 +24,7 @@ def search():
 
     try:
         # Adjust with your actual database name
-        db = mongo.cx.queuedupdbnew
+        db = mongo.cx.queuedupdb
 
         # Search in movies collection
         movies_results = db.movies.aggregate([
