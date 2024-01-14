@@ -1,11 +1,24 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 
-
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb+srv://seifsami:beesknees@queuedupdbnew.lsrfn46.mongodb.net/?retryWrites=true&w=majority"
-
 mongo = PyMongo(app)
+
+from blueprints.user import user_blueprint
+from blueprints.watchlist import user_watchlist_blueprint
+from blueprints.media import media_blueprint
+
+
+app.register_blueprint(user_blueprint, url_prefix='/user')
+app.register_blueprint(user_watchlist_blueprint, url_prefix='/watchlist')
+app.register_blueprint(media_blueprint, url_prefix='/media')
+
+
+
+
+
+
 
 @app.route('/')
 def hello():
@@ -60,6 +73,7 @@ def search():
         return jsonify(combined_results)
     except Exception as e:
         return jsonify({"error": str(e)})
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
