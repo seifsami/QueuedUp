@@ -85,16 +85,15 @@ class Book:
         self.image = image
 
 class User:
-    def __init__(self, _id, first_name, last_name, email, password, username, phone_number, notification_preferences, firebase_uid):
+    def __init__(self, _id, first_name, last_name, email, username, phone_number, notification_preferences, firebase_id):
         self._id = _id
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-        self.password = password  # Handle with care, consider only storing a hash.
         self.username = username
         self.phone_number = phone_number
         self.notification_preferences = notification_preferences  # List of preferences like ['email', 'phone']
-        self.firebase_uid = firebase_uid
+        self.firebase_id = firebase_id
        
 
 class Notification:

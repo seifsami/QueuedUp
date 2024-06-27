@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb+srv://seifsami:beesknees@queuedupdbnew.lsrfn46.mongodb.net/?retryWrites=true&w=majority"
+app.config["MONGO_URI"] = "mongodb+srv://seifsami:beesknees@queuedupdbnew.lsrfn46.mongodb.net/?retryWrites=true&w=majority&appName=QueuedUpDBnew"
 mongo = PyMongo(app)
 
 from blueprints.user import user_blueprint
@@ -31,6 +31,15 @@ def test_mongodb():
         return jsonify(db_list)
     except Exception as e:
         return jsonify({"error": str(e)})
+
+@app.route('/test_mongo_connection')
+def test_mongo_connection():
+    try:
+        # Try to access a known collection
+        collection_names = mongo.db.list_collection_names()
+        return jsonify({"status": "success", "collections": collection_names}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
 
 @app.route('/search')
 def search():
