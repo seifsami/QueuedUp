@@ -1,10 +1,8 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from bson import ObjectId
 from app import mongo
 
 user_watchlist_blueprint = Blueprint('user_watchlist_blueprint', __name__)
-
-
 
 @user_watchlist_blueprint.route('/<user_id>', methods=['GET'])
 def get_user_watchlist(user_id):
@@ -34,7 +32,7 @@ def get_user_watchlist(user_id):
                 "release_date": media_details.get("release_date")
             }
         elif item['media_type'] == 'tv_seasons':
-            # Extract movie-specific details
+            # Extract TV season-specific details
             detailed_item = {
                 "title": media_details.get("title"),
                 "network_name": media_details.get("network_name"),
@@ -45,3 +43,39 @@ def get_user_watchlist(user_id):
         detailed_watchlist.append(detailed_item)
 
     return jsonify(detailed_watchlist), 200
+
+@user_watchlist_blueprint.route('/<user_id>', methods=['POST'])
+def add_to_watchlist(user_id):
+    db = mongo.cx["QueuedUpDBnew"]
+    watchlist = db.userwatchlist
+    data = request.json
+
+    new_watchlist_item = {
+        "user_id": user_id,
+        "item_id": data['item_id'],
+        "media_type": data['media_type']
+    }
+
+    try:
+        watchlist.insert_one(new_watchlist_item)
+        return jsonify({"message": "Item added to watchlist"}), 201
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
+@user_watchlist_blueprint.route('/<user_id>', methods=['DELETE'])
+def remove_from_watchlist(user_id):
+    db = mongo.cx["QueuedUpDBnew"]
+    watchlist = db.userwatchlist
+    data = request.json
+
+    try:
+        result = watchlist.delete_one({"user_id": user_id, "item_id": data['item_id']})
+
+        if result.deleted_count:
+            return jsonify({"message": "Item removed from watchlist"}), 200
+        else:
+            return jsonify({"error": "Item not found in watchlist"}), 404
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
