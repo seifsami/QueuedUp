@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, jsonify, request
 from bson import ObjectId
 from app import mongo
@@ -53,7 +54,8 @@ def add_to_watchlist(user_id):
     new_watchlist_item = {
         "user_id": user_id,
         "item_id": data['item_id'],
-        "media_type": data['media_type']
+        "media_type": data['media_type'],
+        "timestamp_added": datetime.now()
     }
 
     try:

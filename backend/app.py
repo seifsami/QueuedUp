@@ -2,23 +2,21 @@ from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb+srv://seifsami:beesknees@queuedupdbnew.lsrfn46.mongodb.net/?retryWrites=true&w=majority&appName=QueuedUpDBnew"
+app.config["MONGO_URI"] = "mongodb+srv://seifsami:beesknees@queuedupdbnew.lsrfn46.mongodb.net/?retryWrites=true&w=majority"
 mongo = PyMongo(app)
+app.extensions['pymongo'] = mongo  # Ensure the mongo object is available in the app context
 
 from blueprints.user import user_blueprint
 from blueprints.watchlist import user_watchlist_blueprint
 from blueprints.media import media_blueprint
-
+from blueprints.homepage import homepage_blueprint
+from blueprints.cron import cron_blueprint
 
 app.register_blueprint(user_blueprint, url_prefix='/user')
 app.register_blueprint(user_watchlist_blueprint, url_prefix='/watchlist')
 app.register_blueprint(media_blueprint, url_prefix='/media')
-
-
-
-
-
-
+app.register_blueprint(homepage_blueprint, url_prefix='/homepage')
+app.register_blueprint(cron_blueprint, url_prefix='/cron')
 
 @app.route('/')
 def hello():
@@ -35,7 +33,6 @@ def test_mongodb():
 @app.route('/test_mongo_connection')
 def test_mongo_connection():
     try:
-        # Try to access a known collection
         collection_names = mongo.db.list_collection_names()
         return jsonify({"status": "success", "collections": collection_names}), 200
     except Exception as e:
@@ -48,7 +45,6 @@ def search():
     try:
         db = mongo.cx.QueuedUpDB
 
-        # Search in movies collection
         movies_results = db.movies.aggregate([
             {
                 "$search": {
@@ -60,7 +56,6 @@ def search():
             }
         ])
 
-        # Search in tv_seasons collection
         tv_results = db.tv_seasons.aggregate([
             {
                 "$search": {
@@ -72,17 +67,14 @@ def search():
             }
         ])
 
-        # Function to convert ObjectId to string
         def convert_objectid(doc):
             doc['_id'] = str(doc['_id'])
             return doc
 
-        # Apply conversion to each document
         combined_results = [convert_objectid(doc) for doc in list(movies_results)] + [convert_objectid(doc) for doc in list(tv_results)]
         return jsonify(combined_results)
     except Exception as e:
         return jsonify({"error": str(e)})
-    
 
 if __name__ == '__main__':
     app.run(debug=True)
