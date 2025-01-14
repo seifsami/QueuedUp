@@ -1,15 +1,23 @@
-import React, {useState} from 'react';
-import { Box, Text} from '@chakra-ui/react';
+import React, { useState, useEffect } from 'react';
+import { Box, Text, Spinner, Center } from '@chakra-ui/react';
 import Header from '../components/Header';
 import ContentToggle from '../components/ContentToggle';
 import FeaturedRelease from '../components/FeaturedRelease';
 import WatchlistPreview from '../components/WatchlistPreview';
 import Carousel from '../components/Carousel';
 import DetailsModal from '../components/DetailsModal';
+import { getTrendingMedia, getUpcomingMedia, getUserWatchlist } from '../services/api';
 
 const HomePage = ({ user }) => {
+  const [mediaType, setMediaType] = useState('books'); // Default media type
+  const [trendingData, setTrendingData] = useState([]);
+  const [upcomingReleasesData, setUpcomingReleasesData] = useState([]);
+  const [loadingTrending, setLoadingTrending] = useState(true);
+  const [loadingUpcoming, setLoadingUpcoming] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [userWatchlist, setUserWatchlist] = useState([]);
 
   const openModalWithItem = (item) => {
     setSelectedItem(item);
@@ -20,147 +28,123 @@ const HomePage = ({ user }) => {
     setModalOpen(false);
     setSelectedItem(null);
   };
-    
-  const upcomingReleasesData = [
-      {
-        id: 1,
-        title: "The Great Escape",
-        releaseDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), 
-        image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,
-        author:'John Sturges',
-        description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-      },
-      {
-        id: 2,
-        title: "Adventures of Sherlock Holmes",
-        releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-        image: `${process.env.PUBLIC_URL}Americandad.jpeg`,
-        author:'John Sturges',
-        description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-      },
-      {
-          id: 3,
-          title: "Sweeney Todd",
-          releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`${process.env.PUBLIC_URL}familyswitch.jpeg`,
-          author:'John Sturges',
-          description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-        },
-        {
-          id: 3,
-          title: "Sweeney Todd",
-          releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`${process.env.PUBLIC_URL}hitchikers.jpeg`,
-          author:'John Sturges',
-          description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-        },
-        {
-          id: 3,
-          title: "Sweeney Todd",
-          releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`${process.env.PUBLIC_URL}oppenheimer.jpeg`,
-          author:'John Sturges',
-          description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-        },
-        {
-          id: 3,
-          title: "Sweeney Todd",
-          releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`${process.env.PUBLIC_URL}simpsons.jpeg`,
-          author:'John Sturges',
-          description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-        },
-        {
-          id: 3,
-          title: "Sweeney Todd",
-          releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`${process.env.PUBLIC_URL}whatif.jpeg`,
-          author:'John Sturges',
-          description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-        },
-        {
-          id: 3,
-          title: "Sweeney Todd",
-          releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`https://image.tmdb.org/t/p/w500/v77WjVsTMPKTpXZoW2RVNegappO.jpg`,
-          author:'John Sturges',
-          description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-        },
-        {
-          id: 3,
-          title: "Sweeney Todd",
-          releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`,
-          author:'John Sturges',
-          description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-        },
-        {
-          id: 3,
-          title: "Sweeney Todd",
-          releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`,
-          author:'John Sturges',
-          description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-        },
-        {
-          id: 3,
-          title: "Sweeney Todd",
-          releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
-          image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`,
-          author:'John Sturges',
-          description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",
-        },
-      // ... more items
-  ];
 
-  const trendingData = [
-      { id: 1, title: "Tress Of The Emerald Sea", releaseDate:  new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, author:'John Sturges', description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",},
-      { id: 2, title: "Mother Night", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}71RY4785nIL._AC_UF1000,1000_QL80_.jpg`, author:'Kurt Vonnegut', description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.", },
-      { id: 3, title: "East Of Eden", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),image:`${process.env.PUBLIC_URL}510g2SGySaL.jpg`, author:'John Sturges',description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",} ,
-      { id: 4, title: "Tomorrow, and tomorrow, and tomorrow", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}tomorrow.jpeg`, author:'John Sturges', description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",},
-      { id: 5, title: "Name of The Wind", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}rothfuss.webp`, author:'John Sturges',description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.", },
-      { id: 6, title: "Master and Margarita", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}master.jpeg`, author:'John Sturges',description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.", },
-      { id: 7, title: "Hitchikers Guide To The Galaxy", releaseDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), image:`${process.env.PUBLIC_URL}hitchikers.jpeg`, author:'John Sturges',description: "Combining the intellect of Malcolm Gladwell with the irreverent humor of Mary Roach and the paradigm-shifting analysis of Jared Diamond, a leading social scientist offers an unprecedented look inside our complex and often paradoxical relationships with animals.",},
-  ];
+  const fetchUserWatchlist = async () => {
+    if (!user) return;
+    try {
+      console.log('Fetching watchlist for user:', user.uid);
+      const { data } = await getUserWatchlist(user.uid);  // Extract 'data' array directly
+      console.log('Fetched watchlist:', data);
+      setUserWatchlist(data);  // Save the array directly
+    } catch (err) {
+      console.error('Failed to fetch watchlist:', err);
+    }
+  };
 
+  const normalizeDate = (dateStr) => {
+    if (!dateStr) return null;
+    if (typeof dateStr === 'string' && dateStr.includes(',')) {
+      const parsedDate = Date.parse(dateStr);  // Convert to timestamp
+      return isNaN(parsedDate) ? null : new Date(parsedDate);  // Return date or null if invalid
+    }
+    return new Date(dateStr);  // Default case for ISO strings
+  };
 
-  const watchlistData = [
-      { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
-      { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
-      // ... more items
-  ];
+  const parseReleaseDates = (items) => {
+    return items.map(item => ({
+      ...item,
+      releaseDate: item.release_date ? normalizeDate(item.release_date) : null,
+    }));
+  };
+
+  const formatMediaItems = (items, mediaType) => {
+    return items.map((item) => ({
+      ...item,
+      media_type: mediaType,  // Add the media type
+    }));
+  };
+
   
+
+  useEffect(() => {
+    const fetchMediaData = async () => {
+      try {
+        setLoadingTrending(true);
+        setLoadingUpcoming(true);
+    
+        const trendingMedia = await getTrendingMedia(mediaType);
+        const formattedTrendingMedia = formatMediaItems(trendingMedia, mediaType);  // Add media_type
+        setTrendingData(parseReleaseDates(formattedTrendingMedia));  // Parse release dates
+    
+        const upcomingMedia = await getUpcomingMedia(mediaType);
+        const formattedUpcomingMedia = formatMediaItems(upcomingMedia, mediaType);  // Add media_type
+        setUpcomingReleasesData(parseReleaseDates(formattedUpcomingMedia));  // Parse release dates
+    
+        setLoadingTrending(false);
+        setLoadingUpcoming(false);
+      } catch (err) {
+        setError('Failed to fetch media');
+        setLoadingTrending(false);
+        setLoadingUpcoming(false);
+      }
+    };
+
+    fetchMediaData();
+    fetchUserWatchlist();  // Fetch watchlist after fetching media
+  }, [mediaType, user]);  // Refetch when mediaType or user changes
+
+  if (error) {
+    return <Center><Text color="red.500">{error}</Text></Center>;
+  }
+  console.log('Watchlist in HomePage:', userWatchlist);
 
   return (
     <>
-    <Header/>
-    {/* Apply max width directly to the Box and use auto margins for horizontal centering */}
-    <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
-    <ContentToggle />
-    <Box bg='brand.100'>
-      <Box bg='brand.100'>
-        <FeaturedRelease/>
+      <Header />
+      <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
+        <ContentToggle setMediaType={setMediaType} />  {/* Pass setMediaType */}
+        <Box bg='brand.100'>
+          <Box bg='brand.100'>
+            <FeaturedRelease />
+          </Box>
+        </Box>
+        <Box px={4} py={1}>
+          <Text fontSize="2xl" fontWeight="bold" mb={4}>Upcoming Releases</Text>
+          {loadingUpcoming ? (
+            <Center><Spinner size="xl" /></Center>
+          ) : (
+            <Carousel
+              items={upcomingReleasesData}
+              onOpenModal={openModalWithItem}
+              userWatchlist={userWatchlist}  // Pass watchlist to Carousel
+              refetchWatchlist={fetchUserWatchlist}  // Pass refetch function to Carousel
+            />
+          )}
+          <Text fontSize="2xl" fontWeight="bold" mb={4}>Trending</Text>
+          {loadingTrending ? (
+            <Center><Spinner size="xl" /></Center>
+          ) : (
+            <Carousel
+              items={trendingData}
+              onOpenModal={openModalWithItem}
+              userWatchlist={userWatchlist}  // Pass watchlist to Carousel
+              refetchWatchlist={fetchUserWatchlist}  // Pass refetch function to Carousel
+              mediaType={mediaType}
+            />
+          )}
+          
+
+          <WatchlistPreview watchlist={userWatchlist} mediaType={mediaType} />
+
+        </Box>
+        <DetailsModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          item={selectedItem}
+        />
       </Box>
-      </Box>
-      <Box px={4} py={1} >
-      <Text fontSize="2xl" fontWeight="bold" mb={4}>Upcoming Releases</Text>
-      <Carousel items={upcomingReleasesData} 
-        onOpenModal={openModalWithItem} />
-        <Text fontSize="2xl" fontWeight="bold" mb={4}>Trending</Text>
-        <Carousel 
-        items={trendingData}
-        onOpenModal={openModalWithItem} 
-      />
-        <WatchlistPreview watchlist={watchlistData} />
-      </Box>
-      <DetailsModal 
-        isOpen={isModalOpen} 
-        onClose={closeModal} 
-        item={selectedItem} 
-      />
-    </Box>
-  </>
+    </>
   );
 };
-    
+
 export default HomePage;

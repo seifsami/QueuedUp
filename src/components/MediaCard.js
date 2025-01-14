@@ -4,7 +4,7 @@ import { FaEye } from 'react-icons/fa';
 import Countdown from 'react-countdown';
 import NotifyMeButton from './NotifyMeButton';
 
-const MediaCard = ({ item, onOpenModal }) => {
+const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
   const imageContainerHeight = '338px'; 
 
   // Custom renderer for countdown
@@ -17,6 +17,9 @@ const MediaCard = ({ item, onOpenModal }) => {
       );
     }
   };
+
+  console.log('Item passed to NotifyMeButton:', item);
+
 
   return (
     <Box
@@ -58,7 +61,12 @@ const MediaCard = ({ item, onOpenModal }) => {
         <Text fontSize="sm">{new Date(item.releaseDate).toLocaleDateString()}</Text>
         <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
         <HStack justifyContent="space-between" width="full" >
-        <NotifyMeButton item={item}/>
+        <NotifyMeButton
+          item={item}
+          userWatchlist={userWatchlist}
+          refetchWatchlist={refetchWatchlist}  // Pass refetch function
+          mediaType={item.media_type}
+        />
         <Button variant="outline" colorScheme="teal" size="sm" flex={2} onClick={() => onOpenModal(item)}>View Details</Button>
         </HStack>
       </VStack>

@@ -1,27 +1,52 @@
-// NotifyMeButton.js
 import React from 'react';
-import { Button } from '@chakra-ui/react';
+import { Button, useToast } from '@chakra-ui/react';
 import { useModal } from '../ModalContext'; // Adjust the import path as necessary
+import { addToWatchlist } from '../services/api';
 
-export const NotifyMeButton = ({ item, user }) => {
-  const { currentUser, openModalWithItem } = useModal();
+export const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist }) => {
+  const { currentUser, openModalWithItem } = useModal();  // Access modal and current user
+  const toast = useToast();  // To display notifications
 
-  const handleNotifyClick = () => {
-    console.log("Current user on click: ", user);
+  // Check if the item is already in the user's watchlist
+  const isInWatchlist = Array.isArray(userWatchlist) && userWatchlist.some((watchlistItem) => watchlistItem.title === item.title);
+
+  const handleNotifyClick = async () => {
     if (!currentUser) {
-        // If no user is logged in, open the sign-in modal
-        openModalWithItem(item);
-      } else {
-    console.log('clicked'+item)
-    
+      openModalWithItem(item);  // Open login/sign-up modal if user not signed in
+    } else {
+      try {
+        await addToWatchlist(currentUser.uid, item._id, item.media_type || 'books');  // Add item to backend
+        toast({
+          title: 'Added to Watchlist',
+          description: `${item.title} has been added to your watchlist.`,
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+        await refetchWatchlist();  // Re-fetch watchlist after successful addition
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to add item to watchlist. Please try again.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+        console.error('Failed to add to watchlist:', error);
+      }
+    }
   };
-  }
 
   return (
-    <Button onClick={handleNotifyClick} colorScheme="teal" size="sm" flex={2}>
-      Notify Me
+    <Button
+      onClick={handleNotifyClick}
+      colorScheme={isInWatchlist ? 'gray' : 'teal'}  // Gray if already in watchlist, teal otherwise
+      size="sm"
+      isDisabled={isInWatchlist}  // Disable the button if item is already in watchlist
+    >
+      {isInWatchlist ? 'In Watchlist' : 'Notify Me'}
     </Button>
   );
 };
 
-export default NotifyMeButton
+export default NotifyMeButton;

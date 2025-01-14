@@ -1,9 +1,17 @@
 import React from 'react';
 import { Tabs, TabList, Tab} from '@chakra-ui/react';
 
-const ContentToggle = () => {
+const ContentToggle = ({ setMediaType }) => {
   return (
-    <Tabs isFitted variant="enclosed" w="full">
+    <Tabs
+    isFitted
+    variant="enclosed"
+    w="full"
+    onChange={(index) => {
+      const mediaTypes = ['tv_seasons', 'movies', 'books'];  // Corresponding media types
+      setMediaType(mediaTypes[index]);  // Emit media type based on tab index
+    }}
+  >
       <TabList >
       <Tab
         _selected={{ color: 'white', bg: 'teal.600', borderBottom: '4px solid', borderColor: 'teal.700' }}

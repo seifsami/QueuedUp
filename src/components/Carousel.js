@@ -3,7 +3,7 @@ import { Flex, Box, IconButton } from '@chakra-ui/react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import MediaCard from './MediaCard';
 
-const Carousel = ({ items, onOpenModal }) => {
+const Carousel = ({ items, onOpenModal, userWatchlist, refetchWatchlist }) => {
   const scrollContainer = useRef(null);
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
@@ -38,14 +38,18 @@ const Carousel = ({ items, onOpenModal }) => {
     <Flex alignItems="center" my={4} pos="relative">
       <Box ref={scrollContainer} overflowX="scroll" flex="1">
         <Flex>
-          {items.map((item, index) => (
-            <Box key={item.id} width="220px" minW="220px" mx="8px">
-              <MediaCard item={item} onOpenModal={onOpenModal} />
+          {items.map((item) => (
+            <Box key={item._id} width="220px" minW="220px" mx="8px">
+              <MediaCard
+                item={item}
+                onOpenModal={onOpenModal}
+                userWatchlist={userWatchlist}  // Pass watchlist to MediaCard
+                refetchWatchlist={refetchWatchlist}  // Pass refetch function to MediaCard
+              />
             </Box>
           ))}
         </Flex>
       </Box>
-
       {!isAtStart && (
         <IconButton
           onClick={() => scroll(-1)}
@@ -61,7 +65,6 @@ const Carousel = ({ items, onOpenModal }) => {
           size="lg"
         />
       )}
-
       {!isAtEnd && (
         <IconButton
           onClick={() => scroll(1)}

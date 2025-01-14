@@ -8,42 +8,38 @@ user_watchlist_blueprint = Blueprint('user_watchlist_blueprint', __name__)
 @user_watchlist_blueprint.route('/<user_id>', methods=['GET'])
 def get_user_watchlist(user_id):
     db = mongo.cx["QueuedUpDBnew"]
-    user_watchlist = db.userwatchlist.find({"user_id": user_id})
+    user_watchlist = list(db.userwatchlist.find({"user_id": user_id}))  # Convert cursor to list
     detailed_watchlist = []
+
+    print(f"Full watchlist for {user_id}: {user_watchlist}")
 
     for item in user_watchlist:
         collection = db[item['media_type']]
-        media_details = collection.find_one({"_id": ObjectId(item['item_id'])}) 
+        media_details = collection.find_one({"_id": ObjectId(item['item_id'])})
         
-        # Tailor the details based on media type
+        if not media_details:
+            print(f"Warning: Missing media details for {item['item_id']} in {item['media_type']} collection.")
+            continue
+
+        detailed_item = {
+            "title": media_details.get("title", "Unknown Title"),
+            "image": media_details.get("image", ""),
+            "release_date": media_details.get("release_date", "Unknown Date"),
+            "media_type": item["media_type"]
+        }
+
         if item['media_type'] == 'books':
-            # Extract book-specific details
-            detailed_item = {
-                "title": media_details.get("title"),
-                "author": media_details.get("author"),
-                "image": media_details.get("image"),
-                "release_date": media_details.get("release_date")
-            }
+            detailed_item["author"] = media_details.get("author", "Unknown Author")
         elif item['media_type'] == 'movies':
-            # Extract movie-specific details
-            detailed_item = {
-                "title": media_details.get("title"),
-                "director": media_details.get("director"),
-                "image": media_details.get("image"),
-                "release_date": media_details.get("release_date")
-            }
+            detailed_item["director"] = media_details.get("director", "Unknown Director")
         elif item['media_type'] == 'tv_seasons':
-            # Extract TV season-specific details
-            detailed_item = {
-                "title": media_details.get("title"),
-                "network_name": media_details.get("network_name"),
-                "image": media_details.get("image"),
-                "release_date": media_details.get("release_date")
-            }
+            detailed_item["network_name"] = media_details.get("network_name", "Unknown Network")
 
         detailed_watchlist.append(detailed_item)
 
+    print(f"Total detailed items in watchlist for user {user_id}: {len(detailed_watchlist)}")
     return jsonify(detailed_watchlist), 200
+
 
 @user_watchlist_blueprint.route('/<user_id>', methods=['POST'])
 def add_to_watchlist(user_id):

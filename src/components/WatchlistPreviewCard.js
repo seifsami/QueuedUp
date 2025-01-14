@@ -3,9 +3,9 @@ import { Box, Image, Text, HStack, VStack, Icon, useColorModeValue,IconButton, u
 import { FaBook, FaTv, FaFilm, FaShareAlt   } from 'react-icons/fa'; // Icons for media types
 
 const mediaTypeIcons = {
-  book: FaBook,
-  tv: FaTv,
-  movie: FaFilm,
+  books: FaBook,  // Changed from "book" to "books"
+  tv_seasons: FaTv,  // For TV shows
+  movies: FaFilm,
 };
 
 
@@ -25,6 +25,15 @@ const WatchlistPreviewCard = ({ item, onClick }) => {
     console.log(`Sharing ${item.title}`);
   };
 
+  const formatReleaseDate = (dateStr) => {
+    if (!dateStr) return 'N/A'; // Handle missing release date
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Invalid Date'; // Handle invalid dates
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }); // e.g., "February 8, 2025"
+  };
+
+ 
+
   return (
     <HStack
       key={item.id}
@@ -38,9 +47,9 @@ const WatchlistPreviewCard = ({ item, onClick }) => {
       onClick={onClick}
       cursor="pointer" // Change cursor on hover
     >
-      <Icon as={mediaTypeIcons[item.type]} boxSize={6} mr={2} />
+      <Icon as={mediaTypeIcons[item.media_type]} boxSize={6} mr={2} />
       <Image
-        src={`${process.env.PUBLIC_URL}/${item.image}`}
+        src={item.image || 'default-placeholder.jpg'}
         alt={item.title}
         htmlWidth="80px"
         htmlHeight="120px"
@@ -57,9 +66,9 @@ const WatchlistPreviewCard = ({ item, onClick }) => {
       >
           {item.title}
         </Text>
-        <Text fontSize="sm">{item.creator || 'N/A'}</Text>
+        <Text fontSize="sm">{item.author || item.director || item.network_name || 'N/A'}</Text>
         <Text fontSize="sm">{item.series}</Text>
-        <Text fontSize="sm">{item.releaseDate || 'N/A'}</Text>
+        <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
       </Box>
       {useBreakpointValue({ base: false, md: true }) ? (
         <Tooltip hasArrow label="Share" bg="teal.600">
