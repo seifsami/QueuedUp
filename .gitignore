@@ -25,3 +25,5 @@ yarn-error.log*
 /build
 .env
 /backend/venv/
+
+.codegpt

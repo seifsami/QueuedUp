@@ -60,6 +60,17 @@ const DetailsModal = ({ isOpen, onClose, item }) => {
           </Flex>
         </ModalBody>
         <ModalFooter justifyContent="center">
+          <Button 
+            as="a"
+            href={`https://www.amazon.com/s?k=${encodeURIComponent(item.title)}&tag=queuedup0f-20`}
+            target="_blank"
+            rel="noopener noreferrer"
+            colorScheme="orange"
+            size="md"
+            mr={3}
+          >
+            Buy on Amazon
+          </Button>
           <Button colorScheme="green" size="lg" mr={3} onClick={handleNotifyMe}>
             Notify Me!
           </Button>
