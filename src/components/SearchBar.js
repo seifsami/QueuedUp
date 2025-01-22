@@ -10,26 +10,23 @@ import {
   Button,
   Box,
   Text,
-  useBreakpointValue
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import { FaSearch } from 'react-icons/fa';
 import WatchlistPreviewCard from './WatchlistPreviewCard';
+import axios from 'axios';
 
-const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, suggestions, onFocusChange }) => {
-  const inputPaddingLeft = useBreakpointValue({ base: "25px", md: "150px" });
-  const iconLeftPosition = useBreakpointValue({ base: "-20px", md: "100px" });
-  const [showDropdown, setShowDropdown] = React.useState(false); // Only declare the state you need here
+const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFocusChange }) => {
+  const inputPaddingLeft = useBreakpointValue({ base: '25px', md: '150px' });
+  const iconLeftPosition = useBreakpointValue({ base: '-20px', md: '100px' });
   const searchRef = useRef(null);
   const navigate = useNavigate();
-  const [isFocused, setIsFocused] = useState(false);
-  
 
-  const dummyPreviewData = [
-    { id: 1, title: "Stranger Things Season 2", series: "Stranger Things", type:"book", image:`${process.env.PUBLIC_URL}51J4VWwlmvL.jpg`,creator: "Matt Dinniman", releaseDate: '2023-12-30'},
-    { id: 2, title: "The First Law", series: "Mistborn",  type: "tv", image:`${process.env.PUBLIC_URL}51x86u3P-4L.jpg`, creator: "Steven Spielberg", releaseDate: '2023-12-30'},
-    {id: 5, title: "Oppenheimer", series: "N/A",  type: "tv", image:`${process.env.PUBLIC_URL}oppenheimer.jpeg`, creator: "Christopher Nolan", releaseDate: '2024-12-30', dateAdded:'2023-12-05'}
-    // ... more items
-];
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [searchResults, setSearchResults] = useState([]); // Live search results
+  const [loading, setLoading] = useState(false); // Loading indicator
+
   const handleSearch = (e) => {
     if (e.key === 'Enter') {
       navigate(`/search?query=${searchQuery}&type=${mediaType}`);
@@ -38,102 +35,124 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
   };
 
   useEffect(() => {
-    function handleClickOutside(event) {
+    const fetchSearchResults = async () => {
+      console.log('Search Query:', searchQuery, 'Media Type:', mediaType)
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5000/api/search?q=${searchQuery}&type=${mediaType}`
+        );
+        console.log('API Response:', response.data)
+        setSearchResults(response.data); // Update the search results
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimeout = setTimeout(fetchSearchResults, 300); // Debounce API requests
+    return () => clearTimeout(debounceTimeout);
+  }, [searchQuery, mediaType]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
-    }
-  
-    // Attach the event listener to the document
+    };
+
     document.addEventListener('mouseup', handleClickOutside);
-  
-    // Return a cleanup function to remove the event listener
     return () => {
       document.removeEventListener('mouseup', handleClickOutside);
     };
   }, []);
-  
 
   const viewAllResults = (e) => {
-    // Stop the click event from propagating to the onBlur event
     e.preventDefault();
     e.stopPropagation();
-  
-    setShowDropdown(false); // Close the dropdown when navigating
+
+    setShowDropdown(false);
     navigate(`/search?query=${searchQuery}&type=${mediaType}`);
   };
 
   const handleBlur = () => {
-    // Delay hiding the dropdown to allow button click to process
     setTimeout(() => {
-      
-        setShowDropdown(false);
-        setIsFocused(false);
-        onFocusChange(false); // Notify the Header that the search bar has lost focus
-      
-    }, 200); // Delay of 200ms
+      setShowDropdown(false);
+      setIsFocused(false);
+      onFocusChange(false);
+    }, 200);
   };
 
   const handleFocus = () => {
     setIsFocused(true);
-    onFocusChange(true);// Notify the Header that the search bar is focused
+    onFocusChange(true);
   };
 
   const renderGroupedPreviews = () => {
-    // If the mediaType is 'all', show grouped data by type
+    if (!searchResults.length) {
+      return <Text p="4">No results found.</Text>;
+    }
+  
+    const groupedResults = searchResults.reduce((group, item) => {
+      const type = item.media_type || 'unknown';
+      group[type] = group[type] || [];
+      group[type].push(item);
+      return group;
+    }, {});
+  
     if (mediaType === 'all') {
-      return Object.keys(groupedData).map(type => (
+      // Truncate results to 2 per category
+      return Object.keys(groupedResults).map((type) => (
         <Box key={type}>
-          {/* Adjust the title to display plural form or full name */}
-          <Text fontSize="lg" fontWeight="bold" p="2">{type === 'tv' ? 'TV Shows' : type.charAt(0).toUpperCase() + type.slice(1) + 's'}</Text>
-          {groupedData[type].map(item => (
-            <WatchlistPreviewCard key={item.id} item={item} />
+          <Text fontSize="lg" fontWeight="bold" p="2">
+            {type === 'tv_seasons'
+              ? 'TV Shows'
+              : type.charAt(0).toUpperCase() + type.slice(1)}
+          </Text>
+          {groupedResults[type].slice(0, 2).map((item) => ( // Limit to 2 results per category
+            <WatchlistPreviewCard key={item._id || item.id} item={item} />
           ))}
         </Box>
       ));
     } else {
-      // If a specific mediaType is selected, show only that type without a section header
-      const type = mediaType.toLowerCase(); // Convert to lowercase to match your groupedData keys
-    if (groupedData[type]) {
-      return groupedData[type].map(item => (
-        <WatchlistPreviewCard key={item.id} item={item} />
+      // Limit to 6 total for specific media type
+      const filteredResults = groupedResults[mediaType] || [];
+      return filteredResults.slice(0, 6).map((item) => (
+        <WatchlistPreviewCard key={item._id || item.id} item={item} />
       ));
     }
-    return null; // Return null if there's no data for this type
-  }
-};
-
-  const groupedData = dummyPreviewData.reduce((group, item) => {
-    const { type } = item;
-    group[type] = group[type] ?? [];
-    group[type].push(item);
-    return group;
-  }, {});
+  };
+  
 
   return (
-    
-    <Flex flex={1} minW={0} mx={4} position={'relative'} ref={searchRef}>
-      <InputGroup >
+    <Flex flex={1} minW={0} mx={4} position="relative" ref={searchRef}>
+      <InputGroup>
         <Select
           w="100px"
           borderRightRadius={0}
           value={mediaType}
           position="absolute"
           left="0"
-          zIndex="2" // Ensure dropdown is above other content
-          color={'gray.500'}
+          zIndex="2"
+          color="gray.500"
           display={{ base: 'none', md: 'block' }}
           onChange={(e) => {
-            setMediaType(e.target.value.toLowerCase()); // Convert to lowercase to match your groupedData keys
+            setMediaType(e.target.value.toLowerCase());
             setShowDropdown(true);
           }}
         >
           <option value="all">All</option>
-          <option value="book">Books</option>
-          <option value="tv">TV</option>
-          <option value="movie">Movies</option>
+          <option value="books">Books</option>
+          <option value="tv_seasons">TV Shows</option>
+          <option value="movies">Movies</option>
         </Select>
-        <InputLeftElement pointerEvents="none" left={iconLeftPosition} ml={3} >
+        <InputLeftElement pointerEvents="none" left={iconLeftPosition} ml={3}>
           <Icon as={FaSearch} color="gray.300" />
         </InputLeftElement>
         <Input
@@ -141,24 +160,22 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
           placeholder="Search for TV shows, movies, books..."
           variant="filled"
           pl={inputPaddingLeft}
-           // Adjust padding to account for the media type dropdown
           _placeholder={{ color: 'gray.500' }}
           value={searchQuery}
-          _focus={{ bg: 'white'}}
+          _focus={{ bg: 'white' }}
           color="black"
           flex={1}
           onChange={(e) => {
             setSearchQuery(e.target.value);
-            setShowDropdown(true); // Open dropdown when typing
+            setShowDropdown(true);
           }}
           onFocus={handleFocus}
           onBlur={handleBlur}
           onKeyDown={handleSearch}
         />
       </InputGroup>
-      {showDropdown && searchQuery && isFocused && ( // Only show this if showDropdown is true and searchQuery is not empty
-       <Box
-       display={{ base: 'block', md: 'block' }}
+      {showDropdown && searchQuery && isFocused && (
+        <Box
           style={{
             position: 'absolute',
             top: '100%',
@@ -168,28 +185,25 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, sugge
             borderRadius: '8px',
             zIndex: 1000,
             overflow: 'hidden',
-            color: 'black'
-            
+            color: 'black',
           }}
         >
-          
-          {renderGroupedPreviews()}
+          {loading ? <Text p="4">Loading...</Text> : renderGroupedPreviews()}
           <Flex justifyContent="center" p="4">
-          <Button
-            onClick={(e) => viewAllResults(e)}
-            colorScheme="teal"
-            width="full"
-            variant="outline"
-            style={{
-              marginTop: '1rem',
-              borderRadius: '0.375rem',
-            }}
-          >
-            View More
-          </Button>
+            <Button
+              onClick={(e) => viewAllResults(e)}
+              colorScheme="teal"
+              width="full"
+              variant="outline"
+              style={{
+                marginTop: '1rem',
+                borderRadius: '0.375rem',
+              }}
+            >
+              View More
+            </Button>
           </Flex>
         </Box>
-        
       )}
     </Flex>
   );

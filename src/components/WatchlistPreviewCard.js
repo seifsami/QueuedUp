@@ -8,6 +8,12 @@ const mediaTypeIcons = {
   movies: FaFilm,
 };
 
+const defaultImages = {
+  books: "/heather-green-iB9YTvq2rZ8-unsplash.jpg", // Path relative to public folder
+  movies: "/denise-jans-9lTUAlNB87M-unsplash.jpg",
+  tv_seasons: "/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
+};
+
 
 const WatchlistPreviewCard = ({ item, onClick }) => {
   const bg = useColorModeValue('white', 'gray.700'); // Adjusts based on color mode
@@ -49,7 +55,7 @@ const WatchlistPreviewCard = ({ item, onClick }) => {
     >
       <Icon as={mediaTypeIcons[item.media_type]} boxSize={6} mr={2} />
       <Image
-        src={item.image || 'default-placeholder.jpg'}
+        src={item.image || defaultImages[item.media_type || "books"]}
         alt={item.title}
         htmlWidth="80px"
         htmlHeight="120px"

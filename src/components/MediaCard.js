@@ -4,6 +4,12 @@ import { FaEye } from 'react-icons/fa';
 import Countdown from 'react-countdown';
 import NotifyMeButton from './NotifyMeButton';
 
+const defaultImages = {
+  books: "/heather-green-iB9YTvq2rZ8-unsplash.jpg", // Path relative to public folder
+  movies: "/denise-jans-9lTUAlNB87M-unsplash.jpg",
+  tv_seasons: "/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
+};
+
 const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
   const imageContainerHeight = '338px'; 
 
@@ -41,7 +47,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
         borderColor="gray.200"
       >
         <Image
-          src={item.image}
+           src={item.image || defaultImages[item.media_type || "books"]}
           alt={item.title}
           objectFit="cover" // Cover the area, maintaining aspect ratio
           width="100%"
