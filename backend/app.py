@@ -4,8 +4,9 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-app.config["MONGO_URI"] = "mongodb+srv://seifsami:beesknees@queuedupdbnew.lsrfn46.mongodb.net/?retryWrites=true&w=majority"
-mongo = PyMongo(app)
+app.config["MONGO_URI"] = os.getenv("MONGO_URI")mongo = PyMongo(app)
+if not MONGO_URI:
+    print("🚨 ERROR: MONGO_URI is NOT set in environment variables!")
 app.extensions['pymongo'] = mongo  # Ensure the mongo object is available in the app context
 
 from blueprints.user import user_blueprint
