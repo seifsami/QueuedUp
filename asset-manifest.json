@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/QueuedUp/static/css/main.b4c30743.css",
-    "main.js": "/QueuedUp/static/js/main.32b676ed.js",
+    "main.js": "/QueuedUp/static/js/main.d6deb126.js",
     "index.html": "/QueuedUp/index.html",
     "main.b4c30743.css.map": "/QueuedUp/static/css/main.b4c30743.css.map",
-    "main.32b676ed.js.map": "/QueuedUp/static/js/main.32b676ed.js.map"
+    "main.d6deb126.js.map": "/QueuedUp/static/js/main.d6deb126.js.map"
   },
   "entrypoints": [
     "static/css/main.b4c30743.css",
-    "static/js/main.32b676ed.js"
+    "static/js/main.d6deb126.js"
   ]
 }
