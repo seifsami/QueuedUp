@@ -58,7 +58,7 @@ def get_upcoming_items(mongo, media_type):
 
 def update_trending_and_upcoming(mongo):
     db = mongo.cx["QueuedUpDBnew"]
-    today = datetime.now().date()
+    today = datetime.now(timezone.utc).date()
 
     print("Updating trending and upcoming items")
     media_types = ["books", "movies", "tv_seasons"]
