@@ -17,7 +17,7 @@ def clean_result(result):
 def search():
     try:
         # Get query parameters
-        query = request.args.get('q', '').strip()  # Search query
+        query = request.args.get('query') or request.args.get('q', '').strip() # Search query
         media_type = request.args.get('type', '').strip()  # Media type (optional)
         print(f"Received search query: '{query}' with media_type: '{media_type}'") 
 
