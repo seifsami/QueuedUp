@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:5000'; // Your backend URL
-const API_BASE_URL_HOMEPAGE = 'http://127.0.0.1:5000/homepage';
+const API_BASE_URL = "https://queuedup-backend-6d9156837adf.herokuapp.com"
+const API_BASE_URL_HOMEPAGE = 'https://queuedup-backend-6d9156837adf.herokuapp.com/homepage';
 
 const API = axios.create({ baseURL: API_BASE_URL });
 
@@ -28,7 +28,7 @@ export const getTrendingMedia = async (mediaType) => {
   };
 
   export const addToWatchlist = async (userId, itemId, mediaType) => {
-    const BASE_URL = 'http://127.0.0.1:5000';  // Backend base URL
+    const BASE_URL = 'https://queuedup-backend-6d9156837adf.herokuapp.com';  // Backend base URL
     try {
       const response = await axios.post(
         `${API_BASE_URL}/watchlist/${userId}`,  // Include userId in the URL
