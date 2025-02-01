@@ -27,6 +27,7 @@ import firebase from '../firebaseConfig';
 import { useModal } from '../ModalContext';
 import { FaGoogle, FaArrowLeft, FaInfoCircle } from 'react-icons/fa';
 import { registerUser, getUserProfile } from '../services/api'; // Import API calls
+import { isInAppBrowser } from '../utils/browserHelpers';
 
 function OnboardingModal() {
   const { isModalOpen, closeModal, itemToAdd } = useModal();
@@ -170,6 +171,22 @@ const [lastName, setLastName] = useState('');
   };
 
   const handleGoogleSignIn = async () => {
+  // Step 1: Detect In-App Browser and Prompt User
+  if (isInAppBrowser()) {
+    toast({
+      title: "Open in Browser",
+      description: "For security reasons, please open this page in your browser to sign in with Google.",
+      status: "warning",
+      duration: 5000,
+      isClosable: true,
+    });
+
+    // Attempt to open in an external browser (will only work on some devices)
+    const url = window.location.href;
+    window.location.href = `googlechrome://${url.replace(/^https?:\/\//, '')}`;
+
+    return;  // Exit the function to prevent sign-in from continuing
+  }
     const provider = new firebase.auth.GoogleAuthProvider();
     try {
       const result = await firebase.auth().signInWithPopup(provider);

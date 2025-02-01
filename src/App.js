@@ -9,8 +9,6 @@ import LandingPage from './pages/LandingPage';
 import WatchlistPage from './pages/WatchlistPage'; 
 import SearchResultsPage from './pages/SearchResultsPage';
 import ProfilePage from './pages/ProfilePage';
-import { redirectToBrowser } from './utils/redirectHelper';
-
 
 
 const App = () => {
@@ -18,7 +16,6 @@ const App = () => {
   
 
   useEffect(() => {
-    redirectToBrowser();
     const unsubscribe = firebase.auth().onAuthStateChanged(user => {
       console.log("Auth state changed, user:", user);
       if (user) {

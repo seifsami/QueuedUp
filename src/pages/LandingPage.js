@@ -74,7 +74,7 @@ const LandingPage = () => {
                     width="auto"
                     px={10} // Increase padding on the sides for a wider button
                     >
-                    Sign Up
+                    Get Started
                     </MotionButton>
                 </VStack>
                 </Box>
