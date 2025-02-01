@@ -19,7 +19,7 @@ def search():
         # Get query parameters
         query = request.args.get('query') or request.args.get('q', '').strip() # Search query
         media_type = request.args.get('type', '').strip()  # Media type (optional)
-        print(f"Received search query: '{query}' with media_type: '{media_type}'") 
+      
 
         # Ensure a query is provided
         if not query:

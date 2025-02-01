@@ -27,6 +27,11 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
   const [searchResults, setSearchResults] = useState([]); // Live search results
   const [loading, setLoading] = useState(false); // Loading indicator
 
+  const API_BASE = "https://queuedup-backend-6d9156837adf.herokuapp.com";
+
+
+
+
   const handleSearch = (e) => {
     if (e.key === 'Enter') {
       navigate(`/search?query=${searchQuery}&type=${mediaType}`);
@@ -45,7 +50,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
       setLoading(true);
       try {
         const response = await axios.get(
-          `http://127.0.0.1:5000/api/search?q=${searchQuery}&type=${mediaType}`
+          `${API_BASE}/api/search?q=${searchQuery}&type=${mediaType}`
         );
         console.log('API Response:', response.data)
         setSearchResults(response.data); // Update the search results

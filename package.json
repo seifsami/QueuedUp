@@ -2,7 +2,7 @@
   "name": "queued-up",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://seifsami.github.io/QueuedUp",
+  "homepage": "https://queuedup.co/",
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.2",

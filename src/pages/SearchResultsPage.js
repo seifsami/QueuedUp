@@ -20,7 +20,7 @@ const SearchResultsPage = () => {
   const [filteredResults, setFilteredResults] = useState([]); // Filtered results based on type
   const [loading, setLoading] = useState(false); // Loading state
   const [selectedFilter, setSelectedFilter] = useState(typeFromParams); // Sidebar filter selection
-
+  const API_BASE = "https://queuedup-backend-6d9156837adf.herokuapp.com";
   const typeToLabelMap = {
     all: 'All',
     movies: 'Movies',
@@ -35,8 +35,9 @@ const SearchResultsPage = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://127.0.0.1:5000/api/search?q=${query}&type=${selectedFilter}`
+        `${API_BASE}/api/search?q=${query}&type=${selectedFilter}`
       );
+      
       setSearchResults(response.data);
       setFilteredResults(response.data); // Initial display shows all fetched results
     } catch (error) {
