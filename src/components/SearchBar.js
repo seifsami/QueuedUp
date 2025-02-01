@@ -16,11 +16,12 @@ import { FaSearch } from 'react-icons/fa';
 import WatchlistPreviewCard from './WatchlistPreviewCard';
 import axios from 'axios';
 
-const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFocusChange }) => {
+const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFocusChange, focusOnMount }) => {
   const inputPaddingLeft = useBreakpointValue({ base: '25px', md: '150px' });
   const iconLeftPosition = useBreakpointValue({ base: '-20px', md: '100px' });
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  const inputRef = useRef(null);
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -31,7 +32,11 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
 
 
 
-
+  useEffect(() => {
+    if (focusOnMount && inputRef.current) {
+      inputRef.current.focus(); // Auto-focus input when focusOnMount is true
+    }
+  }, [focusOnMount]);
   const handleSearch = (e) => {
     if (e.key === 'Enter') {
       navigate(`/search?query=${searchQuery}&type=${mediaType}`);
@@ -161,6 +166,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
           <Icon as={FaSearch} color="gray.300" />
         </InputLeftElement>
         <Input
+          ref={inputRef}
           type="text"
           placeholder="Search for TV shows, movies, books..."
           variant="filled"
