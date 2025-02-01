@@ -3,13 +3,14 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { ModalProvider } from './ModalContext'
 import firebase from './firebaseConfig'; 
 import './App.css';
-
 import OnboardingModal from './components/OnboardingModal';
 import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';
 import WatchlistPage from './pages/WatchlistPage'; 
 import SearchResultsPage from './pages/SearchResultsPage';
 import ProfilePage from './pages/ProfilePage';
+import { redirectToBrowser } from './utils/redirectHelper';
+
 
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
   
 
   useEffect(() => {
+    redirectToBrowser();
     const unsubscribe = firebase.auth().onAuthStateChanged(user => {
       console.log("Auth state changed, user:", user);
       if (user) {
