@@ -139,8 +139,12 @@ const HomePage = ({ user }) => {
         </Box>
         <DetailsModal
           isOpen={isModalOpen}
-          onClose={closeModal}
+          onClose={() => {
+            closeModal();  // Close the modal
+            fetchUserWatchlist();  // Refresh the watchlist when modal closes
+          }}
           item={selectedItem}
+          refetchWatchlist={fetchUserWatchlist}  // Pass refetch function
         />
       </Box>
     </>

@@ -16,7 +16,8 @@ const defaultImages = {
   tv_seasons: "/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 };
 
-const WatchlistPreviewCard = ({ item }) => {
+const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist }) => {
+  console.log("Item from WatchlistPreviewCard:", item)
   const [isModalOpen, setModalOpen] = useState(false);
   const [detailedItem, setDetailedItem] = useState(item); // 🟢 State to store full item data
 
@@ -34,16 +35,22 @@ const WatchlistPreviewCard = ({ item }) => {
 
   // 🟢 Fetch full item details when card is clicked
   const handleCardClick = async () => {
-    try {
-      const { data } = await axios.get(
-        `https://queuedup-backend-6d9156837adf.herokuapp.com/media/${item.media_type}/${item.item_id}`
-      );
-      console.log("Fetched detailed item:", data);
-      setDetailedItem(data); // Update the state with full item details
-    } catch (error) {
-      console.error("Error fetching detailed item:", error);
-      setDetailedItem(item); // Fallback to partial data if API fails
+    // Check if description exists; if not, fetch full details
+    if (!item.description) {
+      try {
+        const { data } = await axios.get(
+          `https://queuedup-backend-6d9156837adf.herokuapp.com/media/${item.media_type}/${item._id || item.item_id}`
+        );
+        console.log("Fetched detailed item:", data)
+        setDetailedItem(data);
+      } catch (error) {
+        console.error("Error fetching detailed item:", error);
+        setDetailedItem(item);  // Fallback to initial data if API call fails
+      }
+    } else {
+      setDetailedItem(item);  // Use existing data if description exists
     }
+
     setModalOpen(true);
   };
 
@@ -58,6 +65,8 @@ const WatchlistPreviewCard = ({ item }) => {
       return 'Invalid Date';
     }
   };
+  console.log("Item passed to DetailsModal from WatchlistPreviewCard:", detailedItem);
+
 
   return (
     <>
@@ -116,7 +125,9 @@ const WatchlistPreviewCard = ({ item }) => {
       <DetailsModal
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
-        item={detailedItem} // 🟢 Pass detailed item to modal
+        item={detailedItem} 
+        userWatchlist={userWatchlist}
+        refetchWatchlist={refetchWatchlist}
       />
     </>
   );

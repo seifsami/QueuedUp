@@ -1,24 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal, ModalOverlay, ModalContent, ModalFooter, ModalBody,
-  ModalCloseButton, Button, Image, Text, Flex, Box
+  ModalCloseButton, Button, Image, Text, Flex, Box, useToast
 } from '@chakra-ui/react';
+import { getUserWatchlist } from '../services/api';
+import NotifyMeButton from './NotifyMeButton';
+import { useModal } from '../ModalContext';
 
-const DetailsModal = ({ isOpen, onClose, item }) => {
-  console.log("Item Data:", item);
-  if (!item) {
-    return null; // Don't render the modal if item is null
-  }
+const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
+  const { currentUser } = useModal();
+  const [userWatchlist, setUserWatchlist] = useState([]);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const toast = useToast();
 
-  const handleNotifyMe = () => {
-    // Implement the logic for Notify Me action
-    console.log('Notify Me clicked for item:', item.title);
+  useEffect(() => {
+    if (isOpen && currentUser) {
+      fetchUserWatchlist();
+    }
+  }, [isOpen, currentUser]);
+
+  const fetchUserWatchlist = async () => {
+    try {
+      const { data } = await getUserWatchlist(currentUser.uid);
+      setUserWatchlist(data);
+    } catch (error) {
+      console.error('Failed to fetch watchlist:', error);
+    }
   };
 
-  console.log("DetailsModal Received Item Data:", item);
+  const handleNotifySuccess = () => {
+    fetchUserWatchlist();  // Refetch watchlist after adding item
+    if (refetchWatchlist) refetchWatchlist();
+  };
+
+  const handleClose = () => {
+    if (refetchWatchlist) refetchWatchlist();  // Ensure homepage updates on modal close
+    onClose();  // Close the modal
+  };
+
+  if (!item) return null;
+
+  const formattedReleaseDate = item.releaseDate || item.release_date || 'N/A';
+  const truncatedDescription = item.description && item.description.length > 300
+    ? item.description.substring(0, 300) + '...'
+    : item.description;
+  console.log("Item being passed to NotifyMeButton from DetailsModal:", item);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "sm", md: "lg" }} isCentered>
+    <Modal isOpen={isOpen} onClose={handleClose} size={{ base: "sm", md: "lg" }} isCentered>
       <ModalOverlay />
       <ModalContent 
         maxWidth={{ base: "96%", md: "70%" }}
@@ -38,12 +67,12 @@ const DetailsModal = ({ isOpen, onClose, item }) => {
                 alt={item.title}
                 width={{ base: "30vh", md: "50vh" }}
                 height={{ base: "30vh", md: "50vh" }}
-                mt = {6}
+                mt={6}
                 objectFit="contain"
               />
             </Box>
             <Box flex="1" px={{ base: 2, md: 4 }}>
-              <Text fontSize="2xl" fontWeight="bold" mt = {{base:"0", md:"30px"}} mb={2} textAlign={{ base: "center", md: "left" }}>
+              <Text fontSize="2xl" fontWeight="bold" mt={{ base: "0", md: "30px" }} mb={2} textAlign={{ base: "center", md: "left" }}>
                 {item.title}
               </Text>
               {item.author && (
@@ -52,12 +81,25 @@ const DetailsModal = ({ isOpen, onClose, item }) => {
                 </Text>
               )}
               <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
-                Release Date: {new Date(item.releaseDate).toLocaleDateString()}
+                Release Date: {new Date(formattedReleaseDate).toLocaleDateString()}
               </Text>
               {item.description && (
-                <Text fontSize="md" textAlign={{ base: "center", md: "left" }}>
-                  Description: {item.description}
+                <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
+                Description:{' '}
+                <Text as="span" fontSize="md" fontWeight="normal">
+                  {showFullDescription ? item.description : truncatedDescription}
                 </Text>
+                {item.description.length > 300 && (
+                  <Button 
+                    variant="link" 
+                    colorScheme="blue" 
+                    onClick={() => setShowFullDescription(!showFullDescription)}
+                    ml={1}  // Add margin to separate from description text
+                  >
+                    {showFullDescription ? 'See Less' : 'See More'}
+                  </Button>
+                )}
+              </Text>
               )}
             </Box>
           </Flex>
@@ -74,9 +116,19 @@ const DetailsModal = ({ isOpen, onClose, item }) => {
           >
             Buy on Amazon
           </Button>
-          <Button colorScheme="green" size="lg" mr={3} onClick={handleNotifyMe}>
-            Notify Me!
-          </Button>
+
+          {/* NotifyMeButton with success callback */}
+          <NotifyMeButton
+            item={item}
+            userWatchlist={userWatchlist}
+            refetchWatchlist={handleNotifySuccess}  // Trigger watchlist update on success
+            buttonProps={{
+              colorScheme: "green",
+              size: "md",
+              mr: 3,
+            }}
+          />
+
           <Button colorScheme="teal" size="md" onClick={onClose}>
             Close
           </Button>

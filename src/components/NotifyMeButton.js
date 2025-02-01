@@ -3,7 +3,7 @@ import { Button, useToast } from '@chakra-ui/react';
 import { useModal } from '../ModalContext'; // Adjust the import path as necessary
 import { addToWatchlist } from '../services/api';
 
-export const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist }) => {
+export const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonProps }) => {
   const { currentUser, openModalWithItem } = useModal();  // Access modal and current user
   const toast = useToast();  // To display notifications
 
@@ -15,7 +15,15 @@ export const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist }) => {
       openModalWithItem(item);  // Open login/sign-up modal if user not signed in
     } else {
       try {
-        await addToWatchlist(currentUser.uid, item._id, item.media_type || 'books');  // Add item to backend
+        
+          console.log("Attempting to add to watchlist with:", {
+            userId: currentUser.uid,
+            itemId: item._id,
+            mediaType: item.media_type
+          });
+        console.log("Item in NotifyMeButton:", item);
+
+        await addToWatchlist(currentUser.uid, item._id, item.media_type) // Add item to backend
         toast({
           title: 'Added to Watchlist',
           description: `${item.title} has been added to your watchlist.`,
@@ -40,8 +48,9 @@ export const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist }) => {
   return (
     <Button
       onClick={handleNotifyClick}
+      {...buttonProps}
       colorScheme={isInWatchlist ? 'gray' : 'teal'}  // Gray if already in watchlist, teal otherwise
-      size="sm"
+      size={buttonProps?.size || 'sm'}
       isDisabled={isInWatchlist}  // Disable the button if item is already in watchlist
     >
       {isInWatchlist ? 'In Watchlist' : 'Notify Me'}

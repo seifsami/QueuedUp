@@ -13,17 +13,18 @@ def get_media_item(media_type, item_id):
         fields_to_include = {}
 
         if media_type == 'books':
-            fields_to_include = {'title': 1, 'author': 1, 'release_date': 1, 'image': 1, 'description': 1, 'series': 1}  # Add other necessary fields
+            fields_to_include = {'title': 1, 'author': 1, 'release_date': 1, 'image': 1, 'description': 1, 'series': 1}
         elif media_type == 'movies':
-            fields_to_include = {'title': 1, 'director': 1, 'release_date': 1, 'image': 1, 'description': 1, 'genres': 1, 'franchise_name': 1}  # Add other necessary fields
+            fields_to_include = {'title': 1, 'director': 1, 'release_date': 1, 'image': 1, 'description': 1, 'genres': 1, 'franchise_name': 1}
         elif media_type == 'tv_seasons':
-            fields_to_include = {'title': 1, 'network_name': 1, 'release_date': 1, 'image': 1, 'description': 1, 'genres': 1, 'name': 1}  # Add other necessary fields
+            fields_to_include = {'title': 1, 'network_name': 1, 'release_date': 1, 'image': 1, 'description': 1, 'genres': 1, 'name': 1}
 
         print(f"Searching in collection: {media_type} with ID: {item_id}")
         item = collection.find_one({"_id": ObjectId(item_id)}, fields_to_include)
 
         if item:
-            item.pop('_id', None)
+            item['_id'] = str(item['_id'])  # Include _id in the response
+            item['media_type'] = media_type  # Add media_type to response
             return jsonify(item), 200
         else:
             return jsonify({"error": "Item not found"}), 404
