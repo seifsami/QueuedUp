@@ -41,7 +41,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist }) => {
         const { data } = await axios.get(
           `https://queuedup-backend-6d9156837adf.herokuapp.com/media/${item.media_type}/${item._id || item.item_id}`
         );
-        console.log("Fetched detailed item:", data)
+        console.log("new Fetched detailed item:", data)
         setDetailedItem(data);
       } catch (error) {
         console.error("Error fetching detailed item:", error);

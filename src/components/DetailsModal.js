@@ -7,6 +7,12 @@ import { getUserWatchlist } from '../services/api';
 import NotifyMeButton from './NotifyMeButton';
 import { useModal } from '../ModalContext';
 
+const defaultImages = {
+  books: "/heather-green-iB9YTvq2rZ8-unsplash.jpg",
+  movies: "/denise-jans-9lTUAlNB87M-unsplash.jpg",
+  tv_seasons: "/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
+};
+
 const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
   const { currentUser } = useModal();
   const [userWatchlist, setUserWatchlist] = useState([]);
@@ -63,7 +69,7 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
           >
             <Box flexShrink={0} mb={{ base: 4, md: 0 }} textAlign={{ base: "center", md: "left" }}>
               <Image
-                src={item.image}
+                src={item.image || defaultImages[item.media_type || "books"]}
                 alt={item.title}
                 width={{ base: "30vh", md: "50vh" }}
                 height={{ base: "30vh", md: "50vh" }}
@@ -81,7 +87,7 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
                 </Text>
               )}
               <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
-                Release Date: {new Date(formattedReleaseDate).toLocaleDateString()}
+              Release Date: {formattedReleaseDate === 'N/A' ? 'N/A' : new Date(formattedReleaseDate).toLocaleDateString()}
               </Text>
               {item.description && (
                 <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
@@ -129,9 +135,6 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
             }}
           />
 
-          <Button colorScheme="teal" size="md" onClick={onClose}>
-            Close
-          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
