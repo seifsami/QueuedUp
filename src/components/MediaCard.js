@@ -13,6 +13,18 @@ const defaultImages = {
 const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
   const imageContainerHeight = '338px'; 
 
+  const formatReleaseDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    try {
+      let parsedDate = new Date(Date.parse(dateStr));
+      if (isNaN(parsedDate.getTime())) throw new Error("Invalid Date");
+      return parsedDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (error) {
+      console.error("Error parsing date:", dateStr);
+      return 'Invalid Date';
+    }
+  };
+
   // Custom renderer for countdown
   const renderer = ({ days, hours, minutes, completed }) => {
     if (completed) {
@@ -64,7 +76,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
 
       <VStack align="start" p={2} spacing="1">
         <Text fontWeight="bold" noOfLines={2} h="3rem">{item.title} </Text>
-        <Text fontSize="sm">{new Date(item.releaseDate).toLocaleDateString()}</Text>
+        <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
         <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
         <HStack justifyContent="space-between" width="full" >
         <NotifyMeButton
