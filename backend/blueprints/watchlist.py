@@ -34,6 +34,18 @@ def get_user_watchlist(user_id):
             detailed_item["director"] = media_details.get("director", "Unknown Director")
         elif item['media_type'] == 'tv_seasons':
             detailed_item["network_name"] = media_details.get("network_name", "Unknown Network")
+        if item['media_type'] == 'books':
+            detailed_item["author"] = media_details.get("author", "Unknown Author")
+            detailed_item["description"] = media_details.get("description", media_details.get("synopsis", "No Description Available"))
+
+        elif item['media_type'] == 'movies':
+            detailed_item["director"] = media_details.get("director", "Unknown Director")
+            detailed_item["description"] = media_details.get("description", "No Description Available")
+
+        elif item['media_type'] == 'tv_seasons':
+            detailed_item["network_name"] = media_details.get("network_name", "Unknown Network")
+            detailed_item["description"] = media_details.get("description", "No Description Available")
+
 
         detailed_watchlist.append(detailed_item)
 

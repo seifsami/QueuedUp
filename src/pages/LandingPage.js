@@ -102,7 +102,7 @@ const LandingPage = () => {
                 bg="brand.100"
                 color="white"
                 fontSize="md" // Bigger font size
-                // ... other styles
+                onClick={navigateToHomePage}
             >
                 Get Started Now
             </Button>

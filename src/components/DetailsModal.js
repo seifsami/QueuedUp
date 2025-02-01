@@ -5,6 +5,7 @@ import {
 } from '@chakra-ui/react';
 
 const DetailsModal = ({ isOpen, onClose, item }) => {
+  console.log("Item Data:", item);
   if (!item) {
     return null; // Don't render the modal if item is null
   }
@@ -13,6 +14,8 @@ const DetailsModal = ({ isOpen, onClose, item }) => {
     // Implement the logic for Notify Me action
     console.log('Notify Me clicked for item:', item.title);
   };
+
+  console.log("DetailsModal Received Item Data:", item);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={{ base: "sm", md: "lg" }} isCentered>
