@@ -23,7 +23,15 @@ const WatchlistPreview = ({ watchlist = [], mediaType }) => {  // Default to emp
   
 
   return (
-    <Box my={4} bg="gray.50" p={4} borderRadius="lg">
+    <Box 
+      my={4} 
+      bg="white" 
+      p={4} 
+      borderRadius="lg" 
+      border="1px solid" 
+      borderColor="gray.200"
+      boxShadow="md"  // Subtle border for separation
+    >
       <Flex justifyContent="space-between" alignItems="center" mb={4}>
         <Text fontSize="2xl" fontWeight="bold" flex="1">
         My {formatMediaType(mediaType)} Tracking List

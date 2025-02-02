@@ -9,6 +9,7 @@ import LandingPage from './pages/LandingPage';
 import WatchlistPage from './pages/WatchlistPage'; 
 import SearchResultsPage from './pages/SearchResultsPage';
 import ProfilePage from './pages/ProfilePage';
+import Footer from './components/Footer';
 
 
 const App = () => {
@@ -42,6 +43,7 @@ const App = () => {
         <Route path="/search" element={<SearchResultsPage  user={currentUser}/>} /> 
         <Route path="/profile" element={<ProfilePage user={currentUser}/>} /> 
       </Routes>
+      <Footer /> 
     </Router>
    </ModalProvider>
   );

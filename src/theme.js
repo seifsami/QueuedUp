@@ -21,7 +21,7 @@ const theme = extendTheme({
     global: {
       // styles for the `body`
       body: {
-        bg: 'brand.400'// using the text color from your theme
+        bg: 'brand.400'// changed this to gray.100 from brand.400and I swear it looks better but idk could be wrong
       },
       // Add styles for other elements if needed
     },
