@@ -55,3 +55,13 @@ export const getTrendingMedia = async (mediaType) => {
       throw error;  // So the component can handle the error appropriately
     }
   };
+
+  
+export const updateUserProfile = (firebaseId, updatedData) => {
+  return API.put(`/user/update/${firebaseId}`, updatedData)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Error updating user profile:', error);
+      throw new Error('Failed to update user profile');
+    });
+};

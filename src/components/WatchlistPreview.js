@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import WatchlistPreviewCard from './WatchlistPreviewCard';
 
 const formatMediaType = (mediaType) => {
+  if (!mediaType) return 'Media';  // Default label when no mediaType is provided
+
   switch (mediaType) {
     case 'books':
       return 'Books';
@@ -19,7 +21,9 @@ const formatMediaType = (mediaType) => {
 
 const WatchlistPreview = ({ watchlist = [], mediaType }) => {  // Default to empty array
   const navigate = useNavigate();
-  const filteredWatchlist = watchlist.filter((item) => item.media_type === mediaType);
+  const filteredWatchlist = mediaType
+  ? watchlist.filter((item) => item.media_type === mediaType)
+  : watchlist;
   
 
   return (

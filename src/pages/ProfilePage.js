@@ -1,90 +1,215 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Box, Flex, Avatar, Text, VStack, Heading, SimpleGrid,
-  Button, Select, FormLabel, FormControl, useColorModeValue,
+  Box, Flex, Avatar, Text, VStack, Heading, Divider, Button,
+  useColorModeValue, HStack, Input, Tooltip, Badge, Switch
 } from '@chakra-ui/react';
+import { EditIcon, CheckIcon, CloseIcon, InfoOutlineIcon } from '@chakra-ui/icons';
 import Header from '../components/Header';
+import WatchlistPreview from '../components/WatchlistPreview';
+import { getUserProfile, updateUserProfile, getUserWatchlist } from '../services/api';
 
-const ProfilePage = () => {
-
-  const [notificationFrequency, setNotificationFrequency] = useState('daily');
-  const [notificationMedium, setNotificationMedium] = useState('email');
+const ProfilePage = ({ user }) => {
+  const [userData, setUserData] = useState(null);
+  const [notificationPreferences, setNotificationPreferences] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedData, setEditedData] = useState({});
+  const [userWatchlist, setUserWatchlist] = useState([]);
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
-  // Sample user data
-  const userData = {
-    name: "Jane Doe",
-    email: "janedoe@example.com",
-    avatar: "../profileplaceholder.jpeg",
-    //bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-    favorites: ["The Great Gatsby", "To Kill a Mockingbird", "1984"],
-    recentActivity: ["Reviewed 'The Great Gatsby'", "Added '1984' to favorites"]
+  const firebaseId = user?.uid || 'some_firebase_id';
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await getUserProfile(firebaseId);
+        setUserData(response.data);
+        setNotificationPreferences(response.data.notification_preferences || []);
+      } catch (error) {
+        console.error('Failed to load user profile:', error);
+      }
+    };
+
+    const fetchUserWatchlist = async () => {
+      try {
+        const { data } = await getUserWatchlist(firebaseId);
+        setUserWatchlist(data);
+      } catch (error) {
+        console.error('Failed to load watchlist:', error);
+      }
+    };
+
+    fetchUserData();
+    fetchUserWatchlist();
+  }, [firebaseId]);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedData(userData);
   };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedData({});
+  };
+
+  const handleSave = async () => {
+    try {
+      // Map SMS to mobile before sending to the backend
+      const formattedPreferences = notificationPreferences.map(pref =>
+        pref === 'sms' ? 'mobile' : pref
+      );
+
+      await updateUserProfile(firebaseId, { ...editedData, notification_preferences: formattedPreferences });
+      setUserData(editedData);
+      setNotificationPreferences(formattedPreferences);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+  const handleChange = (e) => {
+    setEditedData({ ...editedData, [e.target.name]: e.target.value });
+  };
+
+  const toggleNotificationPreference = (preference) => {
+    setNotificationPreferences((prev) =>
+      prev.includes(preference)
+        ? prev.filter((pref) => pref !== preference)
+        : [...prev, preference]
+    );
+  };
+
+  if (!userData) return <Text>Loading...</Text>;
 
   return (
     <>
       <Header />
-      <Box maxW={{ xl: "1200px" }} mx="auto" bg="white" p={8}>
-        {/* User Profile Section */}
-        <Flex direction={{ base: "column", md: "row" }} alignItems="center" mb={6}>
-          <Avatar size="2xl" name={userData.name} src={userData.avatar} mr={4} />
-          <VStack alignItems={{ base: "center", md: "start" }} mt={{ base: 4, md: 0 }}>
-            <Heading as="h1" size="xl">{userData.name}</Heading>
-            <Text fontSize="lg">{userData.email}</Text>
-            <Text textAlign={{ base: "center", md: "left" }} px={{ md: 4 }}>{userData.bio}</Text>
-          </VStack>
+      <Box maxW="1000px" mx="auto" bg="white" p={8} borderRadius="2xl" boxShadow="2xl" mt={8}>
+        
+        {/* Profile Header */}
+        <Flex justifyContent="space-between" alignItems="center" mb={8}>
+          <Flex direction={{ base: "column", md: "row" }} alignItems="center">
+            <Avatar size="2xl" name={`${userData.first_name} ${userData.last_name}`} src={userData.avatar || '../profileplaceholder.jpeg'} mr={{ md: 8 }} />
+            <VStack alignItems="start" spacing={1}>
+
+              {/* Editable Name */}
+              {isEditing ? (
+                <HStack spacing={2}>
+                  <Input
+                    name="first_name"
+                    value={editedData.first_name}
+                    onChange={handleChange}
+                    placeholder="First Name"
+                    variant="flushed"
+                  />
+                  <Input
+                    name="last_name"
+                    value={editedData.last_name}
+                    onChange={handleChange}
+                    placeholder="Last Name"
+                    variant="flushed"
+                  />
+                </HStack>
+              ) : (
+                <Heading as="h1" size="2xl">{`${userData.first_name} ${userData.last_name}`}</Heading>
+              )}
+
+              {/* Username */}
+              <HStack>
+                <Text fontWeight="bold">Username:</Text>
+                {isEditing ? (
+                  <Input
+                    name="username"
+                    value={editedData.username}
+                    onChange={handleChange}
+                    placeholder="Username"
+                    variant="flushed"
+                  />
+                ) : (
+                  <Text fontSize="md">@{userData.username}</Text>
+                )}
+              </HStack>
+
+              {/* Email with Tooltip in Edit Mode */}
+              <HStack>
+                <Text fontWeight="bold">Email:</Text>
+                <Text fontSize="md" color="gray.400" cursor="not-allowed">{userData.email}</Text>
+                {isEditing && (
+                  <Tooltip label="For security purposes, please contact us at contact@queuedup.co for email change requests.">
+                    <InfoOutlineIcon color="gray.500" ml={2} />
+                  </Tooltip>
+                )}
+              </HStack>
+
+              {/* Phone */}
+              <HStack>
+                <Text fontWeight="bold">Phone:</Text>
+                {isEditing ? (
+                  <Input
+                    name="phone_number"
+                    value={editedData.phone_number}
+                    onChange={handleChange}
+                    placeholder="Phone Number"
+                    variant="flushed"
+                  />
+                ) : (
+                  <Text fontSize="md">{userData.phone_number}</Text>
+                )}
+              </HStack>
+            </VStack>
+          </Flex>
+
+          {/* Edit / Save Buttons */}
+          {isEditing ? (
+            <HStack spacing={4}>
+              <Button colorScheme="green" size="md" leftIcon={<CheckIcon />} onClick={handleSave}>Save</Button>
+              <Button colorScheme="red" size="md" leftIcon={<CloseIcon />} onClick={handleCancel}>Cancel</Button>
+            </HStack>
+          ) : (
+            <Button colorScheme="teal" size="md" leftIcon={<EditIcon />} onClick={handleEdit}>Edit Profile</Button>
+          )}
         </Flex>
 
-         {/* Notification Preferences Section */}
-        <Box mb={10} p={5} borderWidth="1px" borderRadius="lg" borderColor={borderColor}>
-          <Heading as="h2" size="lg" mb={2}>Notification Preferences</Heading>
-          <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-            <FormControl>
-              <FormLabel htmlFor='frequency'>Get Notified:</FormLabel>
-              <Select id='frequency' value={notificationFrequency} onChange={(e) => setNotificationFrequency(e.target.value)}>
-                <option value='daily'>Day Of Release</option>
-                <option value='weekly'>1 Day Before Release</option>
-                <option value='monthly'>1 Week Before Release</option>
-              </Select>
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor='notification-medium'>Notification Medium:</FormLabel>
-              <Select id='notification-medium' value={notificationMedium} onChange={(e) => setNotificationMedium(e.target.value)}>
-                <option value='email'>Email</option>
-                <option value='sms'>SMS</option>
-              </Select>
-            </FormControl>
-          </SimpleGrid>
+        <Divider my={6} />
+
+        {/* Notification Preferences */}
+        <Box p={6} borderWidth="1px" borderRadius="lg" boxShadow="md" mb={8}>
+          <Heading as="h2" size="lg" mb={4}>Notification Preferences</Heading>
+          <HStack spacing={6}>
+            <HStack>
+              <Text>Email:</Text>
+              <Switch
+                isChecked={notificationPreferences.includes('email')}
+                onChange={() => toggleNotificationPreference('email')}
+                colorScheme="teal"
+                size="lg"
+                isDisabled={!isEditing}
+              />
+              {notificationPreferences.includes('email') && <Badge colorScheme="green">ENABLED</Badge>}
+            </HStack>
+
+            <HStack>
+              <Text>SMS:</Text>
+              <Switch
+                isChecked={notificationPreferences.includes('sms')}
+                onChange={() => toggleNotificationPreference('sms')}
+                colorScheme="teal"
+                size="lg"
+                isDisabled={!isEditing}
+              />
+              {notificationPreferences.includes('sms') && <Badge colorScheme="green">ENABLED</Badge>}
+            </HStack>
+          </HStack>
         </Box>
 
-        {/* User Favorites Section */}
-        <Box mb={10}>
-          <Heading as="h2" size="lg" mb={2}>Favorite Items</Heading>
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
-            {userData.favorites.map((item, index) => (
-              <Box key={index} borderWidth="1px" borderRadius="lg" overflow="hidden" p={4}>
-                <Text fontWeight="bold">{item}</Text>
-                {/* Additional item details can go here */}
-              </Box>
-            ))}
-          </SimpleGrid>
-        </Box>
+        <Divider my={6} />
 
-        {/* User Recent Activity Section */}
-        <Box mb={10} p={5} borderWidth="1px" borderRadius="lg" borderColor={borderColor}>
-          <Heading as="h2" size="lg" mb={2}>Recent Activity</Heading>
-          <VStack spacing={2}>
-            {userData.recentActivity.map((activity, index) => (
-              <Text key={index}>{activity}</Text>
-            ))}
-          </VStack>
+        {/* Watchlist Preview */}
+        <Box>
+          <Heading as="h2" size="lg" mb={4}>Your Watchlist</Heading>
+          <WatchlistPreview watchlist={userWatchlist} />
         </Box>
-
-        {/* Additional User Settings or Actions */}
-        <Flex justifyContent="center">
-          <Button colorScheme="teal" size="lg" mr={4}>Edit Profile</Button>
-          <Button colorScheme="gray" size="lg">Cancel</Button>
-        </Flex>
       </Box>
     </>
   );
