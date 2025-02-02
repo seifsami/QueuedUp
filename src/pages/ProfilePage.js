@@ -22,8 +22,14 @@ const ProfilePage = ({ user }) => {
     const fetchUserData = async () => {
       try {
         const response = await getUserProfile(firebaseId);
+        
+        // Map 'mobile' to 'sms' for UI display
+        const mappedPreferences = response.data.notification_preferences.map(pref =>
+          pref === 'mobile' ? 'sms' : pref
+        );
+    
         setUserData(response.data);
-        setNotificationPreferences(response.data.notification_preferences || []);
+        setNotificationPreferences(mappedPreferences);
       } catch (error) {
         console.error('Failed to load user profile:', error);
       }
@@ -54,14 +60,16 @@ const ProfilePage = ({ user }) => {
 
   const handleSave = async () => {
     try {
-      // Map SMS to mobile before sending to the backend
+      // Map 'sms' to 'mobile' before sending to the backend
       const formattedPreferences = notificationPreferences.map(pref =>
         pref === 'sms' ? 'mobile' : pref
       );
-
+  
       await updateUserProfile(firebaseId, { ...editedData, notification_preferences: formattedPreferences });
+      
+      // Keep UI consistent with 'sms' display
       setUserData(editedData);
-      setNotificationPreferences(formattedPreferences);
+      setNotificationPreferences(notificationPreferences);
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -182,7 +190,7 @@ const ProfilePage = ({ user }) => {
               <Switch
                 isChecked={notificationPreferences.includes('email')}
                 onChange={() => toggleNotificationPreference('email')}
-                colorScheme="teal"
+                colorScheme= 'green'
                 size="lg"
                 isDisabled={!isEditing}
               />
@@ -194,7 +202,7 @@ const ProfilePage = ({ user }) => {
               <Switch
                 isChecked={notificationPreferences.includes('sms')}
                 onChange={() => toggleNotificationPreference('sms')}
-                colorScheme="teal"
+                colorScheme="green"
                 size="lg"
                 isDisabled={!isEditing}
               />
