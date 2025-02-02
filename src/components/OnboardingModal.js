@@ -43,7 +43,13 @@ function OnboardingModal() {
   const [currentStep, setCurrentStep] = useState(1);
   const [phoneError, setPhoneError] = useState('');
   const [firstName, setFirstName] = useState('');  // Add first name state
-const [lastName, setLastName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false); // For password reset modal
+  const [resetEmail, setResetEmail] = useState(''); // Email input for reset
+  const [resetLoading, setResetLoading] = useState(false); // Loading state for reset button
+  const [isResetMode, setIsResetMode] = useState(false);  // Add this state
+
+
 
   const handleGoBack = () => {
     setCurrentStep((currentStep) => currentStep - 1);
@@ -61,6 +67,8 @@ const [lastName, setLastName] = useState('');
     setPhoneError('');
     setIsLogin(true);
   };
+
+  
 
   const handleEmailChange = (e) => setEmail(e.target.value);
   const handlePasswordChange = (e) => setPassword(e.target.value);
@@ -232,6 +240,44 @@ const [lastName, setLastName] = useState('');
     }
   };
 
+  const handlePasswordReset = async () => {
+    if (!resetEmail) {
+      toast({
+        title: 'Email Required',
+        description: 'Please enter your email to reset your password.',
+        status: 'warning',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+  
+    setResetLoading(true);
+    try {
+      await firebase.auth().sendPasswordResetEmail(resetEmail);  // Firebase password reset
+      toast({
+        title: 'Password Reset Email Sent',
+        description: 'Check your inbox for the reset link.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      setIsResetModalOpen(false);  // Close the modal after success
+      setResetEmail('');  // Clear the input field
+    } catch (error) {
+      toast({
+        title: 'Reset Failed',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setResetLoading(false);
+    }
+  };
+  
+
   const handlePersonalizationComplete = async () => {
     
     if (notificationPreference.includes('mobile') && !phoneNumber) {
@@ -329,16 +375,10 @@ const [lastName, setLastName] = useState('');
                 ml={-7}
               />
             )}
-            {currentStep === 1 ? (
-              <Box flex="1" fontSize="lg" fontWeight="bold">
-                {isLogin ? 'Sign In' : 'Sign Up'}
-              </Box>
-            ) : (
-              <Box width="auto" fontSize="lg" fontWeight="bold">
-                {currentStep === 2 ? 'Personalize Your Experience' : 'Add Your First Item'}
-              </Box>
-            )}
-            {currentStep === 1 && (
+            <Box flex="1" fontSize="lg" fontWeight="bold">
+              {isResetMode ? 'Reset Password' : isLogin ? 'Sign In' : 'Sign Up'}
+            </Box>
+            {currentStep === 1 && !isResetMode && (
               <Button variant="link" onClick={isLogin ? switchToSignUp : switchToSignIn} color={'brand.100'}>
                 {isLogin ? "I don't have an account" : 'I have an account'}
               </Button>
@@ -346,70 +386,109 @@ const [lastName, setLastName] = useState('');
             {currentStep > 1 && <Box />}
           </Flex>
         </ModalHeader>
-
+  
+        {/* Step 1: Login/Signup/Reset */}
         {currentStep === 1 && (
           <Fade in={true}>
             <ModalBody>
               <Fade in={true}>
                 <VStack spacing={4}>
-                  <FormControl id="email" isRequired>
-                    <FormLabel>Email</FormLabel>
-                    <Input type="email" onChange={handleEmailChange} />
-                  </FormControl>
-                  <FormControl id="password" isRequired>
-                    <FormLabel>Password</FormLabel>
-                    <Input type="password" onChange={handlePasswordChange} />
-                  </FormControl>
-                  {!isLogin && (
+                  {isResetMode ? (
                     <>
-                      <FormControl id="confirm-password" isRequired>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <Input type="password" onChange={handlePasswordConfirmChange} />
-                        {passwordError && <Text color="red.500" fontSize="sm">{passwordError}</Text>}
+                      {/* Password Reset Form */}
+                      <FormControl id="resetEmail" isRequired>
+                        <FormLabel>Email</FormLabel>
+                        <Input
+                          type="email"
+                          placeholder="Enter your email"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                        />
                       </FormControl>
-                      <Text fontSize="xs" textAlign="center">
-                        By continuing, you agree to the Privacy Policy and Terms, and to receive emails from
-                        QueuedUp.
-                      </Text>
+                      <Button
+                        color="white"
+                        bgColor="brand.100"
+                        width="full"
+                        onClick={handlePasswordReset}
+                        isLoading={resetLoading}
+                      >
+                        Send Reset Link
+                      </Button>
+                      <Button variant="link" onClick={() => setIsResetMode(false)} mt={2} color="teal.500">
+                        Back to Sign In
+                      </Button>
                     </>
-                  )}
-                  <Button
-                    color={'white'}
-                    bgColor={'brand.100'}
-                    width="full"
-                    onClick={isLogin ? handleEmailSignIn : handleEmailSignUp}
-                  >
-                    {isLogin ? 'Sign in' : 'Sign up'}
-                  </Button>
-                  <Box pt={0.5} pb={0.5} width="full" textAlign="center">
-                    OR
-                  </Box>
-                  <Button width="full" variant="outline" leftIcon={<FaGoogle />} onClick={handleGoogleSignIn}>
-                    {isLogin ? 'Sign in with Google' : 'Sign up with Google'}
-                  </Button>
-                  {isLogin && (
-                    <Text mt={2} fontSize="xs" textAlign="center">
-                      Can't sign in?
-                    </Text>
+                  ) : (
+                    <>
+                      {/* Sign In / Sign Up Form */}
+                      <FormControl id="email" isRequired>
+                        <FormLabel>Email</FormLabel>
+                        <Input type="email" onChange={handleEmailChange} />
+                      </FormControl>
+                      <FormControl id="password" isRequired>
+                        <FormLabel>Password</FormLabel>
+                        <Input type="password" onChange={handlePasswordChange} />
+                      </FormControl>
+                      {!isLogin && (
+                        <>
+                          <FormControl id="confirm-password" isRequired>
+                            <FormLabel>Confirm Password</FormLabel>
+                            <Input type="password" onChange={handlePasswordConfirmChange} />
+                            {passwordError && <Text color="red.500" fontSize="sm">{passwordError}</Text>}
+                          </FormControl>
+                          <Text fontSize="xs" textAlign="center">
+                            By continuing, you agree to the Privacy Policy and Terms, and to receive emails from
+                            QueuedUp.
+                          </Text>
+                        </>
+                      )}
+                      <Button
+                        color={'white'}
+                        bgColor={'brand.100'}
+                        width="full"
+                        onClick={isLogin ? handleEmailSignIn : handleEmailSignUp}
+                      >
+                        {isLogin ? 'Sign in' : 'Sign up'}
+                      </Button>
+                      <Box pt={0.5} pb={0.5} width="full" textAlign="center">
+                        OR
+                      </Box>
+                      <Button width="full" variant="outline" leftIcon={<FaGoogle />} onClick={handleGoogleSignIn}>
+                        {isLogin ? 'Sign in with Google' : 'Sign up with Google'}
+                      </Button>
+                      {isLogin && (
+                        <Text
+                          mt={2}
+                          fontSize="xs"
+                          textAlign="center"
+                          color="teal.500"
+                          cursor="pointer"
+                          onClick={() => setIsResetMode(true)}
+                        >
+                          Forgot Password?
+                        </Text>
+                      )}
+                    </>
                   )}
                 </VStack>
               </Fade>
             </ModalBody>
           </Fade>
         )}
+  
+        {/* Step 2: Personalization */}
         {currentStep === 2 && (
           <Fade in={true}>
             <ModalBody>
               <VStack spacing={4}>
-              <FormControl id="first_name" isRequired>
-              <FormLabel>First Name</FormLabel>
-              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-            </FormControl>
-
-            <FormControl id="last_name" isRequired>
-              <FormLabel>Last Name</FormLabel>
-              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
-            </FormControl>
+                <FormControl id="first_name" isRequired>
+                  <FormLabel>First Name</FormLabel>
+                  <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                </FormControl>
+                <FormControl id="last_name" isRequired>
+                  <FormLabel>Last Name</FormLabel>
+                  <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                </FormControl>
                 <FormControl id="username" isRequired>
                   <FormLabel>Username</FormLabel>
                   <Input value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -455,6 +534,8 @@ const [lastName, setLastName] = useState('');
       </ModalContent>
     </Modal>
   );
+  
+  
 }
 
 export default OnboardingModal;
