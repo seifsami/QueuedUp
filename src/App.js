@@ -1,51 +1,57 @@
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { ModalProvider } from './ModalContext'
-import firebase from './firebaseConfig'; 
+import { ModalProvider } from './ModalContext';
+import firebase from './firebaseConfig';
 import './App.css';
 import OnboardingModal from './components/OnboardingModal';
 import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';
-import WatchlistPage from './pages/WatchlistPage'; 
+import WatchlistPage from './pages/WatchlistPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import ProfilePage from './pages/ProfilePage';
 import Footer from './components/Footer';
-
+import { Box, Flex } from '@chakra-ui/react';  // Import Chakra Flex utilities
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
-  
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(user => {
       console.log("Auth state changed, user:", user);
       if (user) {
-        // User is signed in
         setCurrentUser(user);
       } else {
-        // User is signed out
         setCurrentUser(null);
       }
     });
 
-    // Clean up the subscription on unmount
     return () => unsubscribe();
   }, []);
 
   return (
     <ModalProvider>
       <OnboardingModal currentUser={currentUser} />
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/homepage" element={<HomePage user={currentUser} />} />
-        <Route path="/watchlist" element={<WatchlistPage user={currentUser} />} />
-        <Route path="/search" element={<SearchResultsPage  user={currentUser}/>} /> 
-        <Route path="/profile" element={<ProfilePage user={currentUser}/>} /> 
-      </Routes>
-      <Footer /> 
-    </Router>
-   </ModalProvider>
+      <Router>
+        {/* Full-height Flex container */}
+        <Flex direction="column" minHeight="100vh">
+          
+          {/* Main content area takes up remaining space */}
+          <Box flex="1">
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/homepage" element={<HomePage user={currentUser} />} />
+              <Route path="/watchlist" element={<WatchlistPage user={currentUser} />} />
+              <Route path="/search" element={<SearchResultsPage user={currentUser} />} />
+              <Route path="/profile" element={<ProfilePage user={currentUser} />} />
+            </Routes>
+          </Box>
+
+          {/* Footer stays at the bottom */}
+          <Footer />
+
+        </Flex>
+      </Router>
+    </ModalProvider>
   );
 };
 

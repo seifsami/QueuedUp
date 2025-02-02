@@ -53,9 +53,25 @@ const ProfilePage = ({ user }) => {
     setEditedData(userData);
   };
 
-  const handleCancel = () => {
+  const fetchUserData = async () => {
+    try {
+      const response = await getUserProfile(firebaseId);
+      setUserData(response.data);
+      setNotificationPreferences(
+        response.data.notification_preferences.map(pref => (pref === 'mobile' ? 'sms' : pref))
+      );
+    } catch (error) {
+      console.error('Failed to load user profile:', error);
+    }
+  };
+  
+
+  const handleCancel = async () => {
     setIsEditing(false);
     setEditedData({});
+    
+    // Refetch to revert any unsaved changes
+    await fetchUserData();
   };
 
   const handleSave = async () => {
@@ -67,9 +83,9 @@ const ProfilePage = ({ user }) => {
   
       await updateUserProfile(firebaseId, { ...editedData, notification_preferences: formattedPreferences });
       
-      // Keep UI consistent with 'sms' display
       setUserData(editedData);
       setNotificationPreferences(notificationPreferences);
+      await fetchUserData();
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -93,14 +109,36 @@ const ProfilePage = ({ user }) => {
   return (
     <>
       <Header />
-      <Box maxW="1000px" mx="auto" bg="white" p={8} borderRadius="2xl" boxShadow="2xl" mt={8}>
-        
+      <Box 
+        maxW="1000px" 
+        mx="auto" 
+        bg="white" 
+        p={{ base: 4, md: 8 }} 
+        borderRadius="2xl" 
+        boxShadow="2xl" 
+        mt={{ base: 2, md: 8 }}
+      >
         {/* Profile Header */}
-        <Flex justifyContent="space-between" alignItems="center" mb={8}>
-          <Flex direction={{ base: "column", md: "row" }} alignItems="center">
-            <Avatar size="2xl" name={`${userData.first_name} ${userData.last_name}`} src={userData.avatar || '../profileplaceholder.jpeg'} mr={{ md: 8 }} />
-            <VStack alignItems="start" spacing={1}>
-
+        <Flex 
+          direction={{ base: "column", md: "row" }} 
+          alignItems={{ base: "center", md: "center" }} 
+          justifyContent="space-between" 
+          mb={8}
+        >
+          <Flex 
+            direction={{ base: "column", md: "row" }} 
+            alignItems="center"
+            textAlign={{ base: "center", md: "left" }}
+          >
+            <Avatar 
+              size={{ base: "xl", md: "2xl" }} 
+              name={`${userData.first_name} ${userData.last_name}`} 
+              src={userData.avatar || '../profileplaceholder.jpeg'} 
+              mb={{ base: 4, md: 0 }} 
+              mr={{ md: 8 }} 
+            />
+  
+            <VStack alignItems={{ base: "center", md: "start" }} spacing={1}>
               {/* Editable Name */}
               {isEditing ? (
                 <HStack spacing={2}>
@@ -110,6 +148,7 @@ const ProfilePage = ({ user }) => {
                     onChange={handleChange}
                     placeholder="First Name"
                     variant="flushed"
+                    size="sm"
                   />
                   <Input
                     name="last_name"
@@ -117,12 +156,15 @@ const ProfilePage = ({ user }) => {
                     onChange={handleChange}
                     placeholder="Last Name"
                     variant="flushed"
+                    size="sm"
                   />
                 </HStack>
               ) : (
-                <Heading as="h1" size="2xl">{`${userData.first_name} ${userData.last_name}`}</Heading>
+                <Heading as="h1" size={{ base: "lg", md: "2xl" }}>
+                  {`${userData.first_name} ${userData.last_name}`}
+                </Heading>
               )}
-
+  
               {/* Username */}
               <HStack>
                 <Text fontWeight="bold">Username:</Text>
@@ -133,34 +175,31 @@ const ProfilePage = ({ user }) => {
                     onChange={handleChange}
                     placeholder="Username"
                     variant="flushed"
+                    size="sm"
                   />
                 ) : (
-                  <Text fontSize="md">@{userData.username}</Text>
+                  <Text fontSize={{ base: "sm", md: "md" }}>@{userData.username}</Text>
                 )}
               </HStack>
-
+  
               {/* Email with Tooltip in Edit Mode */}
               <HStack>
                 <Text fontWeight="bold">Email:</Text>
-                
-                {/* Conditionally grey out in edit mode */}
                 <Text
-                  fontSize="md"
-                  color={isEditing ? "gray.400" : "black"}  // Greyed out only when editing
+                  fontSize={{ base: "sm", md: "md" }}
+                  color={isEditing ? "gray.400" : "black"}
                   cursor={isEditing ? "not-allowed" : "default"}
                 >
                   {userData.email}
                 </Text>
-
-                {/* Show tooltip only in edit mode */}
+  
                 {isEditing && (
                   <Tooltip label="For security purposes, please contact us at contact@queuedup.co for email change requests.">
                     <InfoOutlineIcon color="gray.500" ml={2} />
                   </Tooltip>
                 )}
               </HStack>
-
-
+  
               {/* Phone */}
               <HStack>
                 <Text fontWeight="bold">Phone:</Text>
@@ -171,67 +210,113 @@ const ProfilePage = ({ user }) => {
                     onChange={handleChange}
                     placeholder="Phone Number"
                     variant="flushed"
+                    size="sm"
                   />
                 ) : (
-                  <Text fontSize="md">{userData.phone_number}</Text>
+                  <Text fontSize={{ base: "sm", md: "md" }}>{userData.phone_number}</Text>
                 )}
               </HStack>
             </VStack>
           </Flex>
-
+  
           {/* Edit / Save Buttons */}
-          {isEditing ? (
-            <HStack spacing={4}>
-              <Button colorScheme="green" size="md" leftIcon={<CheckIcon />} onClick={handleSave}>Save</Button>
-              <Button colorScheme="red" size="md" leftIcon={<CloseIcon />} onClick={handleCancel}>Cancel</Button>
-            </HStack>
-          ) : (
-            <Button colorScheme="teal" size="md" leftIcon={<EditIcon />} onClick={handleEdit}>Edit Profile</Button>
-          )}
-        </Flex>
-
-        <Divider my={6} />
-
-        {/* Notification Preferences */}
-        <Box p={6} borderWidth="1px" borderRadius="lg" boxShadow="md" mb={8}>
-          <Heading as="h2" size="lg" mb={4}>Notification Preferences</Heading>
-          <HStack spacing={6}>
-            <HStack>
-              <Text>Email:</Text>
-              <Switch
-                isChecked={notificationPreferences.includes('email')}
-                onChange={() => toggleNotificationPreference('email')}
-                colorScheme= 'green'
-                size="lg"
-                isDisabled={!isEditing}
-              />
-              {notificationPreferences.includes('email') && <Badge colorScheme="green">ENABLED</Badge>}
-            </HStack>
-
-            <HStack>
-              <Text>SMS:</Text>
-              <Switch
-                isChecked={notificationPreferences.includes('sms')}
-                onChange={() => toggleNotificationPreference('sms')}
-                colorScheme="green"
-                size="lg"
-                isDisabled={!isEditing}
-              />
-              {notificationPreferences.includes('sms') && <Badge colorScheme="green">ENABLED</Badge>}
-            </HStack>
+          <HStack 
+            spacing={4} 
+            mt={{ base: 4, md: 0 }} 
+            width={{ base: "100%", md: "auto" }}
+            justifyContent={{ base: "center", md: "flex-end" }}
+          >
+            {isEditing ? (
+              <>
+                <Button 
+                  colorScheme="green" 
+                  size={{ base: "sm", md: "md" }} 
+                  width={{ base: "50%", md: "auto" }} 
+                  leftIcon={<CheckIcon />} 
+                  onClick={handleSave}
+                >
+                  Save
+                </Button>
+                <Button 
+                  colorScheme="red" 
+                  size={{ base: "sm", md: "md" }} 
+                  width={{ base: "50%", md: "auto" }} 
+                  leftIcon={<CloseIcon />} 
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button 
+                colorScheme="teal" 
+                size={{ base: "sm", md: "md" }} 
+                width={{ base: "100%", md: "auto" }} 
+                leftIcon={<EditIcon />} 
+                onClick={handleEdit}
+              >
+                Edit Profile
+              </Button>
+            )}
           </HStack>
-        </Box>
-
+        </Flex>
+  
         <Divider my={6} />
+  
+        {/* Notification Preferences */}
+       
+{/* Notification Preferences */}
+{/* Notification Preferences */}
+<Box p={6} borderWidth="1px" borderRadius="lg" boxShadow="md" mb={8}>
+  <Heading as="h2" size="lg" mb={4}>Notification Preferences</Heading>
+  
+  <Flex 
+    direction={{ base: "column", md: "row" }} 
+    justify="flex-start" 
+    align={{ base: "flex-start", md: "center" }} 
+    gap={{ base: 4, md: 8 }}
+  >
+    {/* Email Preference */}
+    <HStack spacing={3}>
+      <Text>Email:</Text>
+      <Switch
+        isChecked={notificationPreferences.includes('email')}
+        onChange={() => toggleNotificationPreference('email')}
+        colorScheme="green"
+        size="md"
+        isDisabled={!isEditing}
+      />
+      {notificationPreferences.includes('email') && <Badge colorScheme="green">ENABLED</Badge>}
+    </HStack>
 
+    {/* SMS Preference */}
+    <HStack spacing={3}>
+      <Text>SMS:</Text>
+      <Switch
+        isChecked={notificationPreferences.includes('sms')}
+        onChange={() => toggleNotificationPreference('sms')}
+        colorScheme="green"
+        size="md"
+        isDisabled={!isEditing}
+      />
+      {notificationPreferences.includes('sms') && <Badge colorScheme="green">ENABLED</Badge>}
+    </HStack>
+  </Flex>
+</Box>
+
+
+
+  
+        <Divider my={6} />
+  
         {/* Watchlist Preview */}
         <Box>
-          <Heading as="h2" size="lg" mb={4}>Your Watchlist</Heading>
+          <Heading as="h2" size={{ base: "md", md: "lg" }} mb={4}>Your Watchlist</Heading>
           <WatchlistPreview watchlist={userWatchlist} />
         </Box>
       </Box>
     </>
   );
-};
+} 
 
 export default ProfilePage;
