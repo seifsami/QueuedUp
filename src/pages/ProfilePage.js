@@ -142,13 +142,24 @@ const ProfilePage = ({ user }) => {
               {/* Email with Tooltip in Edit Mode */}
               <HStack>
                 <Text fontWeight="bold">Email:</Text>
-                <Text fontSize="md" color="gray.400" cursor="not-allowed">{userData.email}</Text>
+                
+                {/* Conditionally grey out in edit mode */}
+                <Text
+                  fontSize="md"
+                  color={isEditing ? "gray.400" : "black"}  // Greyed out only when editing
+                  cursor={isEditing ? "not-allowed" : "default"}
+                >
+                  {userData.email}
+                </Text>
+
+                {/* Show tooltip only in edit mode */}
                 {isEditing && (
                   <Tooltip label="For security purposes, please contact us at contact@queuedup.co for email change requests.">
                     <InfoOutlineIcon color="gray.500" ml={2} />
                   </Tooltip>
                 )}
               </HStack>
+
 
               {/* Phone */}
               <HStack>
