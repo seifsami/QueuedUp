@@ -20,39 +20,49 @@ def get_items_from_ids(db, media_type, item_ids):
 @homepage_blueprint.route('/trending/<media_type>', methods=['GET'])
 def get_trending(media_type):
     db = mongo.cx["QueuedUpDBnew"]
-    today = str(datetime.now().date())
+    today = datetime.now().date()
 
-    print(f"🟢 Fetching trending {media_type} for {today}...")
-    
-    collection_name = f"daily_trending_{media_type}"
-    print(f"🟢 Looking in collection: {collection_name}")
-
-    trending_data = db[collection_name].find_one({"date": today})
+    # Try fetching today's trending data
+    trending_data = db[f"daily_trending_{media_type}"].find_one({"date": str(today)})
     
     if not trending_data:
-        print(f"🔴 No trending data found for {media_type}!")
+        print(f"No trending data found for today ({today}). Fetching the most recent data...")
+        
+        # Fetch the most recent trending data if today's data isn't available
+        trending_data = db[f"daily_trending_{media_type}"].find_one(
+            {"date": {"$lt": str(today)}},
+            sort=[("date", -1)]  # Sort in descending order to get the most recent entry
+        )
+
+    if trending_data:
+        trending_items = trending_data.get("items", [])
+        detailed_items = get_items_from_ids(db, media_type, trending_items)
+        return jsonify(detailed_items), 200
+    else:
         return jsonify({"error": "No trending items found"}), 404
-
-    trending_items = trending_data.get("items", [])
-    print(f"🟢 Trending items found: {trending_items}")
-
-    detailed_items = get_items_from_ids(db, media_type, trending_items)
-    
-    if not detailed_items:
-        print(f"🔴 No detailed items found for {media_type}!")
-        return jsonify({"error": "No detailed items found"}), 404
-
-    return jsonify(detailed_items), 200
 
 
 @homepage_blueprint.route('/upcoming/<media_type>', methods=['GET'])
 def get_upcoming(media_type):
     db = mongo.cx["QueuedUpDBnew"]
-    today = str(datetime.now().date())
-    upcoming_data = db[f"daily_upcoming_{media_type}"].find_one({"date": today})
+    today = datetime.now().date()
+
+    # Try fetching today's upcoming data
+    upcoming_data = db[f"daily_upcoming_{media_type}"].find_one({"date": str(today)})
+    
+    if not upcoming_data:
+        print(f"No upcoming data found for today ({today}). Fetching the most recent data...")
+
+        # Fetch the most recent upcoming data if today's data isn't available
+        upcoming_data = db[f"daily_upcoming_{media_type}"].find_one(
+            {"date": {"$lt": str(today)}},
+            sort=[("date", -1)]  # Sort in descending order to get the most recent entry
+        )
+
     if upcoming_data:
         upcoming_items = upcoming_data.get("items", [])
         detailed_items = get_items_from_ids(db, media_type, upcoming_items)
         return jsonify(detailed_items), 200
     else:
         return jsonify({"error": "No upcoming items found"}), 404
+
