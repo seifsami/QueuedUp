@@ -16,7 +16,7 @@ const defaultImages = {
   tv_seasons: "/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 };
 
-const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist }) => {
+const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal }) => {
   console.log("Item from WatchlistPreviewCard:", item)
   const [isModalOpen, setModalOpen] = useState(false);
   const [detailedItem, setDetailedItem] = useState(item); // 🟢 State to store full item data
@@ -35,6 +35,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist }) => {
 
   // 🟢 Fetch full item details when card is clicked
   const handleCardClick = async () => {
+    let itemToShow = item;
     // Check if description exists; if not, fetch full details
     if (!item.description) {
       try {
@@ -51,7 +52,12 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist }) => {
       setDetailedItem(item);  // Use existing data if description exists
     }
 
-    setModalOpen(true);
+    if (openModal) {
+      openModal(itemToShow);
+    } else {
+      setModalOpen(true);
+    }
+  
   };
 
   const formatReleaseDate = (dateStr) => {
@@ -122,13 +128,15 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist }) => {
       </HStack>
 
       {/* Details Modal */}
-      <DetailsModal
-        isOpen={isModalOpen}
-        onClose={() => setModalOpen(false)}
-        item={detailedItem} 
-        userWatchlist={userWatchlist}
-        refetchWatchlist={refetchWatchlist}
-      />
+      {!openModal && (
+        <DetailsModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          item={detailedItem}
+          userWatchlist={userWatchlist}
+          refetchWatchlist={refetchWatchlist}
+        />
+      )}
     </>
   );
 };

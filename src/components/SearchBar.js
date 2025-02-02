@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { FaSearch } from 'react-icons/fa';
 import WatchlistPreviewCard from './WatchlistPreviewCard';
+import DetailsModal from './DetailsModal';
 import axios from 'axios';
 
 const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFocusChange, focusOnMount }) => {
@@ -27,6 +28,9 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
   const [isFocused, setIsFocused] = useState(false);
   const [searchResults, setSearchResults] = useState([]); // Live search results
   const [loading, setLoading] = useState(false); // Loading indicator
+  const [selectedItem, setSelectedItem] = useState(null);  // Track the selected item
+  const [isModalOpen, setModalOpen] = useState(false)
+
 
   const API_BASE = "https://queuedup-backend-6d9156837adf.herokuapp.com";
 
@@ -71,18 +75,20 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
   }, [searchQuery, mediaType]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+  const handleClickOutside = (event) => {
+    if (searchRef.current && !searchRef.current.contains(event.target)) {
+      // Check if the clicked element is part of the dropdown
+      if (!event.target.closest('.dropdown-item')) {
         setShowDropdown(false);
       }
-    };
+    }
+  };
 
-    document.addEventListener('mouseup', handleClickOutside);
-    return () => {
-      document.removeEventListener('mouseup', handleClickOutside);
-    };
-  }, []);
-
+  document.addEventListener('mouseup', handleClickOutside);
+  return () => {
+    document.removeEventListener('mouseup', handleClickOutside);
+  };
+}, []);
   const viewAllResults = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -126,7 +132,10 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
               : type.charAt(0).toUpperCase() + type.slice(1)}
           </Text>
           {groupedResults[type].slice(0, 2).map((item) => ( // Limit to 2 results per category
-            <WatchlistPreviewCard key={item._id || item.id} item={item} />
+            <WatchlistPreviewCard key={item._id || item.id} item={item} openModal={(detailedItem) => {
+              setSelectedItem(detailedItem);
+              setModalOpen(true);
+            }} />
           ))}
         </Box>
       ));
@@ -134,7 +143,10 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
       // Limit to 6 total for specific media type
       const filteredResults = groupedResults[mediaType] || [];
       return filteredResults.slice(0, 6).map((item) => (
-        <WatchlistPreviewCard key={item._id || item.id} item={item} />
+        <WatchlistPreviewCard key={item._id || item.id} item={item} openModal={(detailedItem) => {
+          setSelectedItem(detailedItem);
+          setModalOpen(true);
+        }} />
       ));
     }
   };
@@ -216,6 +228,13 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
           </Flex>
         </Box>
       )}
+      {selectedItem && (
+      <DetailsModal 
+        isOpen={isModalOpen} 
+        onClose={() => setModalOpen(false)} 
+        item={selectedItem} 
+      />
+    )}
     </Flex>
   );
 };
