@@ -65,12 +65,15 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
           width="100%"
           height="100%"
         />
-        <Box position="absolute" top="2" right="2" p="2" bg="rgba(255, 255, 255, 0.6)" borderRadius="full">
-          <HStack>
-            <Icon as={FaEye} />
-            <Text fontSize="sm">{item.trackingCount || '0'}</Text>
-          </HStack>
-        </Box>
+         {/* Temporarily Remove Tracking Count */}
+          {/*
+          <Box position="absolute" top="2" right="2" p="2" bg="rgba(255, 255, 255, 0.6)" borderRadius="full">
+            <HStack>
+              <Icon as={FaEye} />
+              <Text fontSize="sm">{item.trackingCount || '0'}</Text>
+            </HStack>
+          </Box>
+          */}
       </Box>
 
       <VStack align="start" p={2} spacing="1">
