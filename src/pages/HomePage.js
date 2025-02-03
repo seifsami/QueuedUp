@@ -9,7 +9,7 @@ import DetailsModal from '../components/DetailsModal';
 import { getTrendingMedia, getUpcomingMedia, getUserWatchlist } from '../services/api';
 
 const HomePage = ({ user }) => {
-  const [mediaType, setMediaType] = useState('books'); // Default media type
+  const [mediaType, setMediaType] = useState('tv_seasons'); // Default media type
   const [trendingData, setTrendingData] = useState([]);
   const [upcomingReleasesData, setUpcomingReleasesData] = useState([]);
   const [loadingTrending, setLoadingTrending] = useState(true);

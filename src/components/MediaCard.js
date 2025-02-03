@@ -5,7 +5,7 @@ import Countdown from 'react-countdown';
 import NotifyMeButton from './NotifyMeButton';
 
 const defaultImages = {
-  books: "/heather-green-iB9YTvq2rZ8-unsplash.jpg", // Path relative to public folder
+  books: "/heather-green-iB9YTvq2rZ8-unsplash.jpg",
   movies: "/denise-jans-9lTUAlNB87M-unsplash.jpg",
   tv_seasons: "/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 };
@@ -18,26 +18,25 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
     try {
       let parsedDate = new Date(Date.parse(dateStr));
       if (isNaN(parsedDate.getTime())) throw new Error("Invalid Date");
-      return parsedDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      return parsedDate.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        timeZone: 'UTC' 
+      });
     } catch (error) {
       console.error("Error parsing date:", dateStr);
       return 'Invalid Date';
     }
   };
 
-  // Custom renderer for countdown
   const renderer = ({ days, hours, minutes, completed }) => {
     if (completed) {
       return <Text fontSize="sm">Released!</Text>;
     } else {
-      return (
-        <Text fontSize="sm">{days}d {hours}h {minutes}m left</Text> // Format can be adjusted as needed
-      );
+      return <Text fontSize="sm">{days}d {hours}h {minutes}m left</Text>;
     }
   };
-
-  console.log('Item passed to NotifyMeButton:', item);
-
 
   return (
     <Box
@@ -47,10 +46,11 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       bg="white"
       boxShadow="sm"
       transition="0.3s"
-      _hover={{ boxShadow: 'md' }}
+      _hover={{ boxShadow: 'md', cursor: 'pointer' }}
       w="220px"
       h="500px"
       m="0 8px"
+      onClick={() => onOpenModal(item)}  // Make the whole card clickable
     >
       <Box 
         height={imageContainerHeight}
@@ -59,13 +59,12 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
         borderColor="gray.200"
       >
         <Image
-           src={item.image || defaultImages[item.media_type || "books"]}
+          src={item.image || defaultImages[item.media_type || "books"]}
           alt={item.title}
-          objectFit="cover" // Cover the area, maintaining aspect ratio
+          objectFit="cover"
           width="100%"
           height="100%"
         />
-        {/* Tracking count overlay */}
         <Box position="absolute" top="2" right="2" p="2" bg="rgba(255, 255, 255, 0.6)" borderRadius="full">
           <HStack>
             <Icon as={FaEye} />
@@ -75,17 +74,31 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       </Box>
 
       <VStack align="start" p={2} spacing="1">
-        <Text fontWeight="bold" noOfLines={2} h="3rem">{item.title} </Text>
+        <Text fontWeight="bold" noOfLines={2} h="3rem">{item.title}</Text>
         <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
-        <Countdown date={new Date(item.releaseDate)} renderer={renderer} />
-        <HStack justifyContent="space-between" width="full" >
-        <NotifyMeButton
-          item={item}
-          userWatchlist={userWatchlist}
-          refetchWatchlist={refetchWatchlist}  // Pass refetch function
-          mediaType={item.media_type}
-        />
-        <Button variant="outline" colorScheme="teal" size="sm" flex={2} onClick={() => onOpenModal(item)}>View Details</Button>
+        <Countdown date={formatReleaseDate(item.release_date)} renderer={renderer} />
+
+        <HStack justifyContent="space-between" width="full">
+        <Box onClick={(e) => e.stopPropagation()}>
+          <NotifyMeButton
+            item={item}
+            userWatchlist={userWatchlist}
+            refetchWatchlist={refetchWatchlist}
+            mediaType={item.media_type}
+          />
+        </Box>
+          <Button 
+            variant="outline" 
+            colorScheme="teal" 
+            size="sm" 
+            flex={2} 
+            onClick={(e) => {
+              e.stopPropagation();  // Prevent modal from opening when this button is clicked
+              onOpenModal(item);
+            }}
+          >
+            View Details
+          </Button>
         </HStack>
       </VStack>
     </Box>

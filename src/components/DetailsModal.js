@@ -45,12 +45,23 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
   };
 
   if (!item) return null;
+  
 
-  const formattedReleaseDate = item.releaseDate || item.release_date || 'N/A';
+  const rawReleaseDate = item.releaseDate || item.release_date || null;
+  const formattedReleaseDate = rawReleaseDate
+    ? new Date(rawReleaseDate).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        timeZone: 'UTC' 
+      })
+    : 'N/A';
+  
   const truncatedDescription = item.description && item.description.length > 300
     ? item.description.substring(0, 300) + '...'
     : item.description;
   console.log("Item being passed to NotifyMeButton from DetailsModal:", item);
+  
   
 
   return (
@@ -88,7 +99,7 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
                 </Text>
               )}
               <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
-              Release Date: {formattedReleaseDate === 'N/A' ? 'N/A' : new Date(formattedReleaseDate).toLocaleDateString()}
+              Release Date: {formattedReleaseDate}
               </Text>
               {item.description && (
                 <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
@@ -111,18 +122,20 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
             </Box>
           </Flex>
         </ModalBody>
-        <ModalFooter justifyContent="center">
-          <Button 
-            as="a"
-            href={`https://www.amazon.com/s?k=${encodeURIComponent(item.title)}&tag=queuedup0f-20`}
-            target="_blank"
-            rel="noopener noreferrer"
-            colorScheme="orange"
-            size="md"
-            mr={3}
-          >
-            Buy on Amazon
-          </Button>
+        <ModalFooter justifyContent="center" >
+          {item.media_type === 'books' && (
+            <Button 
+              as="a"
+              href={`https://www.amazon.com/s?k=${encodeURIComponent(item.title)}&tag=queuedup0f-20`}
+              target="_blank"
+              rel="noopener noreferrer"
+              colorScheme="orange"
+              size="md"
+              mr={3}
+            >
+              Buy on Amazon
+            </Button>
+          )}
 
           {/* NotifyMeButton with success callback */}
           <NotifyMeButton

@@ -65,7 +65,12 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
     try {
       let parsedDate = new Date(Date.parse(dateStr));
       if (isNaN(parsedDate.getTime())) throw new Error("Invalid Date");
-      return parsedDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      return parsedDate.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        timeZone: 'UTC' 
+      });
     } catch (error) {
       console.error("Error parsing date:", dateStr);
       return 'Invalid Date';
@@ -105,26 +110,29 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
           <Text fontSize="sm">{item.series}</Text>
           <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
         </Box>
-        {useBreakpointValue({ base: false, md: true }) ? (
-          <Tooltip hasArrow label="Share" bg="teal.600">
-            <IconButton
-              aria-label="Share"
-              icon={<Icon as={FaShareAlt} />}
-              size={shareIconSize}
-              onClick={handleShareClick}
-            />
-          </Tooltip>
-        ) : (
-          <VStack align="end">
-            <IconButton
-              aria-label="Share"
-              icon={<Icon as={FaShareAlt} />}
-              size="sm"
-              variant="outline"
-              onClick={handleShareClick}
-            />
-          </VStack>
-        )}
+        {/* Share Button Temporarily Removed */}
+          {/*
+          {useBreakpointValue({ base: false, md: true }) ? (
+            <Tooltip hasArrow label="Share" bg="teal.600">
+              <IconButton
+                aria-label="Share"
+                icon={<Icon as={FaShareAlt} />}
+                size={shareIconSize}
+                onClick={handleShareClick}
+              />
+            </Tooltip>
+          ) : (
+            <VStack align="end">
+              <IconButton
+                aria-label="Share"
+                icon={<Icon as={FaShareAlt} />}
+                size="sm"
+                variant="outline"
+                onClick={handleShareClick}
+              />
+            </VStack>
+          )}
+          */}
       </HStack>
 
       {/* Details Modal */}
