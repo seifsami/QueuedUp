@@ -29,6 +29,7 @@ const WatchlistPreview = ({ watchlist = [], mediaType }) => {  // Default to emp
   return (
     <Box 
       my={4} 
+      ml={4}
       bg="white" 
       p={4} 
       borderRadius="lg" 
