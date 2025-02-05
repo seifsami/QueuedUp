@@ -70,7 +70,17 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       </Box>
 
       <VStack align="start" p={2} spacing="1">
-        <Text fontWeight="bold" noOfLines={2} h="3rem">{item.title}</Text>
+        {/* Increase container height to ensure title isn’t cut off */}
+        <Box w="full" h="3.5rem" overflow="hidden">
+          <Text 
+            fontSize="lg" 
+            fontWeight="bold" 
+            noOfLines={2} 
+            lineHeight="1.3"
+          >
+            {item.title}
+          </Text>
+        </Box>
         <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
         {item.release_date && item.release_date !== 'N/A' ? (
           <Countdown date={formatReleaseDate(item.release_date)} renderer={renderer} />
@@ -79,7 +89,6 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
         )}
 
         <HStack justifyContent="space-between" width="full">
-          {/* Wrap each button in a Box with fixed width */}
           <Box width="48%" onClick={(e) => e.stopPropagation()}>
             <NotifyMeButton
               item={item}
