@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Modal, ModalOverlay, ModalContent, ModalFooter, ModalBody,
-  ModalCloseButton, Button, Image, Text, Flex, Box, useToast
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  Image,
+  Text,
+  Flex,
+  Box,
+  useToast,
 } from '@chakra-ui/react';
 import { getUserWatchlist } from '../services/api';
 import NotifyMeButton from './NotifyMeButton';
@@ -11,6 +21,57 @@ const defaultImages = {
   books: "/heather-green-iB9YTvq2rZ8-unsplash.jpg",
   movies: "/denise-jans-9lTUAlNB87M-unsplash.jpg",
   tv_seasons: "/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
+};
+
+// Expanded helper function to determine the appropriate Amazon domain.
+const getAmazonDomain = () => {
+  let domain = 'amazon.com'; // default to US
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    const lang = navigator.language.toUpperCase(); // e.g., "EN-US", "DE-DE"
+    const parts = lang.split('-');
+    
+    // Mapping based on region code if available.
+    if (parts.length === 2) {
+      const region = parts[1];
+      const regionMapping = {
+        'US': 'amazon.com',
+        'GB': 'amazon.co.uk',
+        'DE': 'amazon.de',
+        'FR': 'amazon.fr',
+        'IT': 'amazon.it',
+        'ES': 'amazon.es',
+        'CA': 'amazon.ca',
+        'JP': 'amazon.co.jp',
+        'AU': 'amazon.com.au',
+        'IN': 'amazon.in',
+        'MX': 'amazon.com.mx',
+        'BR': 'amazon.com.br',
+        'NL': 'amazon.nl',
+        'SG': 'amazon.sg',
+        'AE': 'amazon.ae',
+        'EG': 'amazon.eg',
+        'CN': 'amazon.cn'
+      };
+      if (regionMapping[region]) {
+        domain = regionMapping[region];
+      }
+    } else {
+      // Fallback mapping based solely on language code.
+      const langMapping = {
+        'EN': 'amazon.com',
+        'DE': 'amazon.de',
+        'FR': 'amazon.fr',
+        'IT': 'amazon.it',
+        'ES': 'amazon.es',
+        'JA': 'amazon.co.jp',
+        'ZH': 'amazon.cn',
+      };
+      if (langMapping[parts[0]]) {
+        domain = langMapping[parts[0]];
+      }
+    }
+  }
+  return domain;
 };
 
 const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
@@ -35,18 +96,17 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
   };
 
   const handleNotifySuccess = () => {
-    fetchUserWatchlist();  // Refetch watchlist after adding item
+    fetchUserWatchlist(); // Refetch watchlist after adding item
     if (refetchWatchlist) refetchWatchlist();
   };
 
   const handleClose = () => {
-    if (refetchWatchlist) refetchWatchlist();  // Ensure homepage updates on modal close
-    onClose();  // Close the modal
+    if (refetchWatchlist) refetchWatchlist(); // Ensure homepage updates on modal close
+    onClose(); // Close the modal
   };
 
   if (!item) return null;
   
-
   const rawReleaseDate = item.releaseDate || item.release_date || null;
   const formattedReleaseDate = rawReleaseDate
     ? new Date(rawReleaseDate).toLocaleDateString('en-US', { 
@@ -60,10 +120,9 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
   const truncatedDescription = item.description && item.description.length > 300
     ? item.description.substring(0, 300) + '...'
     : item.description;
+  
   console.log("Item being passed to NotifyMeButton from DetailsModal:", item);
   
-  
-
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size={{ base: "sm", md: "lg" }} isCentered>
       <ModalOverlay />
@@ -99,34 +158,34 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
                 </Text>
               )}
               <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
-              Release Date: {formattedReleaseDate}
+                Release Date: {formattedReleaseDate}
               </Text>
               {item.description && (
                 <Text fontSize="lg" mb={2} textAlign={{ base: "center", md: "left" }}>
-                Description:{' '}
-                <Text as="span" fontSize="md" fontWeight="normal">
-                  {showFullDescription ? item.description : truncatedDescription}
+                  Description:{' '}
+                  <Text as="span" fontSize="md" fontWeight="normal">
+                    {showFullDescription ? item.description : truncatedDescription}
+                  </Text>
+                  {item.description.length > 300 && (
+                    <Button 
+                      variant="link" 
+                      colorScheme="blue" 
+                      onClick={() => setShowFullDescription(!showFullDescription)}
+                      ml={1}
+                    >
+                      {showFullDescription ? 'See Less' : 'See More'}
+                    </Button>
+                  )}
                 </Text>
-                {item.description.length > 300 && (
-                  <Button 
-                    variant="link" 
-                    colorScheme="blue" 
-                    onClick={() => setShowFullDescription(!showFullDescription)}
-                    ml={1}  // Add margin to separate from description text
-                  >
-                    {showFullDescription ? 'See Less' : 'See More'}
-                  </Button>
-                )}
-              </Text>
               )}
             </Box>
           </Flex>
         </ModalBody>
-        <ModalFooter justifyContent="center" >
+        <ModalFooter justifyContent="center">
           {item.media_type === 'books' && (
             <Button 
               as="a"
-              href={`https://www.amazon.com/s?k=${encodeURIComponent(item.title)}&tag=queuedup0f-20`}
+              href={`https://www.${getAmazonDomain()}/s?k=${encodeURIComponent(item.title)}&tag=queuedup0f-20`}
               target="_blank"
               rel="noopener noreferrer"
               colorScheme="orange"
@@ -136,19 +195,17 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
               Buy on Amazon
             </Button>
           )}
-
           {/* NotifyMeButton with success callback */}
           <NotifyMeButton
             item={item}
             userWatchlist={userWatchlist}
-            refetchWatchlist={handleNotifySuccess}  // Trigger watchlist update on success
+            refetchWatchlist={handleNotifySuccess}
             buttonProps={{
               colorScheme: "green",
               size: "md",
               mr: 3,
             }}
           />
-
         </ModalFooter>
       </ModalContent>
     </Modal>
