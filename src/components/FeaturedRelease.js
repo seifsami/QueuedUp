@@ -42,7 +42,8 @@ const FeaturedRelease = ({
             maxW="100%"
             maxHeight={{ base: "280px", md: "350px" }}
             objectFit="contain"
-            boxShadow="lg"
+            // More pronounced shadow
+            boxShadow="0px 12px 24px rgba(0, 0, 0, 0.9)"
           />
         </Box>
 
