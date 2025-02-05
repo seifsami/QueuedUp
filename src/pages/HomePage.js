@@ -9,18 +9,26 @@ import DetailsModal from '../components/DetailsModal';
 import { getTrendingMedia, getUpcomingMedia, getUserWatchlist } from '../services/api';
 
 const HomePage = ({ user }) => {
+  // Current mediaType for visible carousel (initially TV shows)
   const [mediaType, setMediaType] = useState('tv_seasons');
+  // Data for current mediaType
   const [trendingData, setTrendingData] = useState([]);
   const [upcomingReleasesData, setUpcomingReleasesData] = useState([]);
+  // Global featured item (prefetched across all media types)
   const [featuredItem, setFeaturedItem] = useState(null);
+  // Loading states for current mediaType
   const [loadingTrending, setLoadingTrending] = useState(true);
   const [loadingUpcoming, setLoadingUpcoming] = useState(true);
   const [error, setError] = useState(null);
+  // Modal state
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
+  // User's watchlist
   const [userWatchlist, setUserWatchlist] = useState([]);
+  // Prefetched data for non-default media types (movies and books)
+  const [prefetchedData, setPrefetchedData] = useState({});
 
-  // Handlers for modal actions.
+  // Modal handlers.
   const openModalWithItem = (item) => {
     setSelectedItem(item);
     setModalOpen(true);
@@ -65,27 +73,40 @@ const HomePage = ({ user }) => {
     }));
   };
 
-  // Fetch carousel data for the selected mediaType.
+  // Helper function to fetch data for a given media type.
+  const fetchDataForType = async (type) => {
+    const trendingMedia = await getTrendingMedia(type);
+    const formattedTrending = formatMediaItems(trendingMedia, type);
+    const parsedTrending = parseReleaseDates(formattedTrending);
+
+    const upcomingMedia = await getUpcomingMedia(type);
+    const formattedUpcoming = formatMediaItems(upcomingMedia, type);
+    const parsedUpcoming = parseReleaseDates(formattedUpcoming);
+
+    return { trending: parsedTrending, upcoming: parsedUpcoming };
+  };
+
+  // Fetch carousel data for the current mediaType.
   useEffect(() => {
     const fetchMediaData = async () => {
       try {
         setLoadingTrending(true);
         setLoadingUpcoming(true);
 
-        // Fetch trending data.
-        const trendingMedia = await getTrendingMedia(mediaType);
-        const formattedTrending = formatMediaItems(trendingMedia, mediaType);
-        const parsedTrending = parseReleaseDates(formattedTrending);
-        setTrendingData(parsedTrending);
-
-        // Fetch upcoming data.
-        const upcomingMedia = await getUpcomingMedia(mediaType);
-        const formattedUpcoming = formatMediaItems(upcomingMedia, mediaType);
-        const parsedUpcoming = parseReleaseDates(formattedUpcoming);
-        setUpcomingReleasesData(parsedUpcoming);
-
-        setLoadingTrending(false);
-        setLoadingUpcoming(false);
+        // If current mediaType is not TV shows and we have prefetched data, use it.
+        if (mediaType !== 'tv_seasons' && prefetchedData[mediaType]) {
+          const { trending, upcoming } = prefetchedData[mediaType];
+          setTrendingData(trending);
+          setUpcomingReleasesData(upcoming);
+          setLoadingTrending(false);
+          setLoadingUpcoming(false);
+        } else {
+          const { trending, upcoming } = await fetchDataForType(mediaType);
+          setTrendingData(trending);
+          setUpcomingReleasesData(upcoming);
+          setLoadingTrending(false);
+          setLoadingUpcoming(false);
+        }
       } catch (err) {
         setError('Failed to fetch media');
         setLoadingTrending(false);
@@ -95,7 +116,32 @@ const HomePage = ({ user }) => {
 
     fetchMediaData();
     fetchUserWatchlist();
+    // NOTE: prefetchedData is intentionally removed from dependencies
   }, [mediaType, user]);
+
+  // Prefetch movies and books in the background (runs only once on mount).
+  useEffect(() => {
+    const prefetchOtherTypes = async () => {
+      try {
+        const typesToPrefetch = ['movies', 'books'];
+        const results = await Promise.all(
+          typesToPrefetch.map(async (type) => {
+            const data = await fetchDataForType(type);
+            return { type, data };
+          })
+        );
+        const newPrefetchedData = {};
+        results.forEach(({ type, data }) => {
+          newPrefetchedData[type] = data;
+        });
+        setPrefetchedData(newPrefetchedData);
+      } catch (err) {
+        console.error('Error prefetching data:', err);
+      }
+    };
+
+    prefetchOtherTypes();
+  }, []);
 
   // Fetch a global featured item on mount using concurrent API calls.
   useEffect(() => {
@@ -104,19 +150,10 @@ const HomePage = ({ user }) => {
         const mediaTypes = ['books', 'movies', 'tv_seasons'];
         const results = await Promise.all(
           mediaTypes.map(async (type) => {
-            const trendingMedia = await getTrendingMedia(type);
-            const formattedTrending = formatMediaItems(trendingMedia, type);
-            const parsedTrending = parseReleaseDates(formattedTrending);
-
-            const upcomingMedia = await getUpcomingMedia(type);
-            const formattedUpcoming = formatMediaItems(upcomingMedia, type);
-            const parsedUpcoming = parseReleaseDates(formattedUpcoming);
-
-            return [...parsedTrending, ...parsedUpcoming];
+            const { trending, upcoming } = await fetchDataForType(type);
+            return [...trending, ...upcoming];
           })
         );
-
-        // Flatten the results into a single array.
         const combined = results.flat();
         if (combined.length > 0) {
           const randomIndex = Math.floor(Math.random() * combined.length);
@@ -128,7 +165,7 @@ const HomePage = ({ user }) => {
     };
 
     fetchGlobalFeatured();
-  }, []); // This effect runs only once on mount.
+  }, []);
 
   if (error) {
     return (
