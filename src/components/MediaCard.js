@@ -44,9 +44,9 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       borderRadius="lg"
       overflow="hidden"
       bg="white"
-      boxShadow="sm"
-      transition="0.3s"
-      _hover={{ boxShadow: 'md', cursor: 'pointer' }}
+      boxShadow="md"  // Default shadow
+      transition="transform 0.2s, box-shadow 0.2s"
+      _hover={{ transform: "translateY(-4px)", boxShadow: "lg", cursor: "pointer" }}
       w="220px"
       h="500px"
       m="0 8px"
@@ -70,7 +70,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       </Box>
 
       <VStack align="start" p={2} spacing="1">
-        {/* Increase container height to ensure title isn’t cut off */}
+        {/* Title container with fixed height */}
         <Box w="full" h="3.5rem" overflow="hidden">
           <Text 
             fontSize="lg" 
@@ -89,6 +89,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
         )}
 
         <HStack justifyContent="space-between" width="full">
+          {/* Wrap each button in a Box with fixed width */}
           <Box width="48%" onClick={(e) => e.stopPropagation()}>
             <NotifyMeButton
               item={item}
