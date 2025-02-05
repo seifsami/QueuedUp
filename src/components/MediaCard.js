@@ -37,6 +37,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       return <Text fontSize="sm">{days}d {hours}h {minutes}m left</Text>;
     }
   };
+  
 
   return (
     <Box
@@ -79,7 +80,11 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       <VStack align="start" p={2} spacing="1">
         <Text fontWeight="bold" noOfLines={2} h="3rem">{item.title}</Text>
         <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
-        <Countdown date={formatReleaseDate(item.release_date)} renderer={renderer} />
+        {item.release_date && item.release_date !== 'N/A' ? (
+          <Countdown date={formatReleaseDate(item.release_date)} renderer={renderer} />
+        ) : (
+          <Text fontSize="sm">Coming Soon</Text>
+        )}
 
         <HStack justifyContent="space-between" width="full">
         <Box onClick={(e) => e.stopPropagation()}>

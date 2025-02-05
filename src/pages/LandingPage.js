@@ -29,7 +29,7 @@ const LandingPage = () => {
             color="white"
             textAlign="center"
             >
-            <Text fontSize="3xl" fontWeight="bold">
+            <Text fontSize="3xl" fontWeight="bold" color="white">
                 QueuedUp
             </Text>
         </Box>
