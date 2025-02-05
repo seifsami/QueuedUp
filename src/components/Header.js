@@ -63,6 +63,7 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
     <Flex
       as="header"
       p={4}
+      mb={2}
       bg="brand.100"
       color="white"
       align="center"

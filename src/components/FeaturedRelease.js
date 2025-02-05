@@ -19,7 +19,7 @@ const FeaturedRelease = ({
       p={{ base: 3, md: 6 }}
       mx="auto"
       maxW="1200px"
-      mt={0}
+      mt={2}
       transition="box-shadow 0.3s"
       _hover={{ boxShadow: "0px 8px 16px rgba(0,0,0,0.6)" }}
     >
