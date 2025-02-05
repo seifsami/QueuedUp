@@ -192,7 +192,7 @@ const HomePage = ({ user }) => {
         )}
 
         <Box px={4} py={1}>
-          <Text fontSize="2xl" fontWeight="bold" mb={4}>
+          <Text fontSize="2xl" fontWeight="bold" mt={2} mb={4}>
             Upcoming Releases
           </Text>
           {loadingUpcoming ? (
