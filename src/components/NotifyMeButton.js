@@ -49,7 +49,7 @@ export const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonPr
     <Button
       onClick={handleNotifyClick}
       {...buttonProps}
-      colorScheme={isInWatchlist ? 'gray' : 'teal'}  // Gray if already in watchlist, teal otherwise
+      colorScheme={isInWatchlist ? 'brand.100' : 'teal'}  // Gray if already in watchlist, teal otherwise
       size={buttonProps?.size || 'sm'}
       isDisabled={isInWatchlist}  // Disable the button if item is already in watchlist
     >

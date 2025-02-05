@@ -90,54 +90,114 @@ const WatchlistPage = ({ user }) => {
       return 0;
     });
 
-  return (
-    <>
-      <Header />
-      <Container maxW="1200px" mx="auto" p={4} bg="white">
-        <Heading as="h2" size="xl" mb={4}>
-          My Tracking List
-        </Heading>
-        <Tabs index={tabIndex} onChange={setTabIndex} variant="soft-rounded" colorScheme="green" pb={2}>
-          <TabList>
-            {filterOptions.map((filterOption, index) => (
-              <Tab key={filterOption.value} isSelected={tabIndex === index}>
-                {filterOption.label}
-              </Tab>
-            ))}
-          </TabList>
-        </Tabs>
-        <HStack spacing={4} mb={4}>
-          <ButtonGroup isAttached variant="outline">
-            <Button isActive={releaseStatus === 'upcoming'} onClick={() => handleReleaseStatusChange('upcoming')}>
-              Upcoming
-            </Button>
-            <Button isActive={releaseStatus === 'released'} onClick={() => handleReleaseStatusChange('released')}>
-              Released
-            </Button>
-          </ButtonGroup>
-          <Select onChange={handleSortChange} value={sortCriterion} size="sm">
-            {Object.entries(sortOptions).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </Select>
-        </HStack>
-        {loading ? (
-          <Center>
-            <Spinner size="xl" />
-          </Center>
-        ) : (
-          <VStack spacing={4} align="stretch">
-            {filteredData.map((item) => (
-              <WatchlistPreviewCard key={item._id} item={item} />
-            ))}
-            {filteredData.length === 0 && <Text py={10} textAlign="center">Your watchlist is currently empty.</Text>}
-          </VStack>
-        )}
-      </Container>
-    </>
-  );
-};
+    return (
+      <>
+        <Header />
+        <Container maxW="1200px" mx="auto" p={4} bg="brand.400" borderRadius="xl" boxShadow="md">
+          <Heading as="h2" size="xl" mb={4} color="brand.500">
+            My Tracking List
+          </Heading>
+  
+          {/* Tabs with Custom Colors */}
+          <Tabs index={tabIndex} onChange={setTabIndex} variant="soft-rounded" colorScheme="brand" pb={2}>
+            <TabList>
+              {filterOptions.map((filterOption, index) => (
+                <Tab
+                  key={filterOption.value}
+                  _selected={{
+                    bg: 'brand.100',
+                    color: 'white',
+                  }}
+                  _hover={{
+                    bg: 'brand.200',
+                  }}
+                >
+                  {filterOption.label}
+                </Tab>
+              ))}
+            </TabList>
+          </Tabs>
+  
+          <HStack spacing={4} mb={4}>
+            {/* ButtonGroup with Updated Colors */}
+            <ButtonGroup isAttached variant="outline" size="sm">
+  <Button
+    isActive={releaseStatus === 'upcoming'}
+    onClick={() => handleReleaseStatusChange('upcoming')}
+    bg={releaseStatus === 'upcoming' ? 'brand.100' : 'white'}  // White background for inactive
+    color={releaseStatus === 'upcoming' ? 'white' : 'brand.100'}  // Muted Green text when inactive
+    borderColor="brand.100"
+    _hover={{
+      bg: releaseStatus === 'upcoming' ? 'brand.100' : 'brand.200',  // Light Sage on hover for inactive
+      color: releaseStatus === 'upcoming' ? 'white' : 'brand.100',
+    }}
+    _active={{
+      bg: 'brand.100',
+      color: 'white',
+    }}
+    borderRightRadius="none"  // Smooth connection with the next button
+  >
+    Upcoming
+  </Button>
 
-export default WatchlistPage;
+  <Button
+    isActive={releaseStatus === 'released'}
+    onClick={() => handleReleaseStatusChange('released')}
+    bg={releaseStatus === 'released' ? 'brand.100' : 'white'}
+    color={releaseStatus === 'released' ? 'white' : 'brand.100'}
+    borderColor="brand.100"
+    _hover={{
+      bg: releaseStatus === 'released' ? 'brand.100' : 'brand.200',
+      color: releaseStatus === 'released' ? 'white' : 'brand.100',
+    }}
+    _active={{
+      bg: 'brand.100',
+      color: 'white',
+    }}
+    borderLeftRadius="none"  // Smooth connection with the previous button
+  >
+    Released
+  </Button>
+</ButtonGroup>
+
+  
+            {/* Select Dropdown with Custom Styles */}
+            <Select
+              onChange={handleSortChange}
+              value={sortCriterion}
+              size="sm"
+              borderColor="brand.100"
+              color="brand.500"
+              _hover={{ borderColor: 'brand.100' }}
+              _focus={{ borderColor: 'brand.100', boxShadow: '0 0 0 1px #2E8B57' }}
+            >
+              {Object.entries(sortOptions).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </HStack>
+  
+          {/* Content Section */}
+          {loading ? (
+            <Center>
+              <Spinner size="xl" color="brand.100" />
+            </Center>
+          ) : (
+            <VStack spacing={4} align="stretch">
+              {filteredData.map((item) => (
+                <WatchlistPreviewCard key={item._id} item={item} />
+              ))}
+              {filteredData.length === 0 && (
+                <Text py={10} textAlign="center" color="brand.500">
+                  Your watchlist is currently empty.
+                </Text>
+              )}
+            </VStack>
+          )}
+        </Container>
+      </>
+    );
+  };
+  export default WatchlistPage;

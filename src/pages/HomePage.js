@@ -103,8 +103,8 @@ const HomePage = ({ user }) => {
       <Header />
       <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
         <ContentToggle setMediaType={setMediaType} />  {/* Pass setMediaType */}
-        <Box bg='brand.100'>
-          <Box bg='brand.100'>
+        <Box >
+          <Box >
             <FeaturedRelease />
           </Box>
         </Box>
