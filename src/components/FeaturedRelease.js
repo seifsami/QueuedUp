@@ -15,11 +15,13 @@ const FeaturedRelease = ({
     <Box
       bg="brand.200"
       borderRadius="xl"
-      boxShadow="md"
-      p={{ base: 2, md: 6 }}
+      boxShadow="lg"
+      p={{ base: 3, md: 6 }}
       mx="auto"
       maxW="1200px"
       mt={0}
+      transition="box-shadow 0.3s"
+      _hover={{ boxShadow: "0px 8px 16px rgba(0,0,0,0.6)" }}
     >
       <Flex
         direction={{ base: 'column', md: 'row' }}
@@ -41,9 +43,10 @@ const FeaturedRelease = ({
             borderRadius="lg"
             maxW="100%"
             maxHeight={{ base: "280px", md: "350px" }}
-            objectFit="contain"
-            // More pronounced shadow
-            boxShadow="0px 12px 24px rgba(0, 0, 0, 0.9)"
+            objectFit="cover"
+            boxShadow="0px 12px 24px rgba(0, 0, 0, 0.8)"
+            transition="transform 0.2s"
+            _hover={{ transform: "scale(1.03)" }}
           />
         </Box>
 
@@ -53,49 +56,64 @@ const FeaturedRelease = ({
           textAlign={{ base: 'center', md: 'left' }}
           mt={{ base: 2, md: 0 }}
         >
-          <Heading as="h3" size="lg" mb={2}>
+          <Heading 
+            as="h3" 
+            size="xl" 
+            mb={4}
+          >
             {item.title || "Featured Release"}
           </Heading>
-          <Text fontSize="md" color="gray.700" noOfLines={{ base: 3, md: 6 }} mb={3}>
+          <Text 
+            fontSize="md" 
+            color="gray.700" 
+            noOfLines={{ base: 3, md: 6 }} 
+            mb={4}
+          >
             {item.description || "No description available."}
           </Text>
 
           {/* Buttons */}
           <Flex
             justify={{ base: 'center', md: 'flex-start' }}
-            gap={{ base: 2, md: 3 }}
+            gap={{ base: 3, md: 4 }}
           >
-            <NotifyMeButton
-              item={item}
-              userWatchlist={userWatchlist}
-              refetchWatchlist={refetchWatchlist}
-              mediaType={mediaType || item.media_type}
-              buttonProps={{
-                size: { base: 'sm', md: 'md' },
-                px: { base: 4, md: 6 }
-              }}
-            />
-            <Button
-              variant="outline"
-              borderColor="brand.100"
-              color="brand.100"
-              bg="white"
-              _hover={{
-                bg: 'gray.100',
-                color: 'brand.100',
-                borderColor: 'brand.100',
-              }}
-              _active={{
-                bg: 'gray.200',
-                color: 'brand.500',
-                borderColor: 'brand.100',
-              }}
-              size={{ base: 'sm', md: 'md' }}
-              px={{ base: 4, md: 6 }}
-              onClick={() => onViewDetails && onViewDetails(item)}
-            >
-              View Details
-            </Button>
+            <Box flex="1">
+              <NotifyMeButton
+                item={item}
+                userWatchlist={userWatchlist}
+                refetchWatchlist={refetchWatchlist}
+                mediaType={mediaType || item.media_type}
+                buttonProps={{
+                  size: { base: 'sm', md: 'md' },
+                  px: { base: 4, md: 6 },
+                  width: "100%"
+                }}
+              />
+            </Box>
+            <Box flex="1">
+              <Button 
+                variant="outline" 
+                borderColor="brand.100"
+                color="brand.100"
+                bg="white"
+                _hover={{ 
+                  bg: 'gray.100',
+                  color: 'brand.100',
+                  borderColor: 'brand.100',
+                }}
+                _active={{
+                  bg: 'gray.200',
+                  color: 'brand.500',
+                  borderColor: 'brand.100',
+                }}
+                size={{ base: 'sm', md: 'md' }}
+                px={{ base: 4, md: 6 }}
+                width="100%"
+                onClick={() => onViewDetails && onViewDetails(item)}
+              >
+                View Details
+              </Button>
+            </Box>
           </Flex>
         </Box>
       </Flex>
