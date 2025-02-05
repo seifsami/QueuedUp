@@ -6,7 +6,7 @@ from bson import ObjectId
 homepage_blueprint = Blueprint('homepage_blueprint', __name__)
 
 def get_items_from_ids(db, media_type, item_ids):
-    print(f"Seleem Testing...")
+    print(f"Testing automatic deployment...")
     collection = db[media_type]
     detailed_items = []
     for item_id in item_ids:
