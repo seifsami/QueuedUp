@@ -1,29 +1,31 @@
 import React from 'react';
 import { Button, useToast } from '@chakra-ui/react';
-import { useModal } from '../ModalContext'; // Adjust the import path as necessary
+import { useModal } from '../ModalContext';
 import { addToWatchlist } from '../services/api';
 
-export const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonProps }) => {
-  const { currentUser, openModalWithItem } = useModal();  // Access modal and current user
-  const toast = useToast();  // To display notifications
+const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonProps }) => {
+  const { currentUser, openModalWithItem } = useModal();
+  const toast = useToast();
 
   // Check if the item is already in the user's watchlist
-  const isInWatchlist = Array.isArray(userWatchlist) && userWatchlist.some((watchlistItem) => watchlistItem.title === item.title);
+  const isInWatchlist =
+    Array.isArray(userWatchlist) &&
+    userWatchlist.some((watchlistItem) => watchlistItem.title === item.title);
 
   const handleNotifyClick = async () => {
     if (!currentUser) {
-      openModalWithItem(item);  // Open login/sign-up modal if user not signed in
+      // If not signed in, open the modal (or login flow)
+      openModalWithItem(item);
     } else {
       try {
-        
-          console.log("Attempting to add to watchlist with:", {
-            userId: currentUser.uid,
-            itemId: item._id,
-            mediaType: item.media_type
-          });
+        console.log("Attempting to add to watchlist with:", {
+          userId: currentUser.uid,
+          itemId: item._id,
+          mediaType: item.media_type,
+        });
         console.log("Item in NotifyMeButton:", item);
 
-        await addToWatchlist(currentUser.uid, item._id, item.media_type) // Add item to backend
+        await addToWatchlist(currentUser.uid, item._id, item.media_type);
         toast({
           title: 'Added to Watchlist',
           description: `${item.title} has been added to your watchlist.`,
@@ -31,7 +33,11 @@ export const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonPr
           duration: 5000,
           isClosable: true,
         });
-        await refetchWatchlist();  // Re-fetch watchlist after successful addition
+
+        // Use safeRefetch: if refetchWatchlist is not a function, default to a no-op.
+        const safeRefetch =
+          typeof refetchWatchlist === 'function' ? refetchWatchlist : () => {};
+        await safeRefetch();
       } catch (error) {
         toast({
           title: 'Error',
@@ -49,9 +55,9 @@ export const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonPr
     <Button
       onClick={handleNotifyClick}
       {...buttonProps}
-      colorScheme={isInWatchlist ? 'brand.100' : 'teal'}  // Gray if already in watchlist, teal otherwise
+      colorScheme={isInWatchlist ? 'brand.100' : 'teal'}
       size={buttonProps?.size || 'sm'}
-      isDisabled={isInWatchlist}  // Disable the button if item is already in watchlist
+      isDisabled={isInWatchlist}
     >
       {isInWatchlist ? 'In Watchlist' : 'Notify Me'}
     </Button>

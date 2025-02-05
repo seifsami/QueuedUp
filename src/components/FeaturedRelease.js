@@ -1,13 +1,22 @@
 import React from 'react';
 import { Box, Image, Flex, Heading, Text, Button } from '@chakra-ui/react';
+import NotifyMeButton from './NotifyMeButton';
 
-const FeaturedRelease = ({ item }) => {
+const FeaturedRelease = ({ 
+  item, 
+  onViewDetails, 
+  userWatchlist, 
+  refetchWatchlist, 
+  mediaType 
+}) => {
+  if (!item) return null;
+
   return (
     <Box
-      bg="brand.200"  // Light Sage Green background for Featured Release
+      bg="brand.200"
       borderRadius="xl"
       boxShadow="md"
-      p={{ base: 2, md: 6 }}  // Reduced padding on mobile to tighten the space
+      p={{ base: 2, md: 6 }}
       mx="auto"
       maxW="1200px"
       mt={0}
@@ -23,15 +32,15 @@ const FeaturedRelease = ({ item }) => {
           flexShrink={0}
           display="flex"
           justifyContent="center"
-          width={{ base: '85%', md: '35%' }}  // Slightly larger image on mobile
-          mt={{ base: 2, md: 0 }}  // Move image closer to top on mobile
+          width={{ base: '85%', md: '35%' }}
+          mt={{ base: 2, md: 0 }}
         >
           <Image
-            src={`${process.env.PUBLIC_URL}9780143108245.jpeg`}
-            alt="Featured Release"
+            src={item.image || `${process.env.PUBLIC_URL}/default-image.jpeg`}
+            alt={item.title || "Featured Release"}
             borderRadius="lg"
             maxW="100%"
-            maxHeight={{ base: "280px", md: "350px" }}  // Increased image height on mobile
+            maxHeight={{ base: "280px", md: "350px" }}
             objectFit="contain"
             boxShadow="lg"
           />
@@ -41,47 +50,48 @@ const FeaturedRelease = ({ item }) => {
         <Box
           flex="1"
           textAlign={{ base: 'center', md: 'left' }}
-          mt={{ base: 2, md: 0 }}  // Less spacing on mobile
+          mt={{ base: 2, md: 0 }}
         >
           <Heading as="h3" size="lg" mb={2}>
-            Featured Release
+            {item.title || "Featured Release"}
           </Heading>
           <Text fontSize="md" color="gray.700" noOfLines={{ base: 3, md: 6 }} mb={3}>
-          The portrayal of Stephen Dedalus's Dublin childhood and youth, his quest for identity through art and his gradual emancipation from the claims of family, religion and Ireland itself, is also an oblique self-portrait of the young James Joyce and a universal testament to the artist's 'eternal imagination'. Both an insight into Joyce's life and childhood, and a unique work of modernist fiction, A Portrait of the Artist as a Young Man is a novel of sexual awakening, religious rebellion and the essential search for voice and meaning that every nascent artist must face in order to blossom fully into themselves.
+            {item.description || "No description available."}
           </Text>
 
-          {/* Buttons - Horizontal on all devices */}
+          {/* Buttons */}
           <Flex
             justify={{ base: 'center', md: 'flex-start' }}
-            gap={{ base: 2, md: 3 }}  // Keep compact gap on mobile
+            gap={{ base: 2, md: 3 }}
           >
-            <Button
-              bg="brand.100"  // Muted Green
-              color="white"
-              _hover={{ bg: '#256B45', boxShadow: 'md', transform: 'translateY(-2px)' }}
-              size={{ base: 'sm', md: 'md' }}  // Smaller buttons on mobile
-              px={{ base: 4, md: 6 }}
-            >
-              Add to Watchlist
-            </Button>
-
+            <NotifyMeButton
+              item={item}
+              userWatchlist={userWatchlist}
+              refetchWatchlist={refetchWatchlist}
+              mediaType={mediaType || item.media_type}
+              buttonProps={{
+                size: { base: 'sm', md: 'md' },
+                px: { base: 4, md: 6 }
+              }}
+            />
             <Button
               variant="outline"
               borderColor="brand.100"
               color="brand.100"
               bg="white"
-              _hover={{ 
-                bg: 'gray.100',           // Light gray background on hover
-                color: 'brand.100',       // Keep text Muted Green
+              _hover={{
+                bg: 'gray.100',
+                color: 'brand.100',
                 borderColor: 'brand.100',
               }}
               _active={{
-                bg: 'gray.200',           // Slightly darker gray when clicked
-                color: 'brand.500',       // Darker gray text when clicked
-                borderColor: 'brand.100', // Keep the Muted Green border
+                bg: 'gray.200',
+                color: 'brand.500',
+                borderColor: 'brand.100',
               }}
               size={{ base: 'sm', md: 'md' }}
               px={{ base: 4, md: 6 }}
+              onClick={() => onViewDetails && onViewDetails(item)}
             >
               View Details
             </Button>

@@ -9,9 +9,10 @@ import DetailsModal from '../components/DetailsModal';
 import { getTrendingMedia, getUpcomingMedia, getUserWatchlist } from '../services/api';
 
 const HomePage = ({ user }) => {
-  const [mediaType, setMediaType] = useState('tv_seasons'); // Default media type
+  const [mediaType, setMediaType] = useState('tv_seasons');
   const [trendingData, setTrendingData] = useState([]);
   const [upcomingReleasesData, setUpcomingReleasesData] = useState([]);
+  const [featuredItem, setFeaturedItem] = useState(null);
   const [loadingTrending, setLoadingTrending] = useState(true);
   const [loadingUpcoming, setLoadingUpcoming] = useState(true);
   const [error, setError] = useState(null);
@@ -19,6 +20,7 @@ const HomePage = ({ user }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [userWatchlist, setUserWatchlist] = useState([]);
 
+  // Handlers for modal actions.
   const openModalWithItem = (item) => {
     setSelectedItem(item);
     setModalOpen(true);
@@ -32,22 +34,21 @@ const HomePage = ({ user }) => {
   const fetchUserWatchlist = async () => {
     if (!user) return;
     try {
-      console.log('Fetching watchlist for user:', user.uid);
-      const { data } = await getUserWatchlist(user.uid);  // Extract 'data' array directly
-      console.log('Fetched watchlist:', data);
-      setUserWatchlist(data);  // Save the array directly
+      const { data } = await getUserWatchlist(user.uid);
+      setUserWatchlist(data);
     } catch (err) {
       console.error('Failed to fetch watchlist:', err);
     }
   };
 
+  // Helper functions for data processing.
   const normalizeDate = (dateStr) => {
     if (!dateStr) return null;
     if (typeof dateStr === 'string' && dateStr.includes(',')) {
-      const parsedDate = Date.parse(dateStr);  // Convert to timestamp
-      return isNaN(parsedDate) ? null : new Date(parsedDate);  // Return date or null if invalid
+      const parsedDate = Date.parse(dateStr);
+      return isNaN(parsedDate) ? null : new Date(parsedDate);
     }
-    return new Date(dateStr);  // Default case for ISO strings
+    return new Date(dateStr);
   };
 
   const parseReleaseDates = (items) => {
@@ -58,28 +59,31 @@ const HomePage = ({ user }) => {
   };
 
   const formatMediaItems = (items, mediaType) => {
-    return items.map((item) => ({
+    return items.map(item => ({
       ...item,
-      media_type: mediaType,  // Add the media type
+      media_type: mediaType,
     }));
   };
 
-  
-
+  // Fetch carousel data for the selected mediaType.
   useEffect(() => {
     const fetchMediaData = async () => {
       try {
         setLoadingTrending(true);
         setLoadingUpcoming(true);
-    
+
+        // Fetch trending data.
         const trendingMedia = await getTrendingMedia(mediaType);
-        const formattedTrendingMedia = formatMediaItems(trendingMedia, mediaType);  // Add media_type
-        setTrendingData(parseReleaseDates(formattedTrendingMedia));  // Parse release dates
-    
+        const formattedTrending = formatMediaItems(trendingMedia, mediaType);
+        const parsedTrending = parseReleaseDates(formattedTrending);
+        setTrendingData(parsedTrending);
+
+        // Fetch upcoming data.
         const upcomingMedia = await getUpcomingMedia(mediaType);
-        const formattedUpcomingMedia = formatMediaItems(upcomingMedia, mediaType);  // Add media_type
-        setUpcomingReleasesData(parseReleaseDates(formattedUpcomingMedia));  // Parse release dates
-    
+        const formattedUpcoming = formatMediaItems(upcomingMedia, mediaType);
+        const parsedUpcoming = parseReleaseDates(formattedUpcoming);
+        setUpcomingReleasesData(parsedUpcoming);
+
         setLoadingTrending(false);
         setLoadingUpcoming(false);
       } catch (err) {
@@ -90,61 +94,108 @@ const HomePage = ({ user }) => {
     };
 
     fetchMediaData();
-    fetchUserWatchlist();  // Fetch watchlist after fetching media
-  }, [mediaType, user]);  // Refetch when mediaType or user changes
+    fetchUserWatchlist();
+  }, [mediaType, user]);
+
+  // Fetch a global featured item on mount using concurrent API calls.
+  useEffect(() => {
+    const fetchGlobalFeatured = async () => {
+      try {
+        const mediaTypes = ['books', 'movies', 'tv_seasons'];
+        const results = await Promise.all(
+          mediaTypes.map(async (type) => {
+            const trendingMedia = await getTrendingMedia(type);
+            const formattedTrending = formatMediaItems(trendingMedia, type);
+            const parsedTrending = parseReleaseDates(formattedTrending);
+
+            const upcomingMedia = await getUpcomingMedia(type);
+            const formattedUpcoming = formatMediaItems(upcomingMedia, type);
+            const parsedUpcoming = parseReleaseDates(formattedUpcoming);
+
+            return [...parsedTrending, ...parsedUpcoming];
+          })
+        );
+
+        // Flatten the results into a single array.
+        const combined = results.flat();
+        if (combined.length > 0) {
+          const randomIndex = Math.floor(Math.random() * combined.length);
+          setFeaturedItem(combined[randomIndex]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch global featured item:', err);
+      }
+    };
+
+    fetchGlobalFeatured();
+  }, []); // This effect runs only once on mount.
 
   if (error) {
-    return <Center><Text color="red.500">{error}</Text></Center>;
+    return (
+      <Center>
+        <Text color="red.500">{error}</Text>
+      </Center>
+    );
   }
-  console.log('Watchlist in HomePage:', userWatchlist);
 
   return (
     <>
       <Header />
-      <Box maxW={{ xl: "1200px" }} mx="auto" bg="white">
-        <ContentToggle setMediaType={setMediaType} />  {/* Pass setMediaType */}
-        <Box >
-          <Box >
-            <FeaturedRelease />
-          </Box>
-        </Box>
+      <Box maxW={{ xl: '1200px' }} mx="auto" bg="white">
+        <ContentToggle setMediaType={setMediaType} />
+
+        {featuredItem && (
+          <FeaturedRelease
+            item={featuredItem}
+            onViewDetails={openModalWithItem}
+            userWatchlist={userWatchlist}
+            refetchWatchlist={fetchUserWatchlist}
+            mediaType={mediaType}
+          />
+        )}
+
         <Box px={4} py={1}>
-          <Text fontSize="2xl" fontWeight="bold" mb={4}>Upcoming Releases</Text>
+          <Text fontSize="2xl" fontWeight="bold" mb={4}>
+            Upcoming Releases
+          </Text>
           {loadingUpcoming ? (
-            <Center><Spinner size="xl" /></Center>
+            <Center>
+              <Spinner size="xl" />
+            </Center>
           ) : (
             <Carousel
               items={upcomingReleasesData}
               onOpenModal={openModalWithItem}
-              userWatchlist={userWatchlist}  // Pass watchlist to Carousel
-              refetchWatchlist={fetchUserWatchlist}  // Pass refetch function to Carousel
+              userWatchlist={userWatchlist}
+              refetchWatchlist={fetchUserWatchlist}
             />
           )}
-          <Text fontSize="2xl" fontWeight="bold" mb={4}>Trending</Text>
+          <Text fontSize="2xl" fontWeight="bold" mb={4}>
+            Trending
+          </Text>
           {loadingTrending ? (
-            <Center><Spinner size="xl" /></Center>
+            <Center>
+              <Spinner size="xl" />
+            </Center>
           ) : (
             <Carousel
               items={trendingData}
               onOpenModal={openModalWithItem}
-              userWatchlist={userWatchlist}  // Pass watchlist to Carousel
-              refetchWatchlist={fetchUserWatchlist}  // Pass refetch function to Carousel
+              userWatchlist={userWatchlist}
+              refetchWatchlist={fetchUserWatchlist}
               mediaType={mediaType}
             />
           )}
-          
-
           <WatchlistPreview watchlist={userWatchlist} mediaType={mediaType} />
-
         </Box>
         <DetailsModal
           isOpen={isModalOpen}
           onClose={() => {
-            closeModal();  // Close the modal
-            fetchUserWatchlist();  // Refresh the watchlist when modal closes
+            closeModal();
+            fetchUserWatchlist();
           }}
           item={selectedItem}
-          refetchWatchlist={fetchUserWatchlist}  // Pass refetch function
+          refetchWatchlist={fetchUserWatchlist}
         />
       </Box>
     </>
