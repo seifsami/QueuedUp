@@ -37,7 +37,6 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       return <Text fontSize="sm">{days}d {hours}h {minutes}m left</Text>;
     }
   };
-  
 
   return (
     <Box
@@ -60,21 +59,22 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
         borderColor="gray.200"
       >
         <Image
-          src={item.image || defaultImages[item.media_type || "books"]}
+          src={(item.image && item.image !== "none")
+                ? item.image
+                : defaultImages[item.media_type || "books"]}
           alt={item.title}
           objectFit="cover"
           width="100%"
           height="100%"
         />
-         {/* Temporarily Remove Tracking Count */}
-          {/*
+        {/*
           <Box position="absolute" top="2" right="2" p="2" bg="rgba(255, 255, 255, 0.6)" borderRadius="full">
             <HStack>
               <Icon as={FaEye} />
               <Text fontSize="sm">{item.trackingCount || '0'}</Text>
             </HStack>
           </Box>
-          */}
+        */}
       </Box>
 
       <VStack align="start" p={2} spacing="1">
@@ -87,38 +87,37 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
         )}
 
         <HStack justifyContent="space-between" width="full">
-        <Box onClick={(e) => e.stopPropagation()}>
-          <NotifyMeButton
-            item={item}
-            userWatchlist={userWatchlist}
-            refetchWatchlist={refetchWatchlist}
-            mediaType={item.media_type}
-          />
-        </Box>
-        <Button 
-          variant="outline" 
-          borderColor="brand.100"     // Muted Green border
-          color="brand.100"           // Muted Green text
-          size="sm" 
-          flex={2}
-          _hover={{ 
-            bg: 'gray.100',           // Light gray background on hover
-            color: 'brand.100',       // Keep text Muted Green
-            borderColor: 'brand.100',
-          }}
-          _active={{
-            bg: 'gray.200',           // Slightly darker gray when clicked
-            color: 'brand.500',       // Darker gray text when clicked
-            borderColor: 'brand.100', // Keep the Muted Green border
-          }}
-          onClick={(e) => {
-            e.stopPropagation();  // Prevent modal from opening when this button is clicked
-            onOpenModal(item);
-          }}
-        >
-          View Details
-        </Button>
-
+          <Box onClick={(e) => e.stopPropagation()}>
+            <NotifyMeButton
+              item={item}
+              userWatchlist={userWatchlist}
+              refetchWatchlist={refetchWatchlist}
+              mediaType={item.media_type}
+            />
+          </Box>
+          <Button 
+            variant="outline" 
+            borderColor="brand.100"     // Muted Green border
+            color="brand.100"           // Muted Green text
+            size="sm" 
+            flex={2}
+            _hover={{ 
+              bg: 'gray.100',           // Light gray background on hover
+              color: 'brand.100',       // Keep text Muted Green
+              borderColor: 'brand.100',
+            }}
+            _active={{
+              bg: 'gray.200',           // Slightly darker gray when clicked
+              color: 'brand.500',       // Darker gray text when clicked
+              borderColor: 'brand.100', // Keep the Muted Green border
+            }}
+            onClick={(e) => {
+              e.stopPropagation();  // Prevent modal from opening when this button is clicked
+              onOpenModal(item);
+            }}
+          >
+            View Details
+          </Button>
         </HStack>
       </VStack>
     </Box>
