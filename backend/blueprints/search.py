@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from bson import ObjectId
 from app import mongo
+from datetime import datetime
 
 search_blueprint = Blueprint('search', __name__)
 
@@ -17,10 +18,9 @@ def clean_result(result):
 def search():
     try:
         # Get query parameters
-        query = request.args.get('query') or request.args.get('q', '').strip() # Search query
+        query = request.args.get('query') or request.args.get('q', '').strip()  # Search query
         media_type = request.args.get('type', '').strip()  # Media type (optional)
       
-
         # Ensure a query is provided
         if not query:
             return jsonify({"error": "A search query is required."}), 400
@@ -38,7 +38,9 @@ def search():
                 "tv_seasons": {"title": 10}
             }
             boosts = field_boosts.get(collection_name, {})  # Get boosts for the collection
-            
+
+            now = datetime.utcnow()  # current time in UTC
+
             return [
                 {
                     "$search": {
@@ -54,6 +56,12 @@ def search():
                                 }
                                 for field, boost in boosts.items()
                             ]
+                        },
+                        "filter": {
+                            "range": {
+                                "path": "release_date",
+                                "gt": now  # Only include items with a release_date in the future
+                            }
                         }
                     }
                 },
@@ -65,10 +73,10 @@ def search():
                         "title": 1,
                         "image": 1,
                         "release_date": 1,
-                        "author": 1,  # Include for books
-                        "franchise_name": 1,  # Include for movies
-                        "director": 1,  # Include for movies
-                        "network_name": 1,  # Include for TV seasons
+                        "author": 1,            # Include for books
+                        "franchise_name": 1,      # Include for movies
+                        "director": 1,          # Include for movies
+                        "network_name": 1,      # Include for TV seasons
                         "media_type": {
                             "$literal": collection_name  # Attach media type to results
                         },
