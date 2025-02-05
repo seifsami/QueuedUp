@@ -12,6 +12,7 @@ const FeaturedRelease = ({
   if (!item) return null;
 
   return (
+    // Entire card is clickable to open the details modal.
     <Box
       bg="brand.200"
       borderRadius="xl"
@@ -22,6 +23,7 @@ const FeaturedRelease = ({
       mt={2}
       transition="box-shadow 0.3s"
       _hover={{ boxShadow: "0px 8px 16px rgba(0,0,0,0.6)" }}
+      onClick={() => onViewDetails && onViewDetails(item)}
     >
       <Flex
         direction={{ base: 'column', md: 'row' }}
@@ -56,26 +58,23 @@ const FeaturedRelease = ({
           textAlign={{ base: 'center', md: 'left' }}
           mt={{ base: 2, md: 0 }}
         >
-          <Heading 
-            as="h3" 
-            size="xl" 
-            mb={4}
-          >
+          <Heading as="h3" size="xl" mb={4}>
             {item.title || "Featured Release"}
           </Heading>
-          <Text 
-            fontSize="md" 
-            color="gray.700" 
-            noOfLines={{ base: 3, md: 6 }} 
+          <Text
+            fontSize="md"
+            color="gray.700"
+            noOfLines={{ base: 3, md: 6 }}
             mb={4}
           >
             {item.description || "No description available."}
           </Text>
 
-          {/* Buttons */}
+          {/* Button Row: prevent clicks inside this area from bubbling up */}
           <Flex
             justify={{ base: 'center', md: 'flex-start' }}
             gap={{ base: 3, md: 4 }}
+            onClick={(e) => e.stopPropagation()}
           >
             <Box flex="1">
               <NotifyMeButton
@@ -91,12 +90,12 @@ const FeaturedRelease = ({
               />
             </Box>
             <Box flex="1">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 borderColor="brand.100"
                 color="brand.100"
                 bg="white"
-                _hover={{ 
+                _hover={{
                   bg: 'gray.100',
                   color: 'brand.100',
                   borderColor: 'brand.100',
@@ -109,7 +108,7 @@ const FeaturedRelease = ({
                 size={{ base: 'sm', md: 'md' }}
                 px={{ base: 4, md: 6 }}
                 width="100%"
-                onClick={() => onViewDetails && onViewDetails(item)}
+                // No onClick here since the entire card opens details
               >
                 View Details
               </Button>
