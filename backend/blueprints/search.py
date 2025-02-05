@@ -20,7 +20,7 @@ def search():
         # Get query parameters (using both 'query' and 'q')
         query = (request.args.get('query') or request.args.get('q', '')).strip()
         media_type = request.args.get('type', '').strip()
-
+      
         # Ensure a query is provided
         if not query:
             return jsonify({"error": "A search query is required."}), 400
@@ -38,7 +38,6 @@ def search():
                 "tv_seasons": {"title": 10}
             }
             boosts = field_boosts.get(collection_name, {})
-
             now = datetime.utcnow()  # current UTC time
 
             return [
@@ -46,14 +45,6 @@ def search():
                     "$search": {
                         "index": index_name,
                         "compound": {
-                            "must": [
-                                {
-                                    "range": {
-                                        "path": "release_date",
-                                        "gt": now
-                                    }
-                                }
-                            ],
                             "should": [
                                 {
                                     "text": {
@@ -67,17 +58,26 @@ def search():
                         }
                     }
                 },
-                {"$limit": 10},
+                # After $search, add a $match stage to only include documents whose
+                # release_date (converted to a date) is in the future.
+                {
+                    "$match": {
+                        "$expr": {
+                            "$gt": [{ "$toDate": "$release_date" }, now]
+                        }
+                    }
+                },
+                { "$limit": 10 },
                 {
                     "$project": {
                         "title": 1,
                         "image": 1,
                         "release_date": 1,
-                        "author": 1,
-                        "franchise_name": 1,
-                        "director": 1,
-                        "network_name": 1,
-                        "media_type": {"$literal": collection_name},
+                        "author": 1,            # Include for books
+                        "franchise_name": 1,      # Include for movies
+                        "director": 1,          # Include for movies
+                        "network_name": 1,      # Include for TV seasons
+                        "media_type": { "$literal": collection_name },
                         "score": {"$meta": "searchScore"}
                     }
                 }
@@ -104,6 +104,7 @@ def search():
         # Sort results by search score in descending order
         results = sorted(results, key=lambda x: x.get('score', 0), reverse=True)
 
+        # Return combined results
         return jsonify(results), 200
 
     except Exception as e:
