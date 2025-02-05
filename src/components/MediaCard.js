@@ -50,7 +50,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       w="220px"
       h="500px"
       m="0 8px"
-      onClick={() => onOpenModal(item)}  // Make the whole card clickable
+      onClick={() => onOpenModal(item)}
     >
       <Box 
         height={imageContainerHeight}
@@ -67,14 +67,6 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
           width="100%"
           height="100%"
         />
-        {/*
-          <Box position="absolute" top="2" right="2" p="2" bg="rgba(255, 255, 255, 0.6)" borderRadius="full">
-            <HStack>
-              <Icon as={FaEye} />
-              <Text fontSize="sm">{item.trackingCount || '0'}</Text>
-            </HStack>
-          </Box>
-        */}
       </Box>
 
       <VStack align="start" p={2} spacing="1">
@@ -87,37 +79,42 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
         )}
 
         <HStack justifyContent="space-between" width="full">
-          <Box onClick={(e) => e.stopPropagation()}>
+          {/* Wrap each button in a Box with fixed width */}
+          <Box width="48%" onClick={(e) => e.stopPropagation()}>
             <NotifyMeButton
               item={item}
               userWatchlist={userWatchlist}
               refetchWatchlist={refetchWatchlist}
               mediaType={item.media_type}
+              buttonProps={{ width: "100%", size: "sm" }}
             />
           </Box>
-          <Button 
-            variant="outline" 
-            borderColor="brand.100"     // Muted Green border
-            color="brand.100"           // Muted Green text
-            size="sm" 
-            flex={2}
-            _hover={{ 
-              bg: 'gray.100',           // Light gray background on hover
-              color: 'brand.100',       // Keep text Muted Green
-              borderColor: 'brand.100',
-            }}
-            _active={{
-              bg: 'gray.200',           // Slightly darker gray when clicked
-              color: 'brand.500',       // Darker gray text when clicked
-              borderColor: 'brand.100', // Keep the Muted Green border
-            }}
-            onClick={(e) => {
-              e.stopPropagation();  // Prevent modal from opening when this button is clicked
-              onOpenModal(item);
-            }}
-          >
-            View Details
-          </Button>
+          <Box width="48%">
+            <Button 
+              variant="outline" 
+              borderColor="brand.100"
+              color="brand.100"
+              bg="white"
+              _hover={{ 
+                bg: 'gray.100',
+                color: 'brand.100',
+                borderColor: 'brand.100',
+              }}
+              _active={{
+                bg: 'gray.200',
+                color: 'brand.500',
+                borderColor: 'brand.100',
+              }}
+              size="sm"
+              width="100%"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenModal(item);
+              }}
+            >
+              View Details
+            </Button>
+          </Box>
         </HStack>
       </VStack>
     </Box>
