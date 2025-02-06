@@ -18,7 +18,7 @@ const FeaturedRelease = ({
     }
   };
 
-  // For the "View Details" button, we explicitly stop propagation and call the same handler.
+  // For the "View Details" button, stop propagation and then call onViewDetails.
   const handleViewDetailsClick = (e) => {
     e.stopPropagation();
     if (onViewDetails) {
@@ -34,7 +34,7 @@ const FeaturedRelease = ({
       boxShadow="lg"
       p={{ base: 3, md: 6 }}
       mx="auto"
-      maxW="1200px"
+      maxW={{ base: '350px', md: '1200px' }}  // Mobile: up to 350px, desktop: up to 1200px
       mt={2}
       transition="box-shadow 0.3s"
       _hover={{ boxShadow: "0px 8px 16px rgba(0,0,0,0.6)" }}
@@ -89,9 +89,9 @@ const FeaturedRelease = ({
           <Flex
             justify={{ base: 'center', md: 'flex-start' }}
             gap={{ base: 3, md: 4 }}
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* NotifyMeButton stops propagation */}
-            <Box flex="1" onClick={(e) => e.stopPropagation()}>
+            <Box flex="1">
               <NotifyMeButton
                 item={item}
                 userWatchlist={userWatchlist}
@@ -104,7 +104,6 @@ const FeaturedRelease = ({
                 }}
               />
             </Box>
-            {/* "View Details" button stops propagation and calls onViewDetails */}
             <Box flex="1">
               <Button 
                 variant="outline" 
