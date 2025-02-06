@@ -25,8 +25,8 @@ const HomePage = ({ user }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   // User's watchlist
   const [userWatchlist, setUserWatchlist] = useState([]);
-  // Prefetched data for non-default media types (movies and books)
-  const [prefetchedData, setPrefetchedData] = useState({});
+  // Cached data for each media type
+  const [cachedData, setCachedData] = useState({});
 
   // Modal handlers.
   const openModalWithItem = (item) => {
@@ -92,18 +92,19 @@ const HomePage = ({ user }) => {
       try {
         setLoadingTrending(true);
         setLoadingUpcoming(true);
-
-        // If current mediaType is not TV shows and we have prefetched data, use it.
-        if (mediaType !== 'tv_seasons' && prefetchedData[mediaType]) {
-          const { trending, upcoming } = prefetchedData[mediaType];
+        if (cachedData[mediaType]) {
+          // Use cached data if available.
+          const { trending, upcoming } = cachedData[mediaType];
           setTrendingData(trending);
           setUpcomingReleasesData(upcoming);
           setLoadingTrending(false);
           setLoadingUpcoming(false);
         } else {
-          const { trending, upcoming } = await fetchDataForType(mediaType);
-          setTrendingData(trending);
-          setUpcomingReleasesData(upcoming);
+          // Otherwise, fetch data and cache it.
+          const data = await fetchDataForType(mediaType);
+          setTrendingData(data.trending);
+          setUpcomingReleasesData(data.upcoming);
+          setCachedData(prev => ({ ...prev, [mediaType]: data }));
           setLoadingTrending(false);
           setLoadingUpcoming(false);
         }
@@ -116,32 +117,37 @@ const HomePage = ({ user }) => {
 
     fetchMediaData();
     fetchUserWatchlist();
-    // NOTE: prefetchedData is intentionally removed from dependencies
   }, [mediaType, user]);
 
-  // Prefetch movies and books in the background (runs only once on mount).
+  // Prefetch movies and books (and TV shows if desired) in the background on mount.
   useEffect(() => {
-    const prefetchOtherTypes = async () => {
+    const prefetchAllTypes = async () => {
       try {
-        const typesToPrefetch = ['movies', 'books'];
+        const typesToPrefetch = ['books', 'movies', 'tv_seasons'];
         const results = await Promise.all(
           typesToPrefetch.map(async (type) => {
-            const data = await fetchDataForType(type);
-            return { type, data };
+            // Only prefetch if not already cached.
+            if (!cachedData[type]) {
+              const data = await fetchDataForType(type);
+              return { type, data };
+            }
+            return null;
           })
         );
-        const newPrefetchedData = {};
-        results.forEach(({ type, data }) => {
-          newPrefetchedData[type] = data;
+        const newData = {};
+        results.forEach(result => {
+          if (result) {
+            newData[result.type] = result.data;
+          }
         });
-        setPrefetchedData(newPrefetchedData);
+        setCachedData(prev => ({ ...prev, ...newData }));
       } catch (err) {
         console.error('Error prefetching data:', err);
       }
     };
 
-    prefetchOtherTypes();
-  }, []);
+    prefetchAllTypes();
+  }, []); // Runs only once on mount.
 
   // Fetch a global featured item on mount using concurrent API calls.
   useEffect(() => {
@@ -150,8 +156,8 @@ const HomePage = ({ user }) => {
         const mediaTypes = ['books', 'movies', 'tv_seasons'];
         const results = await Promise.all(
           mediaTypes.map(async (type) => {
-            const { trending, upcoming } = await fetchDataForType(type);
-            return [...trending, ...upcoming];
+            const data = await fetchDataForType(type);
+            return [...data.trending, ...data.upcoming];
           })
         );
         const combined = results.flat();
@@ -184,7 +190,7 @@ const HomePage = ({ user }) => {
         {featuredItem && (
           <FeaturedRelease
             item={featuredItem}
-            onViewDetails={openModalWithItem}
+            onViewDetails={(item) => setSelectedItem(item) || setModalOpen(true)}
             userWatchlist={userWatchlist}
             refetchWatchlist={fetchUserWatchlist}
             mediaType={mediaType}
@@ -202,7 +208,7 @@ const HomePage = ({ user }) => {
           ) : (
             <Carousel
               items={upcomingReleasesData}
-              onOpenModal={openModalWithItem}
+              onOpenModal={(item) => setSelectedItem(item) || setModalOpen(true)}
               userWatchlist={userWatchlist}
               refetchWatchlist={fetchUserWatchlist}
             />
@@ -217,7 +223,7 @@ const HomePage = ({ user }) => {
           ) : (
             <Carousel
               items={trendingData}
-              onOpenModal={openModalWithItem}
+              onOpenModal={(item) => setSelectedItem(item) || setModalOpen(true)}
               userWatchlist={userWatchlist}
               refetchWatchlist={fetchUserWatchlist}
               mediaType={mediaType}
@@ -228,7 +234,8 @@ const HomePage = ({ user }) => {
         <DetailsModal
           isOpen={isModalOpen}
           onClose={() => {
-            closeModal();
+            setModalOpen(false);
+            setSelectedItem(null);
             fetchUserWatchlist();
           }}
           item={selectedItem}
