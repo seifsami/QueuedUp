@@ -17,7 +17,7 @@ const ContentToggle = ({ setMediaType }) => {
       <TabList 
         bg="brand.400"
         borderRadius="lg"
-        mx={4}
+        mx={0}            // Remove horizontal margins
         p={2}
         boxShadow="base"
         overflowX="auto"
@@ -39,7 +39,7 @@ const ContentToggle = ({ setMediaType }) => {
             }}
             color="brand.500"
             borderRadius="xl"
-            fontWeight="bold" // All tabs are bold
+            fontWeight="bold"
             fontSize={{ base: 'sm', md: 'md' }}
             px={{ base: 4, md: 5 }}
             py={2}

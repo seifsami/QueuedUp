@@ -119,14 +119,13 @@ const HomePage = ({ user }) => {
     fetchUserWatchlist();
   }, [mediaType, user]);
 
-  // Prefetch movies and books (and TV shows if desired) in the background on mount.
+  // Prefetch data for all media types (runs only once on mount).
   useEffect(() => {
     const prefetchAllTypes = async () => {
       try {
         const typesToPrefetch = ['books', 'movies', 'tv_seasons'];
         const results = await Promise.all(
           typesToPrefetch.map(async (type) => {
-            // Only prefetch if not already cached.
             if (!cachedData[type]) {
               const data = await fetchDataForType(type);
               return { type, data };
@@ -147,31 +146,23 @@ const HomePage = ({ user }) => {
     };
 
     prefetchAllTypes();
-  }, []); // Runs only once on mount.
-
-  // Fetch a global featured item on mount using concurrent API calls.
-  useEffect(() => {
-    const fetchGlobalFeatured = async () => {
-      try {
-        const mediaTypes = ['books', 'movies', 'tv_seasons'];
-        const results = await Promise.all(
-          mediaTypes.map(async (type) => {
-            const data = await fetchDataForType(type);
-            return [...data.trending, ...data.upcoming];
-          })
-        );
-        const combined = results.flat();
-        if (combined.length > 0) {
-          const randomIndex = Math.floor(Math.random() * combined.length);
-          setFeaturedItem(combined[randomIndex]);
-        }
-      } catch (err) {
-        console.error('Failed to fetch global featured item:', err);
-      }
-    };
-
-    fetchGlobalFeatured();
   }, []);
+
+  // Once all media types are cached, compute the global featured item.
+  useEffect(() => {
+    const allTypes = ['books', 'movies', 'tv_seasons'];
+    const isAllCached = allTypes.every(type => cachedData[type]);
+    if (isAllCached) {
+      const combined = allTypes.flatMap(type => {
+        const { trending, upcoming } = cachedData[type];
+        return [...trending, ...upcoming];
+      });
+      if (combined.length > 0) {
+        const randomIndex = Math.floor(Math.random() * combined.length);
+        setFeaturedItem(combined[randomIndex]);
+      }
+    }
+  }, [cachedData]);
 
   if (error) {
     return (
@@ -185,12 +176,15 @@ const HomePage = ({ user }) => {
     <>
       <Header />
       <Box maxW={{ xl: '1200px' }} mx="auto" bg="white">
-        <ContentToggle setMediaType={setMediaType} />
+        {/* Sticky Content Toggle with margin top */}
+        <Box position="sticky" top="2px" zIndex="100" bg="white">
+          <ContentToggle setMediaType={setMediaType} />
+        </Box>
 
         {featuredItem && (
           <FeaturedRelease
             item={featuredItem}
-            onViewDetails={(item) => setSelectedItem(item) || setModalOpen(true)}
+            onViewDetails={(item) => { setSelectedItem(item); setModalOpen(true); }}
             userWatchlist={userWatchlist}
             refetchWatchlist={fetchUserWatchlist}
             mediaType={mediaType}
@@ -208,7 +202,7 @@ const HomePage = ({ user }) => {
           ) : (
             <Carousel
               items={upcomingReleasesData}
-              onOpenModal={(item) => setSelectedItem(item) || setModalOpen(true)}
+              onOpenModal={(item) => { setSelectedItem(item); setModalOpen(true); }}
               userWatchlist={userWatchlist}
               refetchWatchlist={fetchUserWatchlist}
             />
@@ -223,7 +217,7 @@ const HomePage = ({ user }) => {
           ) : (
             <Carousel
               items={trendingData}
-              onOpenModal={(item) => setSelectedItem(item) || setModalOpen(true)}
+              onOpenModal={(item) => { setSelectedItem(item); setModalOpen(true); }}
               userWatchlist={userWatchlist}
               refetchWatchlist={fetchUserWatchlist}
               mediaType={mediaType}
