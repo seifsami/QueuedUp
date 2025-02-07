@@ -26,6 +26,7 @@ app.register_blueprint(media_blueprint, url_prefix='/media')
 app.register_blueprint(homepage_blueprint, url_prefix='/homepage')
 app.register_blueprint(cron_blueprint, url_prefix='/cron')
 app.register_blueprint(search_blueprint, url_prefix='/api')
+app.register_blueprint(emailnotifs_blueprint, url_prefix='/api')
 
 @app.route('/')
 def hello():
