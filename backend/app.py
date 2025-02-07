@@ -18,6 +18,7 @@ from blueprints.media import media_blueprint
 from blueprints.homepage import homepage_blueprint
 from blueprints.cron import cron_blueprint
 from blueprints.search import search_blueprint
+from blueprints.emailnotifs import emailnotifs_blueprint
 
 app.register_blueprint(user_blueprint, url_prefix='/user')
 app.register_blueprint(user_watchlist_blueprint, url_prefix='/watchlist')
@@ -45,6 +46,8 @@ def test_mongo_connection():
         return jsonify({"status": "success", "collections": collection_names}), 200
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
+    
+
 
 if __name__ == '__main__':
     app.run(debug=True)
