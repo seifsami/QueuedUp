@@ -66,13 +66,20 @@ const WatchlistPage = ({ user }) => {
 
   // Filter and sort logic
   const filteredData = watchlistData
-    .filter((item) => {
-      // Filter based on release status
-      const today = new Date();
-      const releaseDate = new Date(item.release_date);
-      const isUpcoming = releaseDate >= today;
-      return releaseStatus === 'upcoming' ? isUpcoming : !isUpcoming;
-    })
+  .filter((item) => {
+    // Filter based on release status
+    const today = new Date();
+    
+    // Handle null or missing release_date
+    if (!item.release_date || item.release_date === "N/A") {
+      return releaseStatus === 'upcoming'; // Treat as upcoming
+    }
+
+    const releaseDate = new Date(item.release_date);
+    const isUpcoming = releaseDate >= today;
+
+    return releaseStatus === 'upcoming' ? isUpcoming : !isUpcoming;
+  })
     .filter((item) => {
       // Filter based on selected tab, 'all' shows all types
       const selectedType = filterOptions[tabIndex].value;
