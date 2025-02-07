@@ -62,11 +62,18 @@ def search():
                 # release_date (converted to a date) is in the future.
                 {
                     "$match": {
-                        "$expr": {
-                            "$gt": [{ "$toDate": "$release_date" }, now]
-                        }
+                        "$or": [
+                            { "release_date": None },  # Keep missing release_date
+                            { "release_date": "N/A" },  # Keep items explicitly marked as "N/A"
+                            {
+                                "$expr": {
+                                    "$gt": [{ "$toDate": "$release_date" }, now]  # Keep valid future release dates
+                                }
+                            }
+                        ]
                     }
-                },
+                }
+
                 { "$limit": 10 },
                 {
                     "$project": {
