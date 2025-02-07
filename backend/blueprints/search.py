@@ -63,7 +63,7 @@ def search():
                 {
                     "$match": {
                         "$or": [
-                            { "release_date": None },  # Keep missing release_date
+                            { "release_date": None },  # Keep items with no release date
                             { "release_date": "N/A" },  # Keep items explicitly marked as "N/A"
                             {
                                 "$expr": {
@@ -72,8 +72,7 @@ def search():
                             }
                         ]
                     }
-                }
-
+                },
                 { "$limit": 10 },
                 {
                     "$project": {
