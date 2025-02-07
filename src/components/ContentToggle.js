@@ -9,7 +9,7 @@ const ContentToggle = ({ setMediaType }) => {
     <Tabs
       isFitted
       variant="unstyled"
-      defaultIndex={0}  // "Books" as default
+      defaultIndex={2}  // "Books" as default
       onChange={(index) => {
         setMediaType(mediaTypes[index]);
       }}

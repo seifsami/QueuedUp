@@ -38,7 +38,7 @@ const App = () => {
           {/* Main content area takes up remaining space */}
           <Box flex="1">
             <Routes>
-              <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomePage user={currentUser} />} />
               <Route path="/homepage" element={<HomePage user={currentUser} />} />
               <Route path="/watchlist" element={<WatchlistPage user={currentUser} />} />
               <Route path="/search" element={<SearchResultsPage user={currentUser} />} />

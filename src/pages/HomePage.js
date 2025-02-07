@@ -118,6 +118,7 @@ const HomePage = ({ user }) => {
     fetchMediaData();
     fetchUserWatchlist();
   }, [mediaType, user]);
+  
 
   // Prefetch data for all media types (runs only once on mount).
   useEffect(() => {
@@ -147,6 +148,8 @@ const HomePage = ({ user }) => {
 
     prefetchAllTypes();
   }, []);
+
+
 
   // Once all media types are cached, compute the global featured item.
   useEffect(() => {
