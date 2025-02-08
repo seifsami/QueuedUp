@@ -5,9 +5,9 @@ EMAIL_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "../templates/emai
 
 # Default images in case media item has no image
 DEFAULT_IMAGES = {
-    "books": "https://queuedup-backend.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
-    "movies": "https://queuedup-backend.herokuapp.com/static/denise-jans-9lTUAlNB87M-unsplash.jpg",
-    "tv_seasons": "https://queuedup-backend.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
+    "books": "https://queuedup-backend-6d9156837adf.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
+    "movies": "https://queuedup-backend-6d9156837adf.herokuapp.com/static/denise-jans-9lTUAlNB87M-unsplash.jpg",
+    "tv_seasons": "https://queuedup-backend-6d9156837adf.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 }
 
 
