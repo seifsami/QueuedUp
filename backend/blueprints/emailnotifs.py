@@ -2,23 +2,11 @@ from flask import Blueprint, jsonify
 from tasks.release_query import get_today_releases
 from tasks.email_formatter import format_email_content
 from tasks.email_sender import send_email
-import firebase_admin
-from firebase_admin import auth, credentials
-import json
-import os
+
 
 emailnotifs_blueprint = Blueprint('emailnotifs', __name__)
 
-# Load Firebase credentials from environment variable
-firebase_json = os.getenv("FIREBASE_CREDENTIALS")
-
-if firebase_json:
-    try:
-        creds = credentials.Certificate(json.loads(firebase_json))
-        firebase_admin.initialize_app(creds)
-        print("✅ Firebase Initialized Successfully!")
-    except Exception as e:
-        print(f"🔥 Firebase Initialization Failed: {e}")
+#
 
 # **ONLY YOUR EMAIL FOR TESTING**
 TEST_EMAIL = "seifwsami@gmail.com"  # Replace this with your actual email
