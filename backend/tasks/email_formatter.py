@@ -25,7 +25,7 @@ def build_email_section(items, section_title, media_type):
             <img src="{image_url}" alt="{item['title']}">
             <div>
                 <div class="release-title">{item['title']}</div>
-                {f'<a href="https://www.amazon.com/s?k={item["title"].replace(" ", "+")}&tag=queuedup0f-20" class="cta-button">📖 Buy on Amazon</a>' if media_type == "books" else ""}
+                {f'<a href="https://www.amazon.com/s?k={item["title"].replace(" ", "+")}&tag=queuedup0f-20" class="cta-button"> Buy on Amazon</a>' if media_type == "books" else ""}
             </div>
         </div>
         """
