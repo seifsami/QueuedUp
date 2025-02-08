@@ -21,7 +21,7 @@ if firebase_json:
         print(f"🔥 Firebase Initialization Failed: {e}")
 
 # **ONLY YOUR EMAIL FOR TESTING**
-TEST_EMAIL = "seifwsami@gmail.com"  # Replace this with your actual email
+TEST_EMAIL = "your-email@example.com"  # Replace this with your actual email
 
 @emailnotifs_blueprint.route('/send-notifications', methods=['GET'])
 def send_notifications():
@@ -42,4 +42,4 @@ def send_notifications():
             return jsonify({"success": False, "message": "Failed to send test email"}), 500
 
     except Exception as e:
-        return jsonify({"success": F
+        return jsonify({"success": False, "error": str(e)}), 500
