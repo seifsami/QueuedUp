@@ -46,8 +46,9 @@ def format_email_content(releases):
     books_html = build_email_section(releases["books"], "📚 Books Releasing Today", "books")
 
     # Replace placeholders with actual HTML content
+    email_html = email_html.replace("{{books_section}}", books_html)
     email_html = email_html.replace("{{movies_section}}", movies_html)
     email_html = email_html.replace("{{tv_section}}", tv_html)
-    email_html = email_html.replace("{{books_section}}", books_html)
+   
 
     return email_html
