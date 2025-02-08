@@ -1,33 +1,24 @@
 from flask import Blueprint, jsonify
-from tasks.release_query import get_today_releases
+from tasks.release_query import get_today_releases, get_users_with_watchlist_items
 from tasks.email_formatter import format_email_content
 from tasks.email_sender import send_email
 
-
 emailnotifs_blueprint = Blueprint('emailnotifs', __name__)
 
-#
-
-# **ONLY YOUR EMAIL FOR TESTING**
-TEST_EMAIL = "sseleem1601@gmail.com"  # Replace this with your actual email
-
-@emailnotifs_blueprint.route('/send-notifications', methods=['GET'])
-def send_notifications():
-    """API endpoint to fetch today's releases and send a test email."""
+@emailnotifs_blueprint.route('/preview-notifications', methods=['GET'])
+def preview_notifications():
+    """API endpoint to fetch today's releases and show a preview of per-user notifications."""
     try:
-        releases = get_today_releases()
-        if not any(releases.values()):  # No releases today
-            return jsonify({"success": False, "message": "No releases today."}), 200
-
-        email_content = format_email_content(releases)
-
-        # Send only to your test email
-        success = send_email(TEST_EMAIL, "Your QueuedUp Releases for Today!", email_content)
+        # Get all items releasing today
+        today_releases = get_today_releases()
         
-        if success:
-            return jsonify({"success": True, "message": f"Test email sent to {TEST_EMAIL}"}), 200
-        else:
-            return jsonify({"success": False, "message": "Failed to send test email"}), 500
+        # Get users who have those items on their watchlist
+        users_to_notify = get_users_with_watchlist_items(today_releases)
+
+        # Only include users who actually have items to notify about
+        filtered_users = {email: items for email, items in users_to_notify.items() if any(items.values())}
+
+        return jsonify(filtered_users), 200
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
