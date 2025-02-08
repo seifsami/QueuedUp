@@ -68,3 +68,45 @@ def send_notifications():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+
+@emailnotifs_blueprint.route('/unsubscribe', methods=['GET', 'POST'])
+def unsubscribe():
+    """Handle unsubscribe requests."""
+    db = mongo.cx["QueuedUpDBnew"]
+    unsubscribe_collection = db.unsubscribe  # Create/use the unsubscribe collection
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        if not email:
+            return "Error: No email provided.", 400
+
+        # Insert into unsubscribe collection if not already unsubscribed
+        if not unsubscribe_collection.find_one({"email": email}):
+            unsubscribe_collection.insert_one({"email": email})
+        
+        return '''
+            <html>
+                <body style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+                    <h2>You've Been Unsubscribed</h2>
+                    <p>You will no longer receive release notifications.</p>
+                </body>
+            </html>
+        ''', 200
+
+    # If GET request (from email link), show a simple unsubscribe form
+    email = request.args.get('email', '')
+
+    return f'''
+        <html>
+            <body style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+                <h2>Unsubscribe from QueuedUp</h2>
+                <p>Are you sure you want to unsubscribe from release notifications?</p>
+                <form method="POST">
+                    <input type="hidden" name="email" value="{email}">
+                    <button type="submit" style="background: #777; color: white; padding: 10px 15px; border-radius: 5px; font-size: 16px; border: none;">Confirm Unsubscribe</button>
+                </form>
+            </body>
+        </html>
+    '''
+
