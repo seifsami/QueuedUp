@@ -99,15 +99,17 @@ def unsubscribe():
     email = request.args.get('email', '')
 
     return f'''
-        <html>
-            <body style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-                <h2>Unsubscribe from QueuedUp</h2>
-                <p>Are you sure you want to unsubscribe from release notifications?</p>
-                <form method="POST">
-                    <input type="hidden" name="email" value="{email}">
-                    <button type="submit" style="background: #777; color: white; padding: 10px 15px; border-radius: 5px; font-size: 16px; border: none;">Confirm Unsubscribe</button>
-                </form>
-            </body>
-        </html>
-    '''
+    <html>
+        <body style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+            <h2>Unsubscribe from QueuedUp</h2>
+            <p>You will no longer receive release notifications.</p>
+            <form method="POST">
+                <input type="hidden" name="email" value="{email}">
+                <button type="submit" style="background: #D9534F; color: white; padding: 12px 20px; border-radius: 5px; font-size: 16px; border: none; cursor: pointer;">
+                    Unsubscribe
+                </button>
+            </form>
+        </body>
+    </html>
+'''
 
