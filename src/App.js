@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { ModalProvider } from './ModalContext';
 import firebase from './firebaseConfig';
 import './App.css';
@@ -16,22 +16,17 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL) // 👈 Ensures persistence
-      .then(() => {
-        const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-          console.log("Auth state changed, user:", user);
-          setCurrentUser(user || null);  // Ensure null when logged out
-        });
-  
-        return () => unsubscribe();
-      })
-      .catch(error => {
-        console.error("Auth persistence error:", error);
-      });
-  }, []);
-  
- 
+    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+      console.log("Auth state changed, user:", user);
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        setCurrentUser(null);
+      }
+    });
 
+    return () => unsubscribe();
+  }, []);
 
   return (
     <ModalProvider>
@@ -43,7 +38,7 @@ const App = () => {
           {/* Main content area takes up remaining space */}
           <Box flex="1">
             <Routes>
-            <Route path="/" element={<Navigate to="/homepage" replace />} />
+               <Route path="/" element={<HomePage user={currentUser} />} />
               <Route path="/homepage" element={<HomePage user={currentUser} />} />
               <Route path="/watchlist" element={<WatchlistPage user={currentUser} />} />
               <Route path="/search" element={<SearchResultsPage user={currentUser} />} />
