@@ -18,15 +18,16 @@ const App = () => {
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(user => {
       console.log("Auth state changed, user:", user);
-      if (user) {
-        setCurrentUser(user);
-      } else {
-        setCurrentUser(null);
-      }
+      setCurrentUser(user || null);  // If no user, explicitly set to null
     });
-
+  
     return () => unsubscribe();
   }, []);
+  
+  // ✅ Show loading indicator only while Firebase is initializing
+  if (currentUser === undefined) {
+    return <div>Loading...</div>;  // Can replace with a spinner
+  }
 
   return (
     <ModalProvider>
