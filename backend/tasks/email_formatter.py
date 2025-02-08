@@ -51,5 +51,13 @@ def format_email_content(releases):
     email_html = email_html.replace("{{movies_section}}", movies_html)
     email_html = email_html.replace("{{tv_section}}", tv_html)
    
+    unsubscribe_link = f'https://queuedup-backend-6d9156837adf.herokuapp.com/unsubscribe?email={user_email}'
+    email_html += f'''
+        <div style="text-align: center; font-size: 12px; color: #777; margin-top: 20px;">
+            <p>If you no longer wish to receive these emails, you can 
+                <a href="{unsubscribe_link}" style="color: #777; text-decoration: none;">unsubscribe here</a>.
+            </p>
+        </div>
+    '''
 
     return email_html

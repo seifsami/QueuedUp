@@ -67,3 +67,38 @@ def send_notifications():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+@emailnotifs_blueprint.route('/unsubscribe', methods=['GET', 'POST'])
+def unsubscribe():
+    """Handle unsubscribe requests via form submission."""
+    db = mongo.cx["QueuedUpDBnew"]
+    unsubscribe_collection = db.unsubscribe  # Unsubscribe collection
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        if not email:
+            return "Error: No email provided.", 400
+
+        # Ensure we store emails as lowercase strings (case-insensitive)
+        email = email.strip().lower()
+
+        # Insert into unsubscribe collection **only if not already unsubscribed**
+        if not unsubscribe_collection.find_one({"email": email}):
+            unsubscribe_collection.insert_one({"email": email})
+
+        return "You have been unsubscribed from QueuedUp notifications.", 200
+
+    # Render a simple unsubscribe form for GET requests
+    return '''
+        <html>
+            <body style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+                <h2>Unsubscribe from QueuedUp Notifications</h2>
+                <p>Enter your email to stop receiving updates.</p>
+                <form method="POST">
+                    <input type="email" name="email" placeholder="Your email" required>
+                    <button type="submit">Unsubscribe</button>
+                </form>
+            </body>
+        </html>
+    '''
+

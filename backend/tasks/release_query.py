@@ -42,30 +42,44 @@ def get_today_releases():
 
 
 def get_users_with_watchlist_items(releasing_items):
-    """Find users who have today's releasing items on their watchlist"""
+    """Find users who have today's releasing items on their watchlist (excluding unsubscribed users)."""
     db = mongo.cx["QueuedUpDBnew"]
     users_to_notify = {}
+
+    # Get all unsubscribed emails as a set for fast lookup
+    unsubscribed_users = {entry["email"] for entry in db.unsubscribe.find({}, {"email": 1})}
 
     for media_type, items in releasing_items.items():
         for item in items:
             item_id = str(item["_id"])
-            
+
             # Find users who have this item in their watchlist
             watchlist_entries = db.userwatchlist.find({"item_id": item_id, "media_type": media_type})
 
             for entry in watchlist_entries:
                 user_id = entry["user_id"]
-                
-                # Fetch user email
-                user = db.users.find_one({"_id": ObjectId(user_id)})
+
+                # Fetch user email **(ensure ObjectId conversion is correct)**
+                try:
+                    user = db.users.find_one({"_id": ObjectId(user_id)})
+                except:
+                    print(f"⚠️ Skipping invalid user_id: {user_id}")
+                    continue  # Skip invalid ObjectIds
+
                 if not user or "email" not in user:
                     continue
-                
-                user_email = user["email"]
 
+                user_email = user["email"].strip().lower()
+
+                # ✅ Skip users who unsubscribed
+                if user_email in unsubscribed_users:
+                    print(f"🚫 Skipping unsubscribed user: {user_email}")
+                    continue
+
+                # If user isn't in dict yet, initialize their releases
                 if user_email not in users_to_notify:
                     users_to_notify[user_email] = {"books": [], "movies": [], "tv_seasons": []}
-                
+
                 # Format item details for JSON response
                 formatted_item = {
                     "title": item.get("title", "Unknown Title"),
@@ -83,3 +97,4 @@ def get_users_with_watchlist_items(releasing_items):
                 users_to_notify[user_email][media_type].append(formatted_item)
 
     return users_to_notify
+
