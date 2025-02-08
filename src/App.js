@@ -30,7 +30,7 @@ const App = () => {
       });
   }, []);
   
-  // ✅ Show loading indicator only while Firebase is initializing
+ 
 
 
   return (
