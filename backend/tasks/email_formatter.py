@@ -32,7 +32,7 @@ def build_email_section(items, section_title, media_type):
     
     return section_html
 
-def format_email_content(releases):
+def format_email_content(releases,user_email):
     """Formats today's releases using an external HTML template with dynamic content"""
     try:
         with open(EMAIL_TEMPLATE_PATH, "r", encoding="utf-8") as template_file:

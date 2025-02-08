@@ -44,13 +44,13 @@ def send_notifications():
         failed_count = 0
 
         for user_email, user_releases in users_to_notify.items():
-            if not any(user_releases.values()):  # Skip users with empty lists
+            if not any(user_releases.values()):  # Skip users with empty watchlists
                 continue
 
-            # 🛠 Generate a **personalized** email for this user
-            email_content = format_email_content(user_releases)
+            # ✅ Pass user_email to format_email_content()
+            email_content = format_email_content(user_releases, user_email)
 
-            # 📤 Send the email
+            # 📤 Send email
             success = send_email(user_email, "Your QueuedUp Releases for Today!", email_content)
 
             if success:
@@ -67,38 +67,4 @@ def send_notifications():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-@emailnotifs_blueprint.route('/unsubscribe', methods=['GET', 'POST'])
-def unsubscribe():
-    """Handle unsubscribe requests via form submission."""
-    db = mongo.cx["QueuedUpDBnew"]
-    unsubscribe_collection = db.unsubscribe  # Unsubscribe collection
-
-    if request.method == 'POST':
-        email = request.form.get('email')
-
-        if not email:
-            return "Error: No email provided.", 400
-
-        # Ensure we store emails as lowercase strings (case-insensitive)
-        email = email.strip().lower()
-
-        # Insert into unsubscribe collection **only if not already unsubscribed**
-        if not unsubscribe_collection.find_one({"email": email}):
-            unsubscribe_collection.insert_one({"email": email})
-
-        return "You have been unsubscribed from QueuedUp notifications.", 200
-
-    # Render a simple unsubscribe form for GET requests
-    return '''
-        <html>
-            <body style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-                <h2>Unsubscribe from QueuedUp Notifications</h2>
-                <p>Enter your email to stop receiving updates.</p>
-                <form method="POST">
-                    <input type="email" name="email" placeholder="Your email" required>
-                    <button type="submit">Unsubscribe</button>
-                </form>
-            </body>
-        </html>
-    '''
 
