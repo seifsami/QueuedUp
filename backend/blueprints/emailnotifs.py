@@ -100,12 +100,15 @@ def unsubscribe():
 
     return f'''
     <html>
-        <body style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-            <h2>Unsubscribe from QueuedUp</h2>
-            <p>You will no longer receive release notifications.</p>
+        <body style="text-align: center; padding: 80px; font-family: Arial, sans-serif; background-color: #FAFAFA;">
+            <h1 style="color: #333; font-size: 36px;">Unsubscribe from QueuedUp</h1>
+            <p style="font-size: 22px; color: #555; margin-bottom: 40px;">
+                You will no longer receive release notifications.
+            </p>
             <form method="POST">
                 <input type="hidden" name="email" value="{email}">
-                <button type="submit" style="background: #D9534F; color: white; padding: 12px 20px; border-radius: 5px; font-size: 16px; border: none; cursor: pointer;">
+                <button type="submit" style="background: #D9534F; color: white; padding: 20px 32px; 
+                    border-radius: 10px; font-size: 22px; border: none; cursor: pointer;">
                     Unsubscribe
                 </button>
             </form>
