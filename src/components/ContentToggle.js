@@ -2,14 +2,14 @@ import React from 'react';
 import { Tabs, TabList, Tab, Box } from '@chakra-ui/react';
 
 const ContentToggle = ({ setMediaType }) => {
-  const filters = ['Books', 'Movies', 'TV Shows'];
-  const mediaTypes = ['books', 'movies', 'tv_seasons'];
+  const filters = [ 'TV Shows','Movies','Books'];
+  const mediaTypes = ['tv_seasons', 'movies','books' ];
   
   return (
     <Tabs
       isFitted
       variant="unstyled"
-      defaultIndex={2}  // "Books" as default
+      defaultIndex={0}  // "tv shows" as default
       onChange={(index) => {
         setMediaType(mediaTypes[index]);
       }}
