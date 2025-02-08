@@ -9,7 +9,7 @@ emailnotifs_blueprint = Blueprint('emailnotifs', __name__)
 #
 
 # **ONLY YOUR EMAIL FOR TESTING**
-TEST_EMAIL = "seifwsami@gmail.com"  # Replace this with your actual email
+TEST_EMAIL = "sseleem1601@gmail.com"  # Replace this with your actual email
 
 @emailnotifs_blueprint.route('/send-notifications', methods=['GET'])
 def send_notifications():
