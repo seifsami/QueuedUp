@@ -41,9 +41,10 @@ def format_email_content(releases):
         return "<p>Error: Email template not found.</p>"
 
     # Generate dynamic sections
+    books_html = build_email_section(releases["books"], "📚 Books Releasing Today", "books")
     movies_html = build_email_section(releases["movies"], "🎬 Movies Releasing Today", "movies")
     tv_html = build_email_section(releases["tv_seasons"], "📺 TV Shows Releasing Today", "tv_seasons")
-    books_html = build_email_section(releases["books"], "📚 Books Releasing Today", "books")
+    
 
     # Replace placeholders with actual HTML content
     email_html = email_html.replace("{{books_section}}", books_html)
