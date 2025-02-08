@@ -1,70 +1,52 @@
-def format_email_content(releases):
-    """Formats today's releases into an HTML email structure with brand colors."""
+import os
 
-    email_body = """
-    <html>
-    <body style="font-family: Arial, sans-serif; padding: 20px; background: #FAFAFA; color: #383838;">
-        <h2 style="color: #2E8B57;">📢 Your QueuedUp Releases for Today!</h2>
-    """
+# Define the path to the email template file
+EMAIL_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "../templates/email_template.html")
 
-    # Books Section
-    if releases["books"]:
-        email_body += '<h2 style="color: #2E8B57;">📚 Books Releasing Today</h2>'
-        for book in releases["books"]:
-            amazon_link = f"https://www.amazon.com/s?k={book['title'].replace(' ', '+')}&tag=queuedup0f-20"
-            email_body += f"""
-                <div style="display: flex; align-items: center; margin-bottom: 15px; background: #A8D5BA; padding: 10px; border-radius: 8px;">
-                    <img src="{book['image']}" width="120" height="auto" style="border-radius: 5px; margin-right: 10px;">
-                    <div>
-                        <h3 style="color: #383838;">{book['title']}</h3>
-                        <p style="color: #256B45;">📅 Available Now</p>
-                        <a href="{amazon_link}" style="background: #FF7043; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none;">
-                            🛒 Buy on Amazon
-                        </a>
-                    </div>
-                </div>
-            """
+# Default images in case media item has no image
+DEFAULT_IMAGES = {
+    "books": "https://queuedup.co/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
+    "movies": "https://queuedup.co/static/denise-jans-9lTUAlNB87M-unsplash.jpg",
+    "tv_seasons": "https://queuedup.co/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
+}
 
-    # Movies Section
-    if releases["movies"]:
-        email_body += '<h2 style="color: #2E8B57;">🎬 Movies Releasing Today</h2>'
-        for movie in releases["movies"]:
-            email_body += f"""
-                <div style="display: flex; align-items: center; margin-bottom: 15px; background: #A8D5BA; padding: 10px; border-radius: 8px;">
-                    <img src="{movie['image']}" width="120" height="auto" style="border-radius: 5px; margin-right: 10px;">
-                    <div>
-                        <h3 style="color: #383838;">{movie['title']}</h3>
-                        <p style="color: #256B45;">📅 Out Today!</p>
-                    </div>
-                </div>
-            """
+def build_email_section(items, section_title, media_type):
+    """Generates HTML for each section (Movies, TV, Books)"""
+    if not items:
+        return ""
 
-    # TV Shows Section
-    if releases["tv_seasons"]:
-        email_body += '<h2 style="color: #2E8B57;">📺 TV Shows Releasing Today</h2>'
-        for tv_show in releases["tv_seasons"]:
-            email_body += f"""
-                <div style="display: flex; align-items: center; margin-bottom: 15px; background: #A8D5BA; padding: 10px; border-radius: 8px;">
-                    <img src="{tv_show['image']}" width="120" height="auto" style="border-radius: 5px; margin-right: 10px;">
-                    <div>
-                        <h3 style="color: #383838;">{tv_show['title']}</h3>
-                        <p style="color: #256B45;">📅 Out Today!</p>
-                    </div>
-                </div>
-            """
-
-    # Trending & Watchlist CTA
-    email_body += """
-        <h3 style="color: #2E8B57;">🔥 What's Trending on QueuedUp?</h3>
-        <p>See what’s new & add more to your watchlist!</p>
-        <a href="https://www.queuedup.co/#/homepage" style="background: #007BFF; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none;">
-            Browse Trending Releases
-        </a>
-        <hr>
-        <p style="color: #256B45;">💡 Want QueuedUp to be even better?</p>
-        <p>💬 Reply to this email & tell us what features you’d love to see!</p>
-    </body>
-    </html>
-    """
+    section_html = f'<div class="section-title">{section_title}</div>'
     
-    return email_body
+    for item in items:
+        image_url = item.get("image") or DEFAULT_IMAGES[media_type]
+        section_html += f"""
+        <div class="release-item">
+            <img src="{image_url}" alt="{item['title']}">
+            <div>
+                <div class="release-title">{item['title']}</div>
+                {f'<a href="https://www.amazon.com/s?k={item["title"].replace(" ", "+")}&tag=queuedup0f-20" class="cta-button">📖 Buy on Amazon</a>' if media_type == "books" else ""}
+            </div>
+        </div>
+        """
+    
+    return section_html
+
+def format_email_content(releases):
+    """Formats today's releases using an external HTML template with dynamic content"""
+    try:
+        with open(EMAIL_TEMPLATE_PATH, "r", encoding="utf-8") as template_file:
+            email_html = template_file.read()
+    except FileNotFoundError:
+        return "<p>Error: Email template not found.</p>"
+
+    # Generate dynamic sections
+    movies_html = build_email_section(releases["movies"], "🎬 Movies Releasing Today", "movies")
+    tv_html = build_email_section(releases["tv_seasons"], "📺 TV Shows Releasing Today", "tv_seasons")
+    books_html = build_email_section(releases["books"], "📚 Books Releasing Today", "books")
+
+    # Replace placeholders with actual HTML content
+    email_html = email_html.replace("{{movies_section}}", movies_html)
+    email_html = email_html.replace("{{tv_section}}", tv_html)
+    email_html = email_html.replace("{{books_section}}", books_html)
+
+    return email_html

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QueuedUp - New Releases</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #FAFAFA;
+      color: #383838;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .header {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      color: #2E8B57;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+      border-bottom: 2px solid #2E8B57;
+      padding-bottom: 5px;
+    }
+    .release-item {
+      display: flex;
+      align-items: center;
+      background: #A8D5BA;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .release-item img {
+      width: 120px;
+      height: auto;
+      border-radius: 6px;
+      margin-right: 15px;
+    }
+    .release-title {
+      font-weight: bold;
+      font-size: 16px;
+      color: #383838;
+    }
+    .cta-button {
+      display: inline-block;
+      background: #FF7043;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 14px;
+      margin-top: 20px;
+      color: #256B45;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">📢 Your QueuedUp Releases for Today!</div>
+    <p>Here’s what’s available now from your watchlist.</p>
+
+    {{movies_section}}
+    
+    {{tv_section}}
+    
+    {{books_section}}
+
+    <div class="section-title">🔥 Trending on QueuedUp</div>
+    <p>See what’s new & add more to your watchlist!</p>
+    <a href="https://www.queuedup.co/#/homepage" class="cta-button">🟢 Browse Trending Releases</a>
+    
+    <div class="footer">
+      💡 Want QueuedUp to be even better? Reply & tell us what you’d love to see!
+    </div>
+  </div>
+</body>
+</html>
