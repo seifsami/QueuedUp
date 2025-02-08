@@ -43,7 +43,7 @@ const App = () => {
           {/* Main content area takes up remaining space */}
           <Box flex="1">
             <Routes>
-            <Route path="/" element={window.location.replace("/#/homepage")} />
+            <Route path="/" element={<Navigate to="/homepage" replace />} />
               <Route path="/homepage" element={<HomePage user={currentUser} />} />
               <Route path="/watchlist" element={<WatchlistPage user={currentUser} />} />
               <Route path="/search" element={<SearchResultsPage user={currentUser} />} />
