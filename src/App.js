@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ModalProvider } from './ModalContext';
 import firebase from './firebaseConfig';
 import './App.css';
@@ -31,9 +31,7 @@ const App = () => {
   }, []);
   
   // ✅ Show loading indicator only while Firebase is initializing
-  if (currentUser === undefined) {
-    return <div>Loading...</div>;  // Can replace with a spinner
-  }
+
 
   return (
     <ModalProvider>
@@ -45,7 +43,7 @@ const App = () => {
           {/* Main content area takes up remaining space */}
           <Box flex="1">
             <Routes>
-            <Route path="/" element={<HomePage user={currentUser} />} />
+            <Route path="/" element={<Navigate replace to="/homepage" />} />
               <Route path="/homepage" element={<HomePage user={currentUser} />} />
               <Route path="/watchlist" element={<WatchlistPage user={currentUser} />} />
               <Route path="/search" element={<SearchResultsPage user={currentUser} />} />
