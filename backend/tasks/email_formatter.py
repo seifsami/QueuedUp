@@ -5,10 +5,11 @@ EMAIL_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "../templates/emai
 
 # Default images in case media item has no image
 DEFAULT_IMAGES = {
-    "books": "https://queuedup.co/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
-    "movies": "https://queuedup.co/static/denise-jans-9lTUAlNB87M-unsplash.jpg",
-    "tv_seasons": "https://queuedup.co/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
+    "books": "https://queuedup-backend.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
+    "movies": "https://queuedup-backend.herokuapp.com/static/denise-jans-9lTUAlNB87M-unsplash.jpg",
+    "tv_seasons": "https://queuedup-backend.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 }
+
 
 def build_email_section(items, section_title, media_type):
     """Generates HTML for each section (Movies, TV, Books)"""
