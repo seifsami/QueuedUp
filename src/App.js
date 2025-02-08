@@ -16,12 +16,18 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-      console.log("Auth state changed, user:", user);
-      setCurrentUser(user || null);  // If no user, explicitly set to null
-    });
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL) // 👈 Ensures persistence
+      .then(() => {
+        const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+          console.log("Auth state changed, user:", user);
+          setCurrentUser(user || null);  // Ensure null when logged out
+        });
   
-    return () => unsubscribe();
+        return () => unsubscribe();
+      })
+      .catch(error => {
+        console.error("Auth persistence error:", error);
+      });
   }, []);
   
   // ✅ Show loading indicator only while Firebase is initializing
