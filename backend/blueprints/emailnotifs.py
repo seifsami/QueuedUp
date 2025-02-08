@@ -1,7 +1,8 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, render_template_string, request
 from tasks.release_query import get_today_releases, get_users_with_watchlist_items
 from tasks.email_formatter import format_email_content
 from tasks.email_sender import send_email
+from app import mongo  
 
 emailnotifs_blueprint = Blueprint('emailnotifs', __name__)
 
