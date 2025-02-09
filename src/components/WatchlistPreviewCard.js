@@ -34,31 +34,42 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   };
 
   // 🟢 Fetch full item details when card is clicked
-  const handleCardClick = async () => {
+  const handleCardClick = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  
+    console.log("Card clicked, opening modal...");
+  
+    // 🔥 Ensure search input keeps focus
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+      setTimeout(() => searchInput.focus(), 50); // Delay a bit to prevent flickering
+    }
+  
     let itemToShow = item;
-    // Check if description exists; if not, fetch full details
+  
     if (!item.description) {
       try {
         const { data } = await axios.get(
           `https://queuedup-backend-6d9156837adf.herokuapp.com/media/${item.media_type}/${item._id || item.item_id}`
         );
-        console.log("new Fetched detailed item:", data)
+        console.log("Fetched detailed item:", data);
         setDetailedItem(data);
       } catch (error) {
         console.error("Error fetching detailed item:", error);
-        setDetailedItem(item);  // Fallback to initial data if API call fails
+        setDetailedItem(item);
       }
     } else {
-      setDetailedItem(item);  // Use existing data if description exists
+      setDetailedItem(item);
     }
-
+  
     if (openModal) {
       openModal(itemToShow);
     } else {
       setModalOpen(true);
     }
-  
   };
+  
 
   const formatReleaseDate = (dateStr) => {
     if (!dateStr) return 'N/A';
@@ -82,6 +93,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   return (
     <>
       <HStack
+        className="watchlist-card"
         key={item.id}
         p={{ base: 2, md: 4 }}
         shadow="md"
@@ -110,7 +122,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
           <Text fontSize="sm">{item.series}</Text>
           <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
         </Box>
-        {/* Share Button Temporarily Removed */}
+        {/* Share Button Temporarily Removed until functionality works */}
           {/*
           {useBreakpointValue({ base: false, md: true }) ? (
             <Tooltip hasArrow label="Share" bg="teal.600">

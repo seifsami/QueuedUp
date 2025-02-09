@@ -101,6 +101,7 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
   };
 
   const handleClose = () => {
+    
     if (refetchWatchlist) refetchWatchlist(); // Ensure homepage updates on modal close
     onClose(); // Close the modal
   };
@@ -124,7 +125,7 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
   console.log("Item being passed to NotifyMeButton from DetailsModal:", item);
   
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size={{ base: "sm", md: "lg" }} isCentered>
+    <Modal isOpen={isOpen} onClose={handleClose} size={{ base: "sm", md: "lg" }} isCentered closeOnOverlayClick={true} >
       <ModalOverlay />
       <ModalContent 
         maxWidth={{ base: "96%", md: "70%" }}

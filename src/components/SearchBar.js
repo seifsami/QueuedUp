@@ -5,13 +5,16 @@ import {
   InputGroup,
   Input,
   InputLeftElement,
+  InputRightElement,
   Icon,
   Select,
   Button,
   Box,
   Text,
-  useBreakpointValue,
+  IconButton,
+  useBreakpointValue
 } from '@chakra-ui/react';
+import { CloseIcon } from '@chakra-ui/icons';
 import { FaSearch } from 'react-icons/fa';
 import WatchlistPreviewCard from './WatchlistPreviewCard';
 import DetailsModal from './DetailsModal';
@@ -30,6 +33,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
   const [loading, setLoading] = useState(false); // Loading indicator
   const [selectedItem, setSelectedItem] = useState(null);  // Track the selected item
   const [isModalOpen, setModalOpen] = useState(false)
+  
 
 
   const API_BASE = "https://queuedup-backend-6d9156837adf.herokuapp.com";
@@ -97,13 +101,30 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
     navigate(`/search?query=${searchQuery}&type=${mediaType}`);
   };
 
-  const handleBlur = () => {
+  const handleBlur = (event) => {
     setTimeout(() => {
+      const newFocusElement = document.activeElement;
+  
+      console.log("handleBlur fired! New focus element:", newFocusElement);
+  
+      // 🔥 If the modal is open, do NOT close the search
+      if (document.querySelector('.chakra-modal__content')) {
+        console.log("Modal is open, ignoring handleBlur.");
+        return;
+      }
+  
+      console.log("handleBlur closing search dropdown.");
       setShowDropdown(false);
       setIsFocused(false);
       onFocusChange(false);
-    }, 200);
+    }, 200); // Small delay to allow modal to take focus first
   };
+  
+  
+  
+  
+  
+  
 
   const handleFocus = () => {
     setIsFocused(true);
@@ -178,6 +199,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
           <Icon as={FaSearch} color="gray.300" />
         </InputLeftElement>
         <Input
+         className="search-input"
           ref={inputRef}
           type="text"
           placeholder="Search for TV shows, movies, books..."
@@ -196,9 +218,36 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
           onBlur={handleBlur}
           onKeyDown={handleSearch}
         />
+        {searchQuery && (
+          <InputRightElement width="2.5rem">
+            <IconButton
+              aria-label="Clear search"
+              icon={<CloseIcon />}
+              size="xs"
+              variant="ghost"
+              color="gray.500"
+              onTouchStart={(e) => { // 🔥 Prevents losing focus on mobile
+                e.preventDefault();
+                setSearchQuery('');
+                if (inputRef.current) {
+                  inputRef.current.focus(); // 🔥 Keeps keyboard open!
+                }
+              }}
+              onClick={(e) => { // 🔥 Still works for desktop
+                e.preventDefault();
+                setSearchQuery('');
+                if (inputRef.current) {
+                  inputRef.current.focus();
+                }
+              }}
+              _hover={{ color: 'gray.700' }}
+            />
+          </InputRightElement>
+        )}
       </InputGroup>
       {showDropdown && searchQuery && isFocused && (
         <Box
+        className="search-dropdown"
           style={{
             position: 'absolute',
             top: '100%',
