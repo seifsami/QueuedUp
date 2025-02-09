@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Image, Text, HStack, VStack, Icon, useColorModeValue, IconButton, useBreakpointValue, Tooltip } from '@chakra-ui/react';
-import { FaBook, FaTv, FaFilm, FaShareAlt } from 'react-icons/fa';
+import { Box, Image, Text, HStack, VStack, Icon, useColorModeValue, IconButton, useBreakpointValue, Tooltip, useToast } from '@chakra-ui/react';
+import { FaBook, FaTv, FaFilm, FaShareAlt, FaPlus } from 'react-icons/fa';
 import axios from 'axios'; // ✅ Import Axios for API calls
 import DetailsModal from './DetailsModal';
+
 
 const mediaTypeIcons = {
   books: FaBook,
@@ -10,10 +11,11 @@ const mediaTypeIcons = {
   movies: FaFilm,
 };
 
+
 const defaultImages = {
-  books: "/heather-green-iB9YTvq2rZ8-unsplash.jpg",
-  movies: "/denise-jans-9lTUAlNB87M-unsplash.jpg",
-  tv_seasons: "/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
+  books: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
+  movies: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/denise-jans-9lTUAlNB87M-unsplash.jpg",
+  tv_seasons: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 };
 
 const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal }) => {
