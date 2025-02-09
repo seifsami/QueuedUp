@@ -19,6 +19,10 @@ from blueprints.homepage import homepage_blueprint
 from blueprints.cron import cron_blueprint
 from blueprints.search import search_blueprint
 from blueprints.emailnotifs import emailnotifs_blueprint
+from blueprints.requests import request_blueprint
+
+
+
 
 app.register_blueprint(user_blueprint, url_prefix='/user')
 app.register_blueprint(user_watchlist_blueprint, url_prefix='/watchlist')
@@ -27,6 +31,8 @@ app.register_blueprint(homepage_blueprint, url_prefix='/homepage')
 app.register_blueprint(cron_blueprint, url_prefix='/cron')
 app.register_blueprint(search_blueprint, url_prefix='/api')
 app.register_blueprint(emailnotifs_blueprint, url_prefix='/api')
+app.register_blueprint(request_blueprint, url_prefix='/api')
+
 
 @app.route('/')
 def hello():
@@ -47,7 +53,8 @@ def test_mongo_connection():
         return jsonify({"status": "success", "collections": collection_names}), 200
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
-    
+
+
 
 
 if __name__ == '__main__':

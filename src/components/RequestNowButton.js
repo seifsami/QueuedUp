@@ -18,7 +18,7 @@ import {
 } from '@chakra-ui/react';
 import { submitRequest } from '../services/api';
 
-const RequestNowButton = ({ currentUser }) => {  // ✅ Accept user as a prop
+const RequestNowButton = ({ currentUser }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -42,7 +42,7 @@ const RequestNowButton = ({ currentUser }) => {  // ✅ Accept user as a prop
       mediaType,
       title,
       extraInfo,
-      userId: currentUser ? currentUser.uid : null, // ✅ Use passed `currentUser`
+      userId: currentUser ? currentUser.uid : null,
       createdAt: new Date().toISOString(),
     };
 
@@ -80,7 +80,7 @@ const RequestNowButton = ({ currentUser }) => {  // ✅ Accept user as a prop
 
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent p={4}> 
           <ModalHeader>Request Missing Content</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -112,12 +112,27 @@ const RequestNowButton = ({ currentUser }) => {  // ✅ Accept user as a prop
             </FormControl>
           </ModalBody>
 
-          <ModalFooter>
-            <Button colorScheme="gray" mr={3} onClick={onClose}>
-              Cancel
-            </Button>
-            <Button colorScheme="brand.100" onClick={handleSubmit}>
+          <ModalFooter mt={4} display="flex" flexDirection="column"> 
+            <Button
+              colorScheme="brand"
+              bg="brand.100"
+              color="white"
+              fontWeight="bold"
+              width="full"
+              onClick={handleSubmit}
+              _hover={{ bg: 'brand.700' }} 
+            >
               Submit Request
+            </Button>
+            <Button
+              variant="ghost"
+              mt={2} 
+              color="brand.500"
+              width="full"
+              _hover={{ textDecoration: 'underline', color: 'gray.800' }} 
+              onClick={onClose}
+            >
+              Cancel
             </Button>
           </ModalFooter>
         </ModalContent>
