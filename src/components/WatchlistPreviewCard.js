@@ -10,9 +10,14 @@ import {
   useColorModeValue,
   useBreakpointValue,
   Tooltip,
-  useToast
+  useToast,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem
+ 
 } from '@chakra-ui/react';
-import { FaBook, FaTv, FaFilm, FaTrash } from 'react-icons/fa';
+import { FaBook, FaTv, FaFilm, FaTrash, FaEllipsisV, FaTimes } from 'react-icons/fa';
 import axios from 'axios'; // ✅ Import Axios for API calls
 import DetailsModal from './DetailsModal';
 
@@ -38,6 +43,12 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   const cardHeight = useBreakpointValue({ base: 'auto', md: '120px' });
   const titleLineHeight = useBreakpointValue({ base: 'tall', md: 'normal' });
   const titlePadding = useBreakpointValue({ base: '1', md: '2' });
+  const [fadeOut, setFadeOut] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const isMobile = useBreakpointValue({ base: true, md: false });
+
+
+
 
   const [isModalOpen, setModalOpen] = useState(false);
   const [detailedItem, setDetailedItem] = useState(item); 
@@ -61,7 +72,12 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
       return; // Prevent API call if item_id is missing
     }
   
-    setHidden(true); // 🔥 Hide from UI immediately
+    setFadeOut(true); // 🔥 Start fade-out effect
+
+    setTimeout(() => {
+    setHidden(true); // 🔥 Hide from UI after fade-out completes
+    }, 400); // 400ms fade-out
+
   
     const timeoutId = setTimeout(async () => {
       try {
@@ -74,11 +90,12 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
       } catch (error) {
         console.error("Error removing item:", error);
         setHidden(false);
+        setFadeOut(false);
       }
-    }, 7000);
+    }, 5000);
   
     setUndoTimeout(timeoutId);
-  };
+  
   
 
     // Show Snackbar-style notification
@@ -114,6 +131,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
             onClick={() => {
               clearTimeout(timeoutId);
               setHidden(false);
+              setFadeOut(false);
               onClose();
             }}
           >
@@ -194,33 +212,71 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   return (
     <>
       <Box position="relative" width="full">
-        {/* Trash Button (Top Right) */}
+        {/* 🗑️ Delete/Options Button (Top Right) */}
         {showDelete && (
-          <Tooltip 
-          label="Remove from Watchlist" 
-          bg="#333" 
-          color="#FFF" 
-          fontSize="xs"  // 🔥 Makes it slightly smaller
-          borderRadius="md"
-          p={2}
-        >
-          <IconButton
-            aria-label="Remove"
-            icon={<FaTrash />}
-            size="sm"
-            position="absolute"
-            top="2px"   // 🔥 Adds more padding
-            right="2px"
-            bg="transparent"
-            color="gray.500"
-            _hover={{ color: "red.500", bg: "transparent" }}
-            onClick={(e) => {
-              e.stopPropagation(); // ✅ Prevents modal opening
-              handleRemoveClick();
-            }}
-          />
-        </Tooltip>
-        
+          isMobile ? (
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                icon={<FaEllipsisV />}
+                size="sm"
+                position="absolute"
+                top="2px"
+                right="2px"
+                bg="transparent"
+                color="gray.500"
+                _hover={{ color: "gray.700", bg: "transparent" }}
+                onClick={(e) => e.stopPropagation()} // Prevents card click
+              />
+              <MenuList
+                   minW="120px" // ✅ Keeps it compact
+                   borderRadius="md"
+                   boxShadow="0px 4px 12px rgba(0,0,0,0.15)" // ✅ Smooth shadow
+                   zIndex="1000"
+                   transform="translateY(-5px)"  // ✅ Ensures it stays above everything
+              >
+                <MenuItem
+                  icon={<FaTrash />}
+                  color="red.500" // ✅ Make the trash icon red for clarity
+                  fontSize="sm" // ✅ Reduce font size to match design better
+                  p="8px 12px" // ✅ More compact padding
+                  _hover={{ bg: "red.50", color: "red.600" }} // ✅ Subtle hover effect
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveClick();
+                  }}
+                >
+                  Remove
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          ) : (
+            <Tooltip
+              label="Remove from Watchlist"
+              bg="#F5F5F5" // ✅ Light gray for contrast
+              color="#333" // ✅ Darker text for readability
+              fontSize="xs"
+              borderRadius="md"
+              p={2}
+              boxShadow="0px 4px 10px rgba(0,0,0,0.1)" // ✅ Subtle shadow for depth
+            >
+              <IconButton
+                aria-label="Remove"
+                icon={<FaTimes />}
+                size="sm"
+                position="absolute"
+                top="2px"
+                right="2px"
+                bg="transparent"
+                color="gray.500"
+                _hover={{ color: "red.500", bg: "transparent" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveClick();
+                }}
+              />
+            </Tooltip>
+          )
         )}
   
         {/* Card Content */}
@@ -235,6 +291,11 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
           minHeight="120px"
           _hover={{ bg: hoverBg }}
           onClick={handleCardClick}
+          style={{
+            opacity: fadeOut ? 0 : 1, // 🔥 Gradual fade-out
+            transition: "opacity 0.4s ease-in-out", // 🔥 Smooth transition over 400ms
+            pointerEvents: isMobile ? "none" : "auto"
+          }}
           cursor="pointer"
         >
           <Icon as={mediaTypeIcons[item.media_type]} boxSize={6} mr={2} />
@@ -255,29 +316,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
             <Text fontSize="sm">{item.release_date ? new Date(item.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</Text>
           </Box>
         </HStack>
-        {/* Share Button Temporarily Removed until functionality works */}
-          {/*
-          {useBreakpointValue({ base: false, md: true }) ? (
-            <Tooltip hasArrow label="Share" bg="teal.600">
-              <IconButton
-                aria-label="Share"
-                icon={<Icon as={FaShareAlt} />}
-                size={shareIconSize}
-                onClick={handleShareClick}
-              />
-            </Tooltip>
-          ) : (
-            <VStack align="end">
-              <IconButton
-                aria-label="Share"
-                icon={<Icon as={FaShareAlt} />}
-                size="sm"
-                variant="outline"
-                onClick={handleShareClick}
-              />
-            </VStack>
-          )}
-          */}
+
       </Box>
   
       {/* Details Modal */}
@@ -291,7 +330,10 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
         />
       )}
     </>
-  );
+);
+
+
+
   
 };
 
