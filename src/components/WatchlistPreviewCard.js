@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
-import { Box, Image, Text, HStack, VStack, Icon, useColorModeValue, IconButton, useBreakpointValue, Tooltip, useToast } from '@chakra-ui/react';
-import { FaBook, FaTv, FaFilm, FaShareAlt, FaPlus } from 'react-icons/fa';
+import {
+  Box,
+  Image,
+  Text,
+  HStack,
+  VStack,
+  Icon,
+  IconButton,
+  useColorModeValue,
+  useBreakpointValue,
+  Tooltip,
+  useToast
+} from '@chakra-ui/react';
+import { FaBook, FaTv, FaFilm, FaTrash } from 'react-icons/fa';
 import axios from 'axios'; // ✅ Import Axios for API calls
 import DetailsModal from './DetailsModal';
 
@@ -18,17 +30,79 @@ const defaultImages = {
   tv_seasons: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 };
 
-const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal }) => {
-  console.log("Item from WatchlistPreviewCard:", item)
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [detailedItem, setDetailedItem] = useState(item); // 🟢 State to store full item data
-
+const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal, showDelete = true, userId }) => {
   const bg = useColorModeValue('white', 'gray.700');
+  const hoverBg = useColorModeValue('gray.100', 'gray.600');
   const shareIconSize = useBreakpointValue({ base: 'md', md: 'lg' });
   const titleMaxLines = useBreakpointValue({ base: 2, md: 1 });
   const cardHeight = useBreakpointValue({ base: 'auto', md: '120px' });
   const titleLineHeight = useBreakpointValue({ base: 'tall', md: 'normal' });
   const titlePadding = useBreakpointValue({ base: '1', md: '2' });
+
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [detailedItem, setDetailedItem] = useState(item); 
+  const [isHidden, setHidden] = useState(false);
+  const [undoTimeout, setUndoTimeout] = useState(null);
+  const toast = useToast();
+  
+  if (isHidden) return null; 
+
+  const handleRemoveClick = async () => {
+    setHidden(true); // 🔥 Hide from UI immediately
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        await axios.delete(`https://queuedup-backend-6d9156837adf.herokuapp.com/watchlist/${userId}`, {
+          data: { item_id: item._id }
+        });
+
+        refetchWatchlist && refetchWatchlist();
+      } catch (error) {
+        console.error("Error removing item:", error);
+        setHidden(false); // 🔥 Bring it back if API call failed
+      }
+    }, 7000); // 🔥 7-second delay before permanent removal
+
+    setUndoTimeout(timeoutId);
+
+    // Show Snackbar-style notification
+    toast({
+      position: "bottom",
+      duration: 7000,
+      render: ({ onClose }) => (
+        <HStack
+          bg="gray.700"
+          color="white"
+          p={3}
+          borderRadius="md"
+          align="center"
+          justify="space-between"
+          width="auto"
+        >
+          <Text fontSize="sm">Item removed</Text>
+          <Text
+            fontSize="sm"
+            fontWeight="bold"
+            cursor="pointer"
+            color="brand.300"
+            _hover={{ textDecoration: "underline" }}
+            onClick={() => {
+              clearTimeout(timeoutId); // 🔥 Cancel removal
+              setHidden(false);
+              onClose(); // Close Snackbar
+            }}
+          >
+            UNDO
+          </Text>
+        </HStack>
+      ),
+    });
+  };
+
+
+
+
+
 
   const handleShareClick = (event) => {
     event.stopPropagation();
@@ -103,7 +177,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
         borderRadius="lg"
         bg={bg}
         minHeight={cardHeight}
-        _hover={{ bg: useColorModeValue('gray.100', 'gray.600') }}
+        _hover={{ bg: hoverBg }}
         onClick={handleCardClick} // 🟢 Fetch and open modal on click
         cursor="pointer"
       >
@@ -124,6 +198,19 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
           <Text fontSize="sm">{item.series}</Text>
           <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
         </Box>
+        {/* 🗑️ Trash Bin Button (Now Default On) */}
+        {showDelete && (
+          <Tooltip label="Remove from Watchlist" bg="red.600">
+            <IconButton
+              aria-label="Remove"
+              icon={<FaTrash />}
+              size="sm"
+              color="gray.500"
+              _hover={{ color: "red.500" }}
+              onClick={handleRemoveClick}
+            />
+          </Tooltip>
+        )}
         {/* Share Button Temporarily Removed until functionality works */}
           {/*
           {useBreakpointValue({ base: false, md: true }) ? (
