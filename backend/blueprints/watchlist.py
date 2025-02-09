@@ -81,23 +81,25 @@ def remove_from_watchlist(user_id):
     watchlist = db.userwatchlist
     data = request.json
 
-    print(f"Received DELETE request for user: {user_id} with item_id: {data}")  # 🔍 Debugging log
+    print(f"Received DELETE request for user: {user_id} with payload: {data}")  # ✅ More precise logging
 
     try:
-        # Convert item_id to ObjectId if needed
-        item_id = data['item_id']
-        query = {"user_id": user_id}
+        # Extract item_id correctly
+        item_id = data.get("item_id")  # 🔥 FIX: Ensure we get item_id properly
 
-        # 🔥 Check if the item_id is stored as a string or an ObjectId
+        if not item_id:
+            return jsonify({"error": "Missing item_id"}), 400
+
+        # Handle both string and ObjectId formats
         possible_formats = [
-            {"user_id": user_id, "item_id": item_id},  
-            {"user_id": user_id, "item_id": ObjectId(item_id)}  # 🛠️ Try ObjectId too
+            {"user_id": user_id, "item_id": item_id},
+            {"user_id": user_id, "item_id": ObjectId(item_id)}
         ]
 
         # Try deleting in both formats
         result = None
-        for q in possible_formats:
-            result = watchlist.delete_one(q)
+        for query in possible_formats:
+            result = watchlist.delete_one(query)
             if result.deleted_count > 0:
                 break  # ✅ Successfully deleted, exit loop
 
@@ -107,6 +109,8 @@ def remove_from_watchlist(user_id):
             return jsonify({"message": "Item removed from watchlist"}), 200
         else:
             return jsonify({"error": "Item not found in watchlist"}), 404
+
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
