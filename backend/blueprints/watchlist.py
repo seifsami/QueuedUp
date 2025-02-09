@@ -79,30 +79,26 @@ from bson import ObjectId
 def remove_from_watchlist(user_id):
     db = mongo.cx["QueuedUpDBnew"]
     watchlist = db.userwatchlist
-    data = request.json
+    data = request.json  # Get JSON payload
 
-    # Strip user_id of any leading/trailing spaces or newlines
-    user_id = user_id.strip()
+    # ✅ Strip any whitespace and fix potential formatting issues
+    clean_user_id = user_id.strip().replace("'", "")  # Removes unwanted quotes
+    item_id = data.get("item_id")
 
-    print(f"Received DELETE request for user: '{user_id}'")  
+    print(f"Received DELETE request for user: {clean_user_id}")
     print(f"with payload: {data}")
 
+    query = {"user_id": clean_user_id, "item_id": item_id}  # ✅ Clean query
+    print(f"Formatted delete query: {query}")
+
     try:
-        item_id = data.get("item_id")
-        if not item_id:
-            return jsonify({"error": "Missing item_id"}), 400
-
-        query = {"user_id": user_id, "item_id": item_id}
         result = watchlist.delete_one(query)
-
-        print(f"Delete query: {query}")
         print(f"MongoDB delete result: {result.deleted_count}")
 
-        if result.deleted_count > 0:
+        if result.deleted_count:
             return jsonify({"message": "Item removed from watchlist"}), 200
-
-        return jsonify({"error": "Item not found in watchlist"}), 404
-
+        else:
+            return jsonify({"error": "Item not found in watchlist"}), 404
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
