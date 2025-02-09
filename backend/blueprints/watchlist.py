@@ -22,7 +22,7 @@ def get_user_watchlist(user_id):
             continue
 
         detailed_item = {
-            "_id": str(item['item_id']),
+            "item_id": str(item['item_id']),
             "title": media_details.get("title", "Unknown Title"),
             "image": media_details.get("image", ""),
             "release_date": media_details.get("release_date", "Unknown Date"),
