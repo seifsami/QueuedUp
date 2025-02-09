@@ -52,16 +52,17 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
 
     const timeoutId = setTimeout(async () => {
       try {
-        await axios.delete(`https://queuedup-backend-6d9156837adf.herokuapp.com/watchlist/${userId}`, {
+        const response = await axios.delete(`https://queuedup-backend-6d9156837adf.herokuapp.com/watchlist/${userId}`, {
           data: { item_id: item._id }
         });
-
+  
+        console.log("API Response:", response.data); // ✅ Check Heroku logs
         refetchWatchlist && refetchWatchlist();
       } catch (error) {
         console.error("Error removing item:", error);
-        setHidden(false); // 🔥 Bring it back if API call failed
+        setHidden(false);
       }
-    }, 7000); // 🔥 7-second delay before permanent removal
+    }, 7000);
 
     setUndoTimeout(timeoutId);
 
@@ -71,25 +72,34 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
       duration: 7000,
       render: ({ onClose }) => (
         <HStack
-          bg="gray.700"
+          bg="#2E2E2E" // 🔥 Darker gray for better contrast
           color="white"
-          p={3}
+          p={4} // 🔥 More padding for balance
           borderRadius="md"
           align="center"
           justify="space-between"
           width="auto"
+          border="1px solid"
+          borderColor="gray.700"
+          boxShadow="0px 4px 12px rgba(0, 0, 0, 0.2)" // 🔥 Slightly deeper shadow
         >
-          <Text fontSize="sm">Item removed</Text>
+          <Text fontSize="md" fontWeight="600" color="#F5F5F5"> {/* 🔥 Brighter for visibility */}
+            Item removed
+          </Text>
           <Text
-            fontSize="sm"
-            fontWeight="bold"
+            fontSize="md"
+            fontWeight="bold" // 🔥 Stronger emphasis
             cursor="pointer"
-            color="brand.300"
-            _hover={{ textDecoration: "underline" }}
+            letterSpacing="0.5px"
+            color="#2E8B57"
+            _hover={{ 
+              textDecoration: "underline", 
+              color: "#1E6A3A" 
+            }} 
             onClick={() => {
-              clearTimeout(timeoutId); // 🔥 Cancel removal
+              clearTimeout(timeoutId);
               setHidden(false);
-              onClose(); // Close Snackbar
+              onClose();
             }}
           >
             UNDO
@@ -97,13 +107,13 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
         </HStack>
       ),
     });
+    
+    
+    
+    
+    
   };
-
-
-
-
-
-
+  
   const handleShareClick = (event) => {
     event.stopPropagation();
     console.log(`Sharing ${item.title}`);
@@ -168,49 +178,68 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
 
   return (
     <>
-      <HStack
-        className="watchlist-card"
-        key={item.id}
-        p={{ base: 2, md: 4 }}
-        shadow="md"
-        borderWidth="1px"
-        borderRadius="lg"
-        bg={bg}
-        minHeight={cardHeight}
-        _hover={{ bg: hoverBg }}
-        onClick={handleCardClick} // 🟢 Fetch and open modal on click
-        cursor="pointer"
-      >
-        <Icon as={mediaTypeIcons[item.media_type]} boxSize={6} mr={2} />
-        <Image
-          src={item.image || defaultImages[item.media_type || "books"]}
-          alt={item.title}
-          htmlWidth="80px"
-          htmlHeight="120px"
-          objectFit="cover"
-          borderRadius="md"
-        />
-        <Box flex="1" pl={2} minWidth={0} pr={titlePadding}>
-          <Text fontWeight="bold" noOfLines={titleMaxLines} lineHeight={titleLineHeight} maxHeight={`${titleLineHeight * 2}em`} overflow="hidden" textOverflow="ellipsis">
-            {item.title}
-          </Text>
-          <Text fontSize="sm">{item.author || item.director || item.network_name || 'N/A'}</Text>
-          <Text fontSize="sm">{item.series}</Text>
-          <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
-        </Box>
-        {/* 🗑️ Trash Bin Button (Now Default On) */}
+      <Box position="relative" width="full">
+        {/* Trash Button (Top Right) */}
         {showDelete && (
-          <Tooltip label="Remove from Watchlist" bg="red.600">
-            <IconButton
-              aria-label="Remove"
-              icon={<FaTrash />}
-              size="sm"
-              color="gray.500"
-              _hover={{ color: "red.500" }}
-              onClick={handleRemoveClick}
-            />
-          </Tooltip>
+          <Tooltip 
+          label="Remove from Watchlist" 
+          bg="#333" 
+          color="#FFF" 
+          fontSize="xs"  // 🔥 Makes it slightly smaller
+          borderRadius="md"
+          p={2}
+        >
+          <IconButton
+            aria-label="Remove"
+            icon={<FaTrash />}
+            size="sm"
+            position="absolute"
+            top="2px"   // 🔥 Adds more padding
+            right="2px"
+            bg="transparent"
+            color="gray.500"
+            _hover={{ color: "red.500", bg: "transparent" }}
+            onClick={(e) => {
+              e.stopPropagation(); // ✅ Prevents modal opening
+              handleRemoveClick();
+            }}
+          />
+        </Tooltip>
+        
         )}
+  
+        {/* Card Content */}
+        <HStack
+          className="watchlist-card"
+          key={item.id}
+          p={{ base: 2, md: 4 }}
+          shadow="md"
+          borderWidth="1px"
+          borderRadius="lg"
+          bg={bg}
+          minHeight="120px"
+          _hover={{ bg: hoverBg }}
+          onClick={handleCardClick}
+          cursor="pointer"
+        >
+          <Icon as={mediaTypeIcons[item.media_type]} boxSize={6} mr={2} />
+          <Image
+            src={item.image || defaultImages[item.media_type || "books"]}
+            alt={item.title}
+            htmlWidth="80px"
+            htmlHeight="120px"
+            objectFit="cover"
+            borderRadius="md"
+          />
+          <Box flex="1" pl={2} minWidth={0}>
+            <Text fontWeight="bold" noOfLines={2} lineHeight="tall" overflow="hidden">
+              {item.title}
+            </Text>
+            <Text fontSize="sm">{item.author || item.director || item.network_name || 'N/A'}</Text>
+            <Text fontSize="sm">{item.series}</Text>
+            <Text fontSize="sm">{item.release_date ? new Date(item.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</Text>
+          </Box>
+        </HStack>
         {/* Share Button Temporarily Removed until functionality works */}
           {/*
           {useBreakpointValue({ base: false, md: true }) ? (
@@ -234,8 +263,8 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
             </VStack>
           )}
           */}
-      </HStack>
-
+      </Box>
+  
       {/* Details Modal */}
       {!openModal && (
         <DetailsModal
@@ -248,6 +277,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
       )}
     </>
   );
+  
 };
 
 export default WatchlistPreviewCard;

@@ -19,7 +19,7 @@ const formatMediaType = (mediaType) => {
 };
 
 
-const WatchlistPreview = ({ watchlist = [], mediaType }) => {  // Default to empty array
+const WatchlistPreview = ({ watchlist = [], mediaType , userId}) => {  // Default to empty array
   const navigate = useNavigate();
   const filteredWatchlist = mediaType
   ? watchlist.filter((item) => item.media_type === mediaType)
