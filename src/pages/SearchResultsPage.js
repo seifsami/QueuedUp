@@ -9,7 +9,7 @@ import NoResults from '../components/NoResults';
 import Filters from '../components/Filters';
 import RequestNowButton from '../components/RequestNowButton';
 
-const SearchResultsPage = () => {
+const SearchResultsPage = ({ currentUser }) => {
   const isMobile = useBreakpointValue({ base: true, md: false });
   const resultsTextSize = useBreakpointValue({ base: 'md', md: 'xl' });
   const [searchParams, setSearchParams] = useSearchParams();
@@ -75,7 +75,7 @@ const SearchResultsPage = () => {
   const RenderRequestPrompt = () => (
     <Box mt={1} p={2} textAlign={{ base: 'center', md: 'left' }}>
       <Text mb={2}>Can't find what you're looking for?</Text>
-      <RequestNowButton />
+      <RequestNowButton currentUser={currentUser} />  
     </Box>
   );
 

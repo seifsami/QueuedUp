@@ -65,3 +65,13 @@ export const updateUserProfile = (firebaseId, updatedData) => {
       throw new Error('Failed to update user profile');
     });
 };
+
+export const submitRequest = async (requestData) => {
+  try {
+    const response = await axios.post(`https://queuedup-backend-6d9156837adf.herokuapp.com/api/request`, requestData);
+    return response.data;
+  } catch (error) {
+    console.error('Error submitting request:', error);
+    throw new Error('Failed to submit request');
+  }
+};
