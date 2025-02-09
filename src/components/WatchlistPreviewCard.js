@@ -44,16 +44,29 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   const [isHidden, setHidden] = useState(false);
   const [undoTimeout, setUndoTimeout] = useState(null);
   const toast = useToast();
+
   
   if (isHidden) return null; 
+  console.log("🔍 Full Item Object in WatchlistPreviewCard:", item);
+  console.log("🛠 Extracted item_id:", item._id || item.id); 
+
 
   const handleRemoveClick = async () => {
+    const itemId = item.item_id || item._id || item.id;  // ✅ Ensure we extract correctly
+    console.log("🛠 Removing item:", item);
+    console.log("🛠 Extracted item_id:", itemId);  // ✅ Now this should print the correct ID
+  
+    if (!itemId) {
+      console.error("🚨 ERROR: item_id is undefined!");
+      return; // Prevent API call if item_id is missing
+    }
+  
     setHidden(true); // 🔥 Hide from UI immediately
-
+  
     const timeoutId = setTimeout(async () => {
       try {
         const response = await axios.delete(`https://queuedup-backend-6d9156837adf.herokuapp.com/watchlist/${userId}`, {
-          data: { item_id: item._id }
+          data: { item_id: itemId }  // ✅ Send correct item_id
         });
   
         console.log("API Response:", response.data); // ✅ Check Heroku logs
@@ -63,8 +76,10 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
         setHidden(false);
       }
     }, 7000);
-
+  
     setUndoTimeout(timeoutId);
+  };
+  
 
     // Show Snackbar-style notification
     toast({

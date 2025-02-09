@@ -153,7 +153,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
               : type.charAt(0).toUpperCase() + type.slice(1)}
           </Text>
           {groupedResults[type].slice(0, 2).map((item) => ( // Limit to 2 results per category
-            <WatchlistPreviewCard key={item._id || item.id} item={item} openModal={(detailedItem) => {
+            <WatchlistPreviewCard key={item._id || item.id} item={item} showDelete={false} openModal={(detailedItem) => {
               setSelectedItem(detailedItem);
               setModalOpen(true);
             }} />

@@ -101,7 +101,7 @@ const SearchResultsPage = ({ currentUser }) => {
               <Text>Loading...</Text>
             ) : filteredResults.length ? (
               filteredResults.map((item) => (
-                <WatchlistPreviewCard key={item._id || item.id} item={item} width="full" />
+                <WatchlistPreviewCard key={item._id || item.id} item={item} showDelete={false} width="full" />
               ))
             ) : (
               <NoResults />
