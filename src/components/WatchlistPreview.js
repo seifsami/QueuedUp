@@ -48,7 +48,7 @@ const WatchlistPreview = ({ watchlist = [], mediaType }) => {  // Default to emp
       <VStack spacing={4} align="stretch">
         {filteredWatchlist.length > 0 ? (
           filteredWatchlist.map((item) => (
-            <WatchlistPreviewCard key={item.id || item._id} item={item} />
+            <WatchlistPreviewCard key={item.id || item._id} item={item} userId={userId}/>
           ))
         ) : (
           <Text>No items in your {formatMediaType(mediaType)} watchlist yet!</Text>

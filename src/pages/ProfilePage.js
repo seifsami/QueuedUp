@@ -312,7 +312,7 @@ const ProfilePage = ({ user }) => {
         {/* Watchlist Preview */}
         <Box>
           <Heading as="h2" size={{ base: "md", md: "lg" }} mb={4}>Your Watchlist</Heading>
-          <WatchlistPreview watchlist={userWatchlist} />
+          <WatchlistPreview watchlist={userWatchlist} userId={user?.uid} />
         </Box>
       </Box>
     </>

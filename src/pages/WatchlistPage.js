@@ -194,7 +194,7 @@ const WatchlistPage = ({ user }) => {
           ) : (
             <VStack spacing={4} align="stretch">
               {filteredData.map((item) => (
-                <WatchlistPreviewCard key={item._id} item={item} />
+                <WatchlistPreviewCard key={item._id} item={item} userId={user?.uid}/>
               ))}
               {filteredData.length === 0 && (
                 <Text py={10} textAlign="center" color="brand.500">

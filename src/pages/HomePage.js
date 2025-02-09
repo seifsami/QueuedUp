@@ -226,7 +226,7 @@ const HomePage = ({ user }) => {
               mediaType={mediaType}
             />
           )}
-          <WatchlistPreview watchlist={userWatchlist} mediaType={mediaType} />
+          <WatchlistPreview watchlist={userWatchlist} mediaType={mediaType} userId={user?.uid} />
         </Box>
         <DetailsModal
           isOpen={isModalOpen}
