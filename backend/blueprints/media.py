@@ -44,7 +44,7 @@ def get_media_by_slug(media_type, slug):
         if media_type == 'books':
             fields_to_include = {
                 'title': 1, 'author': 1, 'release_date': 1, 'image': 1, 
-                'description': 1, 'series': 1, 'slug': 1, 'language': 1
+                'description': 1, 'series': 1, 'slug': 1, 'language': 1, 'publisher': 1
             }
         elif media_type == 'movies':
             fields_to_include = {
@@ -67,6 +67,11 @@ def get_media_by_slug(media_type, slug):
             # 🔹 Standardize field names for consistency in the frontend
             item['creator'] = item.get('author') or item.get('director') or item.get('network_name')
             item['creator_label'] = "Author" if media_type == "books" else "Director" if media_type == "movies" else "Network"
+
+            # 🔹 Format release date properly (remove timestamp)
+            if 'release_date' in item and isinstance(item['release_date'], str):
+                item['release_date'] = item['release_date'].split(' ')[1:4]  # Extract only Date (no timestamp)
+                item['release_date'] = " ".join(item['release_date'])  # Convert list back to string
 
             return jsonify(item), 200
         else:

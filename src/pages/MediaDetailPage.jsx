@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 import Countdown from 'react-countdown';
-import { FaCalendarAlt, FaTv, FaGlobe, FaFilm } from 'react-icons/fa';
+import { FaCalendarAlt, FaTv, FaGlobe, FaFilm, FaUser, FaBook } from 'react-icons/fa';
 import NotifyMeButton from '../components/NotifyMeButton';
 
 const defaultImages = {
@@ -23,19 +23,15 @@ const defaultImages = {
   tv_seasons: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 };
 
-// Countdown Renderer for the release
-const CountdownRenderer = ({ days, hours, minutes, seconds, completed }) => {
-  if (completed) {
-    return <Text fontSize="lg" fontWeight="bold" color="green.500">Now Available!</Text>;
-  }
-  return (
-    <HStack>
-      <Text fontSize="lg" fontWeight="bold" color="brand.300">
-        Releases in:
-      </Text>
-      <Text fontSize="lg">{days}d {hours}h {minutes}m</Text>
-    </HStack>
-  );
+// Amazon helper function
+const getAmazonDomain = () => {
+  let domain = 'amazon.com';
+  const regionMapping = {
+    'US': 'amazon.com', 'GB': 'amazon.co.uk', 'DE': 'amazon.de', 'FR': 'amazon.fr',
+    'IT': 'amazon.it', 'ES': 'amazon.es', 'CA': 'amazon.ca', 'JP': 'amazon.co.jp',
+  };
+  const lang = navigator.language.toUpperCase().split('-')[1];
+  return regionMapping[lang] || domain;
 };
 
 const MediaDetailPage = () => {
@@ -65,77 +61,25 @@ const MediaDetailPage = () => {
   if (loading) return <Text>Loading...</Text>;
   if (error || !media) return <Text>Media not found.</Text>;
 
-  const rawReleaseDate = media.releaseDate || media.release_date || null;
-  const formattedReleaseDate = rawReleaseDate
-    ? new Date(rawReleaseDate).toLocaleDateString('en-US', { 
-        year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' 
-      })
-    : 'N/A';
-
   return (
     <Flex direction={{ base: "column", md: "row" }} p={8} gap={6} alignItems="start">
-      {/* Left Column - Poster */}
       <Box flex="1" maxW="400px">
-        <Image
-          src={media.image || defaultImages[mediaType]}
-          alt={media.title}
-          borderRadius="lg"
-          boxShadow="lg"
-        />
+        <Image src={media.image || defaultImages[mediaType]} alt={media.title} borderRadius="lg" boxShadow="lg" />
       </Box>
 
-      {/* Right Column - Details */}
       <Box flex="2">
-        <Text fontSize="3xl" fontWeight="bold" color="brand.600" mb={2}>
-          {media.title}
-        </Text>
+        <Text fontSize="3xl" fontWeight="bold" color="brand.600" mb={2}>{media.title}</Text>
 
         <HStack spacing={4} mb={4} wrap="wrap">
-          {/* Network Name */}
-          {media.network_name && (
-            <Tag size="lg" colorScheme="teal">
-              <Icon as={FaTv} mr={1} /> {media.network_name}
-            </Tag>
-          )}
-
-          {/* Release Date */}
-          <Tag size="lg" bg="brand.200" color="brand.700">
-            <Icon as={FaCalendarAlt} mr={1} /> {formattedReleaseDate}
-          </Tag>
-
-          {/* Spoken Languages */}
-          {media.spoken_languages && media.spoken_languages.length > 0 && (
-            <Tag size="lg" bg="brand.100" color="white">
-              <Icon as={FaGlobe} mr={1} /> {media.spoken_languages.join(', ')}
-            </Tag>
-          )}
+          <Tag size="lg" colorScheme="teal"><Icon as={FaUser} mr={1} /> {media.creator_label}: {media.creator}</Tag>
+          <Tag size="lg" bg="brand.200" color="brand.700"><Icon as={FaCalendarAlt} mr={1} /> {media.release_date}</Tag>
+          {media.language && <Tag size="lg" bg="brand.100" color="white"><Icon as={FaGlobe} mr={1} /> Language: {media.language}</Tag>}
+          {media.publisher && <Tag size="lg" bg="gray.200" color="gray.800"><Icon as={FaBook} mr={1} /> Publisher: {media.publisher}</Tag>}
         </HStack>
 
-        {/* Countdown */}
-        {rawReleaseDate && (
-          <Countdown date={new Date(rawReleaseDate)} renderer={CountdownRenderer} />
-        )}
-
-        <Divider my={4} />
-
-        {/* Genres */}
-        {media.genres && media.genres.length > 0 && (
-          <Box mb={4}>
-            <Text fontSize="xl" fontWeight="bold" mb={2}>Genres:</Text>
-            <HStack wrap="wrap">
-              {media.genres.map((genre, index) => (
-                <Tag key={index} size="lg" colorScheme="orange">
-                  <Icon as={FaFilm} mr={1} /> {genre}
-                </Tag>
-              ))}
-            </HStack>
-          </Box>
-        )}
-
-        {/* Description */}
         {media.description && (
-          <Box>
-            <Text fontSize="xl" fontWeight="bold" mb={2}>Description:</Text>
+          <Box mb={4}>
+            <Text fontSize="xl" fontWeight="bold">Description:</Text>
             <Text fontSize="md" color="gray.600">
               {showFullDescription ? media.description : media.description?.slice(0, 250) + '...'}
               {media.description?.length > 250 && (
@@ -147,17 +91,12 @@ const MediaDetailPage = () => {
           </Box>
         )}
 
-        {/* Notify Me Button */}
-        <NotifyMeButton
-          item={media}
-          buttonProps={{
-            bg: "brand.300",
-            color: "white",
-            size: "lg",
-            mt: 4,
-            _hover: { bg: "brand.600" },
-          }}
-        />
+        <HStack spacing={4} mt={6}>
+          <NotifyMeButton item={media} buttonProps={{ colorScheme: "green", size: "lg" }} />
+          {media.media_type === 'books' && (
+            <Button as="a" href={`https://www.${getAmazonDomain()}/s?k=${encodeURIComponent(media.title)}&tag=queuedup0f-20`} target="_blank" colorScheme="orange" size="lg">Buy on Amazon</Button>
+          )}
+        </HStack>
       </Box>
     </Flex>
   );
