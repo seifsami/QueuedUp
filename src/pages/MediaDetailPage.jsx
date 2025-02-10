@@ -66,7 +66,7 @@ const MediaDetailPage = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [recommendations, setRecommendations] = useState([]);
   const [loadingRecs, setLoadingRecs] = useState(true);
-  const hypeMeterPercentage = media.hype_meter_percentage ||50;  // Default 25%
+  const hypeMeterPercentage = media?.hype_meter_percentage ?? 0;  // Default 25%
  
 
   useEffect(() => {
@@ -75,9 +75,10 @@ const MediaDetailPage = () => {
         const response = await axios.get(
           `https://queuedup-backend-6d9156837adf.herokuapp.com/media/slug/${mediaType}/${slug}`
         );
+        console.log("✅ API Response:", response.data);  // 🔹 LOG RESPONSE
         setMedia(response.data);
       } catch (error) {
-        console.error("Error fetching media:", error);
+        console.error("❌ Error fetching media:", error);
         setError(true);
       } finally {
         setLoading(false);
@@ -85,6 +86,7 @@ const MediaDetailPage = () => {
     }
     fetchMediaDetails();
   }, [mediaType, slug]);
+  
 
   useEffect(() => {
     if (media) {
