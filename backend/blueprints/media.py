@@ -132,3 +132,9 @@ def get_recommendations(media_type, item_id):
     except Exception as e:
         print(f"Error in recommendations: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
+@media_blueprint.route('/debug/routes', methods=['GET'])
+def debug_routes():
+    """Returns all registered routes in Flask to debug 404 errors."""
+    return jsonify([str(rule) for rule in media_blueprint.url_map.iter_rules()])
+
