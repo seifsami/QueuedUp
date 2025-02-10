@@ -186,25 +186,20 @@ def get_recommendations(media_type, item_id):
 
             for rec in recommended_items:
                 try:
-                    query_id = ObjectId(rec["_id"]) if ObjectId.is_valid(rec["_id"]) else rec["_id"]
-                    query_media_type = rec["_id"]["media_type"]
+                    query_id = rec["_id"]
 
-                    # ✅ Ensure we exclude the current item
-                    if str(query_id) == item_id:
-                        print(f"🚨 Skipping current item {query_id}")
-                        continue
-                    media_item = db[query_media_type].find_one(
-                        {"_id": ObjectId(query_id)}, 
-                        {"title": 1, "image": 1, "slug": 1, "media_type": 1}  # ✅ Ensure media_type is fetched!
-                    )
+                    # ✅ Determine `media_type` based on the collection name
+                    for collection_name in ["books", "movies", "tv_seasons"]:
+                        media_item = db[collection_name].find_one(
+                            {"_id": ObjectId(query_id)},
+                            {"title": 1, "image": 1, "slug": 1}
+                        )
+                        if media_item:
+                            media_item["_id"] = str(media_item["_id"])
+                            media_item["media_type"] = collection_name  # ✅ Manually add media_type
+                            recommendations.append(media_item)
+                            break  # Stop searching once found
 
-                    
-
-                    media_item = db[media_type].find_one({"_id": query_id}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
-                    if media_item:
-                        media_item["_id"] = str(media_item["_id"])
-                        media_item["media_type"] = query_media_type
-                        recommendations.append(media_item)
                 except Exception as e:
                     print(f"❌ Error fetching media item: {str(e)}")
 
@@ -213,19 +208,24 @@ def get_recommendations(media_type, item_id):
             missing_count = 4 - len(recommendations)
             print(f"⚠️ Not enough recommendations ({len(recommendations)} found), adding {missing_count} random items.")
 
-            random_items = list(db[media_type].aggregate([
-                {"$match": {"_id": {"$ne": ObjectId(item_id)}}},  # Exclude the current item
-                {"$sample": {"size": missing_count}},
-                {"$project": {"title": 1, "image": 1, "slug": 1, "media_type": 1}}  # ✅ Ensure media_type is included
-            ]))
+            for collection_name in ["books", "movies", "tv_seasons"]:
+                random_items = list(db[collection_name].aggregate([
+                    {"$match": {"_id": {"$ne": ObjectId(item_id)}}},  # Exclude the current item
+                    {"$sample": {"size": missing_count}},
+                    {"$project": {"title": 1, "image": 1, "slug": 1}}
+                ]))
 
 
             for item in random_items:
                 if item not in recommendations:
                     item["_id"] = str(item["_id"])
+                    item["media_type"] = collection_name  # ✅ Manually add media_type
                     recommendations.append(item)
 
+
         print(f"✅ Returning {len(recommendations)} recommendations.")
+        print("🔍 Raw Recommended Items Before Sending:", recommendations)
+
 
         # ✅ Step 5: Store Recommendations in Redis (6 Hours)
     
