@@ -11,13 +11,14 @@ import {
   Tag,
   Icon,
   Divider,
-  Spinner,
+  Spinner
 } from '@chakra-ui/react';
 import axios from 'axios';
 import Countdown from 'react-countdown';
 import { FaCalendarAlt, FaTv, FaGlobe, FaFilm, FaUser, FaBook } from 'react-icons/fa';
 import NotifyMeButton from '../components/NotifyMeButton';
 import Carousel from '../components/Carousel';
+import HypeMeter from '../components/HypeMeter';
 
 const defaultImages = {
   books: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
@@ -54,6 +55,9 @@ const CountdownRenderer = ({ days, hours, minutes, completed }) => {
   );
 };
 
+
+  
+
 const MediaDetailPage = () => {
   const { mediaType, slug } = useParams();
   const [media, setMedia] = useState(null);
@@ -62,6 +66,8 @@ const MediaDetailPage = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [recommendations, setRecommendations] = useState([]);
   const [loadingRecs, setLoadingRecs] = useState(true);
+  const hypeMeterPercentage = media.hype_meter_percentage ||50;  // Default 25%
+ 
 
   useEffect(() => {
     async function fetchMediaDetails() {
@@ -156,7 +162,7 @@ const MediaDetailPage = () => {
           )}
   
           <Divider my={4} />
-  
+          <HypeMeter hypeMeterPercentage={hypeMeterPercentage} />
           {/* Description Section */}
           {media.description && (
             <Box>
