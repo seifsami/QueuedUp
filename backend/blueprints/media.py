@@ -9,6 +9,12 @@ import random
 
 media_blueprint = Blueprint('media_blueprint', __name__)
 
+def serialize_datetime(obj):
+            """Convert datetime objects to ISO format for JSON serialization."""
+            if isinstance(obj, datetime.datetime):
+                return obj.isoformat()
+            raise TypeError("Type not serializable")
+
 @media_blueprint.route('/<media_type>/<item_id>', methods=['GET'])
 def get_media_item(media_type, item_id):
     try:
