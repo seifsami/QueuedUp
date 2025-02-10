@@ -5,7 +5,7 @@ from app import mongo, redis_client  # ✅ Ensure Redis is imported
 
 hype_blueprint = Blueprint('hype_blueprint', __name__)
 
-@hype_blueprint.route('/hype/<media_type>/<item_id>', methods=['GET'])
+@hype_blueprint.route('/<media_type>/<item_id>', methods=['GET'])
 def get_hype_score(media_type, item_id):
     """ Returns the cached hype score or computes it on-demand """
     db = mongo.cx["QueuedUpDBnew"]
