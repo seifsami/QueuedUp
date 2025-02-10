@@ -79,3 +79,45 @@ def get_media_by_slug(media_type, slug):
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
+@media_blueprint.route('/recommendations/<media_type>/<item_id>', methods=['GET'])
+def get_recommendations(media_type, item_id):
+    """Finds media that users also have in their watchlist, filtered by media type."""
+    try:
+        db = mongo.cx["QueuedUpDBnew"]
+        watchlist_collection = db["userwatchlist"]
+
+        # Step 1: Find all users who have this item in their watchlist
+        users_with_item = watchlist_collection.find({"item_id": item_id, "media_type": media_type}, {"user_id": 1})
+
+        user_ids = [user["user_id"] for user in users_with_item]
+
+        if not user_ids:
+            return jsonify({"recommendations": []}), 200  # No users have this item
+
+        # Step 2: Find other items (of the same media type) these users also have
+        recommended_items = watchlist_collection.aggregate([
+            {"$match": {"user_id": {"$in": user_ids}, "media_type": media_type}},  # Only same media type
+            {"$group": {"_id": "$item_id", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+            {"$limit": 5}  # Return top 5 recommendations
+        ])
+
+        recommendations = []
+        for rec in recommended_items:
+            media_item = db[media_type].find_one({"_id": ObjectId(rec["_id"])}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
+            if media_item:
+                media_item["_id"] = str(media_item["_id"])
+                recommendations.append(media_item)
+
+        # Step 3: If not enough recommendations, get random items from the same media type
+        if len(recommendations) < 3:
+            random_items = db[media_type].aggregate([{"$sample": {"size": 3}}])
+            for item in random_items:
+                if item not in recommendations:
+                    item["_id"] = str(item["_id"])
+                    recommendations.append(item)
+
+        return jsonify({"recommendations": recommendations}), 200
+    except Exception as e:
+        print(f"Error in recommendations: {str(e)}")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
