@@ -274,7 +274,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
           style={{
             opacity: fadeOut ? 0 : 1, // 🔥 Gradual fade-out
             transition: "opacity 0.4s ease-in-out", // 🔥 Smooth transition over 400ms
-            pointerEvents: isMobile ? "none" : "auto"
+            
           }}
           cursor="pointer"
         >
