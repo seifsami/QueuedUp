@@ -20,24 +20,13 @@ const HomePage = ({ user }) => {
   const [loadingTrending, setLoadingTrending] = useState(true);
   const [loadingUpcoming, setLoadingUpcoming] = useState(true);
   const [error, setError] = useState(null);
-  // Modal state
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [isModalOpen, setModalOpen] = useState(false);
   // User's watchlist
   const [userWatchlist, setUserWatchlist] = useState([]);
   // Cached data for each media type
   const [cachedData, setCachedData] = useState({});
 
-  // Modal handlers.
-  const openModalWithItem = (item) => {
-    setSelectedItem(item);
-    setModalOpen(true);
-  };
+  
 
-  const closeModal = () => {
-    setModalOpen(false);
-    setSelectedItem(null);
-  };
 
   const fetchUserWatchlist = async () => {
     if (!user) return;
@@ -190,7 +179,6 @@ const HomePage = ({ user }) => {
         {featuredItem && (
           <FeaturedRelease
             item={featuredItem}
-            onViewDetails={(item) => { setSelectedItem(item); setModalOpen(true); }}
             userWatchlist={userWatchlist}
             refetchWatchlist={fetchUserWatchlist}
             mediaType={mediaType}
@@ -208,7 +196,6 @@ const HomePage = ({ user }) => {
           ) : (
             <Carousel
               items={upcomingReleasesData}
-              onOpenModal={(item) => { setSelectedItem(item); setModalOpen(true); }}
               userWatchlist={userWatchlist}
               refetchWatchlist={fetchUserWatchlist}
             />
@@ -223,7 +210,6 @@ const HomePage = ({ user }) => {
           ) : (
             <Carousel
               items={trendingData}
-              onOpenModal={(item) => { setSelectedItem(item); setModalOpen(true); }}
               userWatchlist={userWatchlist}
               refetchWatchlist={fetchUserWatchlist}
               mediaType={mediaType}
@@ -231,16 +217,7 @@ const HomePage = ({ user }) => {
           )}
           <WatchlistPreview watchlist={userWatchlist} mediaType={mediaType} userId={user?.uid} />
         </Box>
-        <DetailsModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setModalOpen(false);
-            setSelectedItem(null);
-            fetchUserWatchlist();
-          }}
-          item={selectedItem}
-          refetchWatchlist={fetchUserWatchlist}
-        />
+        
       </Box>
     </>
   );

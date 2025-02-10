@@ -10,9 +10,8 @@ const defaultImages = {
   tv_seasons: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 };
 
-const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
+const MediaCard = ({ item, userWatchlist, refetchWatchlist }) => {
   const navigate = useNavigate();
-  const imageContainerHeight = '338px'; 
 
   // Format release date function
   const formatReleaseDate = (dateStr) => {
@@ -41,26 +40,17 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
     }
   };
 
-  // 🚀 Click Handler: Open Modal or Navigate
-  const handleCardClick = (e) => {
-    console.log("🖱 Click Event Triggered:", e.target);  // Log what was clicked
-
-    if (e.target.closest(".view-more-btn")) {
-      // 🎯 Navigate to details page
+  // ✅ Navigate Immediately When Clicking the Card
+  const handleCardClick = () => {
+    console.log("🖱 Card Clicked:", item);
+    
+    if (item.slug) {
       console.log("🔍 Navigating to:", `/media/${item.media_type}/${item.slug}`);
-
-      if (item.slug) {
-        navigate(`/media/${item.media_type}/${item.slug}`);
-      } else {
-        console.error("❌ Missing slug for item:", item);
-      }
+      navigate(`/media/${item.media_type}/${item.slug}`);
     } else {
-      // 🎯 Open Modal
-      console.log("📌 Opening Modal for:", item.title);
-      onOpenModal(item);
+      console.error("❌ Missing slug for item:", item);
     }
   };
-
 
   return (
     <Box
@@ -74,21 +64,16 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       w="220px"
       h="500px"
       m="0 8px"
-      onClick={handleCardClick}
+      onClick={handleCardClick} // ✅ Clicking anywhere now correctly navigates
     >
-      {/* Debugging Slug */}
-      {console.log("🛠 MediaCard Item:", item)}
-
       <Box 
-        height={imageContainerHeight}
+        height="338px"
         position="relative"
         borderBottom="1px solid"
         borderColor="gray.200"
       >
         <Image
-          src={(item.image && item.image !== "none")
-                ? item.image
-                : defaultImages[item.media_type || "books"]}
+          src={(item.image && item.image !== "none") ? item.image : defaultImages[item.media_type || "books"]}
           alt={item.title}
           objectFit="cover"
           width="100%"
@@ -99,12 +84,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       <VStack align="start" p={2} spacing="1">
         {/* Title */}
         <Box w="full" h="3.5rem" overflow="hidden">
-          <Text 
-            fontSize="lg" 
-            fontWeight="bold" 
-            noOfLines={2} 
-            lineHeight="1.3"
-          >
+          <Text fontSize="lg" fontWeight="bold" noOfLines={2} lineHeight="1.3">
             {item.title}
           </Text>
         </Box>
@@ -144,7 +124,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
               onClick={(e) => {
                 console.log("🛠 View More Clicked!", item);
                 e.stopPropagation();
-                handleCardClick(e);
+                navigate(`/media/${item.media_type}/${item.slug}`); // ✅ Navigate immediately
               }}
             >
               View More

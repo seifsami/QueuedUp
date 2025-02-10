@@ -189,15 +189,22 @@ def get_recommendations(media_type, item_id):
             for rec in recommended_items:
                 try:
                     query_id = ObjectId(rec["_id"]) if ObjectId.is_valid(rec["_id"]) else rec["_id"]
+                    query_media_type = rec["_id"]["media_type"]
 
                     # ✅ Ensure we exclude the current item
                     if str(query_id) == item_id:
                         print(f"🚨 Skipping current item {query_id}")
                         continue
+                    media_item = db[query_media_type].find_one(
+                        {"_id": ObjectId(query_id)}, 
+                        {"title": 1, "image": 1, "slug": 1, "media_type": 1}
+                    )
+                    
 
                     media_item = db[media_type].find_one({"_id": query_id}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
                     if media_item:
                         media_item["_id"] = str(media_item["_id"])
+                        media_item["media_type"] = query_media_type
                         recommendations.append(media_item)
                 except Exception as e:
                     print(f"❌ Error fetching media item: {str(e)}")

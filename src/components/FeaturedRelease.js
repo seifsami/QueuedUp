@@ -1,33 +1,25 @@
 import React from 'react';
 import { Box, Image, Flex, Heading, Text, Button } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 import NotifyMeButton from './NotifyMeButton';
 
-const FeaturedRelease = ({ 
-  item, 
-  onViewDetails, 
-  userWatchlist, 
-  refetchWatchlist, 
-  mediaType 
-}) => {
+const FeaturedRelease = ({ item, userWatchlist, refetchWatchlist, mediaType }) => {
+  const navigate = useNavigate();
+  
   if (!item) return null;
 
-  // Outer click handler that opens details modal
-  const handleCardClick = () => {
-    if (onViewDetails) {
-      onViewDetails(item);
-    }
-  };
-
-  // For the "View Details" button, stop propagation and then call onViewDetails.
-  const handleViewDetailsClick = (e) => {
-    e.stopPropagation();
-    if (onViewDetails) {
-      onViewDetails(item);
+  // 🚀 Click handler to navigate to MediaDetailPage
+  const handleNavigate = () => {
+    if (item.slug) {
+      console.log("🔍 Navigating to:", `/media/${item.media_type}/${item.slug}`);
+      navigate(`/media/${item.media_type}/${item.slug}`);
+    } else {
+      console.error("❌ Missing slug for item:", item);
     }
   };
 
   return (
-    // Entire card is clickable.
+    // Entire card is clickable and navigates to the details page
     <Box
       bg="brand.200"
       borderRadius="xl"
@@ -37,8 +29,8 @@ const FeaturedRelease = ({
       maxW={{ base: '350px', md: '1200px' }}  // Mobile: up to 350px, desktop: up to 1200px
       mt={2}
       transition="box-shadow 0.3s"
-      _hover={{ boxShadow: "0px 8px 16px rgba(0,0,0,0.6)" }}
-      onClick={handleCardClick}
+      _hover={{ boxShadow: "0px 8px 16px rgba(0,0,0,0.6)", cursor: "pointer" }}
+      onClick={handleNavigate}  // ✅ Clicking the card navigates
     >
       <Flex
         direction={{ base: 'column', md: 'row' }}
@@ -68,30 +60,18 @@ const FeaturedRelease = ({
         </Box>
 
         {/* Content Section */}
-        <Box
-          flex="1"
-          textAlign={{ base: 'center', md: 'left' }}
-          mt={{ base: 2, md: 0 }}
-        >
+        <Box flex="1" textAlign={{ base: 'center', md: 'left' }} mt={{ base: 2, md: 0 }}>
           <Heading as="h3" size="xl" mb={4}>
             {item.title || "Featured Release"}
           </Heading>
-          <Text
-            fontSize="md"
-            color="gray.700"
-            noOfLines={{ base: 3, md: 6 }}
-            mb={4}
-          >
+          <Text fontSize="md" color="gray.700" noOfLines={{ base: 3, md: 6 }} mb={4}>
             {item.description || "No description available."}
           </Text>
 
           {/* Button Row */}
-          <Flex
-            justify={{ base: 'center', md: 'flex-start' }}
-            gap={{ base: 3, md: 4 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Box flex="1">
+          <Flex justify={{ base: 'center', md: 'flex-start' }} gap={{ base: 3, md: 4 }}>
+            {/* Notify Me Button */}
+            <Box flex="1" onClick={(e) => e.stopPropagation()}>
               <NotifyMeButton
                 item={item}
                 userWatchlist={userWatchlist}
@@ -100,30 +80,24 @@ const FeaturedRelease = ({
                 buttonProps={{
                   size: { base: 'sm', md: 'md' },
                   px: { base: 4, md: 6 },
-                  width: "100%"
+                  width: "100%",
                 }}
               />
             </Box>
-            <Box flex="1">
+
+            {/* View Details Button (also navigates) */}
+            <Box flex="1" onClick={(e) => e.stopPropagation()}>
               <Button 
                 variant="outline" 
                 borderColor="brand.100"
                 color="brand.100"
                 bg="white"
-                _hover={{ 
-                  bg: 'gray.100',
-                  color: 'brand.100',
-                  borderColor: 'brand.100',
-                }}
-                _active={{
-                  bg: 'gray.200',
-                  color: 'brand.500',
-                  borderColor: 'brand.100',
-                }}
+                _hover={{ bg: 'gray.100', color: 'brand.100', borderColor: 'brand.100' }}
+                _active={{ bg: 'gray.200', color: 'brand.500', borderColor: 'brand.100' }}
                 size={{ base: 'sm', md: 'md' }}
                 px={{ base: 4, md: 6 }}
                 width="100%"
-                onClick={handleViewDetailsClick}
+                onClick={handleNavigate}  // ✅ Clicking button also navigates
               >
                 View Details
               </Button>
