@@ -15,3 +15,4 @@ gunicorn
 sendgrid==6.11.0
 python-dotenv
 redis==5.0.1
+requests==2.32.3
