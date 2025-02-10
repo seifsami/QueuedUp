@@ -122,7 +122,7 @@ def get_recommendations(media_type, item_id):
                 {"$match": {"user_id": {"$in": user_ids}, "media_type": media_type}},
                 {"$group": {"_id": "$item_id", "count": {"$sum": 1}}},
                 {"$sort": {"count": -1}},
-                {"$limit": 5}
+                {"$limit": 4}
             ]))
 
             print(f"🔎 Found {len(recommended_items)} recommended items before filtering.")
@@ -144,8 +144,8 @@ def get_recommendations(media_type, item_id):
                     print(f"❌ Error fetching media item: {str(e)}")
 
         # Step 4: If we have fewer than 5 recommendations, add random ones
-        if len(recommendations) < 5:
-            missing_count = 5 - len(recommendations)
+        if len(recommendations) < 4:
+            missing_count = 4 - len(recommendations)
             print(f"⚠️ Not enough recommendations ({len(recommendations)} found), adding {missing_count} random items.")
 
             random_items = list(db[media_type].aggregate([
