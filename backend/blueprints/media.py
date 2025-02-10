@@ -81,7 +81,6 @@ def get_media_by_slug(media_type, slug):
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
     
 
-
 @media_blueprint.route('/recommendations/<media_type>/<item_id>', methods=['GET'])
 def get_recommendations(media_type, item_id):
     """Finds media that users also have in their watchlist, filtered by media type."""
@@ -89,26 +88,32 @@ def get_recommendations(media_type, item_id):
         db = mongo.cx["QueuedUpDBnew"]
         watchlist_collection = db["userwatchlist"]
 
-        # Convert `item_id` to ObjectId
-        try:
+        # 🔹 Check if item_id is already a valid ObjectId
+        if ObjectId.is_valid(item_id):
             item_id = ObjectId(item_id)
-        except Exception as e:
+        else:
+            print(f"❌ Invalid ObjectId: {item_id}")
             return jsonify({"error": "Invalid item ID format"}), 400
 
+        print(f"✅ Converted item_id to ObjectId: {item_id}")
+
         # Step 1: Find all users who have this item in their watchlist
-        users_with_item = watchlist_collection.find({"item_id": item_id, "media_type": media_type}, {"user_id": 1})
+        users_with_item = list(watchlist_collection.find({"item_id": item_id, "media_type": media_type}, {"user_id": 1}))
         user_ids = [user["user_id"] for user in users_with_item]
 
         if not user_ids:
-            return jsonify({"recommendations": []}), 200  # No users have this item
+            print("⚠️ No users found with this item.")
+            return jsonify({"recommendations": []}), 200
 
-        # Step 2: Find other items (of the same media type) these users also have
-        recommended_items = watchlist_collection.aggregate([
+        # Step 2: Find other items these users also have
+        recommended_items = list(watchlist_collection.aggregate([
             {"$match": {"user_id": {"$in": user_ids}, "media_type": media_type}},  # Only same media type
             {"$group": {"_id": "$item_id", "count": {"$sum": 1}}},
             {"$sort": {"count": -1}},
             {"$limit": 5}  # Return top 5 recommendations
-        ])
+        ]))
+
+        print(f"🔎 Found {len(recommended_items)} recommended items.")
 
         recommendations = []
         for rec in recommended_items:
@@ -118,23 +123,19 @@ def get_recommendations(media_type, item_id):
                     media_item["_id"] = str(media_item["_id"])
                     recommendations.append(media_item)
             except Exception as e:
-                print(f"Error fetching media item: {str(e)}")
+                print(f"❌ Error fetching media item: {str(e)}")
 
         # Step 3: If not enough recommendations, get random items from the same media type
         if len(recommendations) < 3:
+            print("⚠️ Not enough recommendations, adding random items.")
             random_items = db[media_type].aggregate([{"$sample": {"size": 3}}])
             for item in random_items:
                 if item not in recommendations:
                     item["_id"] = str(item["_id"])
                     recommendations.append(item)
 
+        print(f"✅ Returning {len(recommendations)} recommendations.")
         return jsonify({"recommendations": recommendations}), 200
     except Exception as e:
-        print(f"Error in recommendations: {str(e)}")
+        print(f"❌ Error in recommendations: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
-
-@media_blueprint.route('/debug/routes', methods=['GET'])
-def debug_routes():
-    """Returns all registered routes in Flask to debug 404 errors."""
-    return jsonify([str(rule) for rule in media_blueprint.url_map.iter_rules()])
-
