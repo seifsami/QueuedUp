@@ -5,6 +5,7 @@ from app import mongo
 import json
 import time
 import datetime
+import requests
 
 
 media_blueprint = Blueprint('media_blueprint', __name__)
