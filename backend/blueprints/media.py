@@ -1,5 +1,5 @@
 # Assuming the file is named media.py in the blueprints directory
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, current_app
 from bson import ObjectId
 from app import mongo
 import json
@@ -87,11 +87,13 @@ def get_media_by_slug(media_type, slug):
 def get_recommendations(media_type, item_id):
     """Finds media that users also have in their watchlist, filtered by media type."""
     try:
-        db = mongo.cx["QueuedUpDBnew"]
+        db = current_app.extensions['pymongo'].cx["QueuedUpDBnew"]
         watchlist_collection = db["userwatchlist"]
 
-        # 🔹 Strip any whitespace or newline characters
-        item_id = item_id.strip()
+        # ✅ Use Redis from Flask app config
+        redis_client = current_app.config.get("REDIS_CLIENT")
+
+        item_id = item_id.strip()  # Remove any whitespace/newlines
         cache_key = f"cached_recommendations:{media_type}:{item_id}"
 
         # ✅ Step 1: Check Redis Cache
@@ -101,7 +103,7 @@ def get_recommendations(media_type, item_id):
                 print(f"⚡ Returning cached recommendations for {item_id}")
                 return jsonify({"recommendations": json.loads(cached_data)}), 200
 
-        print(f"📌 Received item_id: {item_id}")
+        print(f"📌 Querying MongoDB for item_id: {item_id}")
 
         # Step 2: Find all users who have this item in their watchlist
         users_with_item = list(watchlist_collection.find(
@@ -110,7 +112,6 @@ def get_recommendations(media_type, item_id):
         user_ids = [user["user_id"] for user in users_with_item]
 
         recommendations = []
-
         if user_ids:
             print(f"👥 Found {len(user_ids)} users with this item.")
 
@@ -128,7 +129,7 @@ def get_recommendations(media_type, item_id):
                 try:
                     query_id = ObjectId(rec["_id"]) if ObjectId.is_valid(rec["_id"]) else rec["_id"]
 
-                    # 🔹 Ensure we exclude the current item
+                    # ✅ Ensure we exclude the current item
                     if str(query_id) == item_id:
                         print(f"🚨 Skipping current item {query_id}")
                         continue
