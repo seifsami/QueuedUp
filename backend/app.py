@@ -4,17 +4,23 @@ from flask_cors import CORS
 import os
 import redis
 
-
-
+try:
+    import redis
+    redis_url = os.getenv("REDIS_URL")
+    redis_client = redis.from_url(redis_url, decode_responses=True,ssl_cert_reqs=None) if redis_url else None
+    if redis_client:
+        print("✅ Redis connected successfully!")
+    else:
+        print("⚠️ Redis is not configured. Caching is disabled.")
+except ImportError:
+    print("⚠️ Redis module not found. Caching is disabled.")
+    redis_client = None
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 MONGO_URI = os.getenv("MONGO_URI")
 if not MONGO_URI:
     print("🚨 ERROR: MONGO_URI is NOT set in environment variables!")
-redis_url = os.getenv("REDIS_URL")
-redis_client = redis.from_url(redis_url, decode_responses=True) if redis_url else None
-
 app.config["MONGO_URI"] = MONGO_URI
 mongo = PyMongo(app)
 app.extensions['pymongo'] = mongo  # Ensure the mongo object is available in the app context
