@@ -1,70 +1,58 @@
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify
 from bson import ObjectId
 import random
+from app import mongo, redis_client  # ✅ Ensure Redis is imported
 
 hype_blueprint = Blueprint('hype_blueprint', __name__)
 
-@hype_blueprint.route('/update', methods=['POST'])
-def update_hype_scores():
-    """Daily cron job to calculate hype scores for all media types."""
-    try:
-        db = current_app.extensions['pymongo'].cx["QueuedUpDBnew"]
-        watchlist_collection = db["userwatchlist"]
-        media_types = ['books', 'movies', 'tv_seasons']
+@hype_blueprint.route('/hype/<media_type>/<item_id>', methods=['GET'])
+def get_hype_score(media_type, item_id):
+    """ Returns the cached hype score or computes it on-demand """
+    db = mongo.cx["QueuedUpDBnew"]
+    watchlist_collection = db["userwatchlist"]
 
-        for media_type in media_types:
-            print(f"📊 Processing hype scores for {media_type}")
+    # Check Redis cache first
+    cache_key = f"hype:{media_type}:{item_id}"
+    cached_score = redis_client.get(cache_key)
 
-            # Step 1: Get watchlist counts for all items in this media type
-            watchlist_counts = watchlist_collection.aggregate([
-                {"$match": {"media_type": media_type}},
-                {"$group": {"_id": "$item_id", "count": {"$sum": 1}}},
-            ])
+    if cached_score:
+        print(f"✅ Cache hit for {cache_key}")
+        return jsonify({"hype_meter_percentage": int(cached_score)}), 200
 
-            watchlist_map = {str(item["_id"]): item["count"] for item in watchlist_counts}
-            max_watchlist_count = max(watchlist_map.values(), default=1)  # Prevent division by zero
+    print(f"⏳ Cache miss! Computing hype score for {media_type} {item_id}")
 
-            print(f"🔥 Most watched {media_type} has {max_watchlist_count} watchlists")
+    # Step 1: Get how many users have added this item
+    watchlist_count = watchlist_collection.count_documents({"item_id": item_id, "media_type": media_type})
 
-            # Step 2: Assign hype scores
-            updates = []
-            for item_id, count in watchlist_map.items():
-                raw_hype_score = count / max_watchlist_count  # Normalize
+    # Step 2: Get the most tracked item to normalize scores
+    most_hyped = watchlist_collection.aggregate([
+        {"$match": {"media_type": media_type}},
+        {"$group": {"_id": "$item_id", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 1}
+    ])
+    most_hyped_count = next(most_hyped, {}).get("count", 1)  # Avoid divide-by-zero
 
-                # Assign hype meter percentage
-                if raw_hype_score >= 0.8:
-                    hype_percentage = "100%"
-                elif raw_hype_score >= 0.5:
-                    hype_percentage = "80%"
-                elif raw_hype_score >= 0.3:
-                    hype_percentage = "60%"
-                elif raw_hype_score >= 0.1:
-                    hype_percentage = "40%"
-                else:
-                    hype_percentage = "25%"  # Default for bottom 10%
+    if watchlist_count == 0:
+        # If no one is tracking this item, assign a randomized score (for variety)
+        hype_meter_percentage = random.choice([25, 40])
+    else:
+        raw_hype_score = watchlist_count / most_hyped_count
 
-                updates.append((item_id, raw_hype_score, hype_percentage))
+        # Map score to tiers
+        if raw_hype_score >= 0.8:
+            hype_meter_percentage = 100
+        elif raw_hype_score >= 0.5:
+            hype_meter_percentage = 80
+        elif raw_hype_score >= 0.3:
+            hype_meter_percentage = 60
+        elif raw_hype_score >= 0.1:
+            hype_meter_percentage = 40
+        else:
+            hype_meter_percentage = 25
 
-            # Step 3: Find all items & add missing ones with 0 watchlist count
-            all_items = db[media_type].find({}, {"_id": 1})  # Get all items
-            for item in all_items:
-                item_id = str(item["_id"])
-                if item_id not in watchlist_map:  # Items with 0 watchlists
-                    raw_hype_score = 0
-                    hype_percentage = random.choice(["25%", "40%"])  # Randomize
+    # Step 3: Cache the result for 24 hours
+    redis_client.setex(cache_key, 86400, hype_meter_percentage)
+    print(f"✅ Cached {cache_key} for 24h: {hype_meter_percentage}%")
 
-                    updates.append((item_id, raw_hype_score, hype_percentage))
-
-            # Step 4: Bulk update MongoDB
-            for item_id, raw_hype, hype_percent in updates:
-                db[media_type].update_one(
-                    {"_id": ObjectId(item_id)},
-                    {"$set": {"raw_hype_score": raw_hype, "hype_meter_percentage": hype_percent}}
-                )
-
-            print(f"✅ Updated {len(updates)} items for {media_type}")
-
-        return jsonify({"status": "success", "message": "Hype scores updated"}), 200
-    except Exception as e:
-        print(f"❌ Error updating hype scores: {str(e)}")
-        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+    return jsonify({"hype_meter_percentage": hype_meter_percentage}), 200
