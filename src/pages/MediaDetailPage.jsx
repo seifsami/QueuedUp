@@ -11,7 +11,8 @@ import {
   Tag,
   Icon,
   Divider,
-  Spinner
+  Spinner,
+  useToast
 } from '@chakra-ui/react';
 import axios from 'axios';
 import Countdown from 'react-countdown';
@@ -20,6 +21,9 @@ import NotifyMeButton from '../components/NotifyMeButton';
 import Carousel from '../components/Carousel';
 import HypeMeter from '../components/HypeMeter';
 import Header from '../components/Header';
+
+const API_BASE_URL = "https://queuedup-backend-6d9156837adf.herokuapp.com";
+
 
 const defaultImages = {
   books: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
@@ -59,7 +63,7 @@ const CountdownRenderer = ({ days, hours, minutes, completed }) => {
 
   
 
-const MediaDetailPage = () => {
+const MediaDetailPage = ({ user }) => {
   const { mediaType, slug } = useParams();
   const [media, setMedia] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -68,6 +72,9 @@ const MediaDetailPage = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [loadingRecs, setLoadingRecs] = useState(true);
   const hypeMeterPercentage = media?.hype_meter_percentage ?? 25;  // Default 25%
+  const [userWatchlist, setUserWatchlist] = useState([]);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const toast = useToast();
  
   useEffect(() => {
     async function fetchMediaDetails() {
@@ -85,6 +92,37 @@ const MediaDetailPage = () => {
     }
     fetchMediaDetails();
   }, [mediaType, slug]);
+
+  const fetchWatchlist = async () => {
+    if (!user) {
+      console.log("⚠️ No user logged in, skipping watchlist fetch.");
+      return;
+    }
+  
+    try {
+      console.log("🔄 Fetching watchlist for user:", user.uid);
+      const { data } = await axios.get(`${API_BASE_URL}/watchlist/${user.uid}`);
+      
+      console.log("📌 Fetched Watchlist Data:", data);
+      
+      if (!Array.isArray(data)) {
+        console.error("🚨 Error: Watchlist API response is not an array!", data);
+        return;
+      }
+  
+      setUserWatchlist(data);
+      console.log("✅ Updated userWatchlist state:", data);
+    } catch (error) {
+      console.error("❌ Error fetching watchlist:", error);
+    }
+  };
+  
+  
+
+  // 🔥 Fetch watchlist when the page loads
+  useEffect(() => {
+    fetchWatchlist();
+  }, [user]);
   
   useEffect(() => {
     if (media) {
@@ -186,7 +224,13 @@ const MediaDetailPage = () => {
   
           {/* Action Buttons */}
           <HStack spacing={6} mt={6}>
-            <NotifyMeButton item={media} buttonProps={{ colorScheme: "green", size: "lg" }} />
+          <NotifyMeButton 
+                item={media}
+                userWatchlist={userWatchlist}  // ✅ Pass watchlist to update UI correctly
+                refetchWatchlist={fetchWatchlist}  // ✅ Refetch when adding
+                mediaType={media.media_type}
+                buttonProps={{ colorScheme: "green", size: "lg" }}
+              />
             {media.media_type === 'books' && (
               <Button as="a" href={`https://www.${getAmazonDomain()}/s?k=${encodeURIComponent(media.title)}&tag=queuedup0f-20`} target="_blank" 
                 bg="brand.300" color="white" size="lg" _hover={{ bg: "brand.700" }}>

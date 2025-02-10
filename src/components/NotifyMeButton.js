@@ -7,25 +7,29 @@ const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonProps }) 
   const { currentUser, openModalWithItem } = useModal();
   const toast = useToast();
 
-  // Check if the item is already in the user's watchlist
+  console.log("🔍 NotifyMeButton received item:", item);
+  console.log("📌 User's Watchlist:", userWatchlist);
+
+  // ✅ Check watchlist by comparing `_id` (backend uses item_id)
   const isInWatchlist =
     Array.isArray(userWatchlist) &&
-    userWatchlist.some((watchlistItem) => watchlistItem.title === item.title);
+    userWatchlist.some((watchlistItem) => watchlistItem.item_id === item._id);
+
+  console.log("🛠 isInWatchlist?", isInWatchlist);
 
   const handleNotifyClick = async () => {
     if (!currentUser) {
-      // If not signed in, open the modal (or login flow)
       openModalWithItem(item);
     } else {
       try {
-        console.log("Attempting to add to watchlist with:", {
+        console.log("Attempting to add to watchlist:", {
           userId: currentUser.uid,
           itemId: item._id,
           mediaType: item.media_type,
         });
-        console.log("Item in NotifyMeButton:", item);
-
+  
         await addToWatchlist(currentUser.uid, item._id, item.media_type);
+  
         toast({
           title: 'Added to Watchlist',
           description: `${item.title} has been added to your watchlist.`,
@@ -33,11 +37,8 @@ const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonProps }) 
           duration: 5000,
           isClosable: true,
         });
-
-        // Use safeRefetch: if refetchWatchlist is not a function, default to a no-op.
-        const safeRefetch =
-          typeof refetchWatchlist === 'function' ? refetchWatchlist : () => {};
-        await safeRefetch();
+  
+        await refetchWatchlist();  // ✅ Ensure refetch happens AFTER item is added
       } catch (error) {
         toast({
           title: 'Error',
@@ -50,14 +51,15 @@ const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonProps }) 
       }
     }
   };
+  
 
   return (
     <Button
       onClick={handleNotifyClick}
       {...buttonProps}
-      colorScheme={isInWatchlist ? 'brand.100' : 'teal'}
+      colorScheme={isInWatchlist ? 'gray' : 'teal'}
       size={buttonProps?.size || 'sm'}
-      isDisabled={isInWatchlist}
+      isDisabled={isInWatchlist} // ✅ Disable if already in watchlist
     >
       {isInWatchlist ? 'In Watchlist' : 'Notify Me'}
     </Button>

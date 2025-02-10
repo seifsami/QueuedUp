@@ -142,8 +142,6 @@ def get_media_by_slug(media_type, slug):
 
     
 
-
-
 @media_blueprint.route('/recommendations/<media_type>/<item_id>', methods=['GET'])
 def get_recommendations(media_type, item_id):
     """Finds media that users also have in their watchlist, filtered by media type."""
@@ -197,8 +195,9 @@ def get_recommendations(media_type, item_id):
                         continue
                     media_item = db[query_media_type].find_one(
                         {"_id": ObjectId(query_id)}, 
-                        {"title": 1, "image": 1, "slug": 1, "media_type": 1}
+                        {"title": 1, "image": 1, "slug": 1, "media_type": 1}  # ✅ Ensure media_type is fetched!
                     )
+
                     
 
                     media_item = db[media_type].find_one({"_id": query_id}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
