@@ -9,8 +9,9 @@ import LandingPage from './pages/LandingPage';
 import WatchlistPage from './pages/WatchlistPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import ProfilePage from './pages/ProfilePage';
+import MediaDetailPage from './pages/MediaDetailPage'; // ✅ Import the new media details page
 import Footer from './components/Footer';
-import { Box, Flex } from '@chakra-ui/react';  // Import Chakra Flex utilities
+import { Box, Flex } from '@chakra-ui/react';  
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -32,23 +33,20 @@ const App = () => {
     <ModalProvider>
       <OnboardingModal currentUser={currentUser} />
       <Router>
-        {/* Full-height Flex container */}
         <Flex direction="column" minHeight="100vh">
           
-          {/* Main content area takes up remaining space */}
           <Box flex="1">
             <Routes>
-               <Route path="/" element={<HomePage user={currentUser} />} />
+              <Route path="/" element={<HomePage user={currentUser} />} />
               <Route path="/homepage" element={<HomePage user={currentUser} />} />
               <Route path="/watchlist" element={<WatchlistPage user={currentUser} />} />
               <Route path="/search" element={<SearchResultsPage user={currentUser} />} />
               <Route path="/profile" element={<ProfilePage user={currentUser} />} />
+              <Route path="/media/:mediaType/:slug" element={<MediaDetailPage user={currentUser} />} />
             </Routes>
           </Box>
 
-          {/* Footer stays at the bottom */}
           <Footer />
-
         </Flex>
       </Router>
     </ModalProvider>
