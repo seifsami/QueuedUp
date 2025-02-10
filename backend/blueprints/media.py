@@ -31,3 +31,31 @@ def get_media_item(media_type, item_id):
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
+@media_blueprint.route('/slug/<media_type>/<slug>', methods=['GET'])
+def get_media_by_slug(media_type, slug):
+    """Fetches a media item using its slug instead of ID."""
+    try:
+        db = mongo.cx["QueuedUpDBnew"]
+        collection = db[media_type]
+        fields_to_include = {}
+
+        if media_type == 'books':
+            fields_to_include = {'title': 1, 'author': 1, 'release_date': 1, 'image': 1, 'description': 1, 'series': 1, 'slug': 1}
+        elif media_type == 'movies':
+            fields_to_include = {'title': 1, 'director': 1, 'release_date': 1, 'image': 1, 'description': 1, 'genres': 1, 'franchise_name': 1, 'slug': 1}
+        elif media_type == 'tv_seasons':
+            fields_to_include = {'title': 1, 'network_name': 1, 'release_date': 1, 'image': 1, 'description': 1, 'genres': 1, 'name': 1, 'slug': 1}
+
+        print(f"Searching in collection: {media_type} with Slug: {slug}")
+        item = collection.find_one({"slug": slug}, fields_to_include)
+
+        if item:
+            item['_id'] = str(item['_id'])  # Convert ObjectId to string
+            item['media_type'] = media_type  # Add media_type to response
+            return jsonify(item), 200
+        else:
+            return jsonify({"error": "Media not found"}), 404
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
