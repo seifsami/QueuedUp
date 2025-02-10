@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspence } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Box,

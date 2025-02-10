@@ -5,10 +5,6 @@ from app import mongo
 import json
 import time
 import datetime
-import requests
-import random 
-
-
 
 
 media_blueprint = Blueprint('media_blueprint', __name__)
@@ -40,87 +36,98 @@ def get_media_item(media_type, item_id):
         print(f"Error: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
-
-
-
 @media_blueprint.route('/slug/<media_type>/<slug>', methods=['GET'])
 def get_media_by_slug(media_type, slug):
-    """Fetches a media item using its slug instead of ID, with caching for performance."""
+    """Fetches a media item using its slug instead of ID."""
     try:
-        db = mongo.cx["QueuedUpDBnew"]  # ✅ Keeping the existing DB reference
+        db = mongo.cx["QueuedUpDBnew"]
         collection = db[media_type]
         redis_client = current_app.config.get("REDIS_CLIENT")  # ✅ Get Redis client
 
-        # ✅ Step 1: Check Redis Cache for Media Data
-        cache_key = f"cached_media:{media_type}:{slug}"
-        cached_data = redis_client.get(cache_key) if redis_client else None
+        # ✅ Check Redis cache for media details first (6-hour cache)
+        media_cache_key = f"cached_media:{media_type}:{slug}"
+        cached_media = redis_client.get(media_cache_key) if redis_client else None
 
-        if cached_data:
+        if cached_media:
             print(f"⚡ Cache hit for media: {slug}")
-            return jsonify(json.loads(cached_data)), 200
+            return jsonify(json.loads(cached_media)), 200
 
-        print(f"🔎 Querying MongoDB for {media_type} with slug: {slug}")
-        item = collection.find_one({"slug": slug})
+        fields_to_include = {}
 
-        if not item:
-            return jsonify({"error": "Media not found"}), 404
+        # 🔹 Define the fields we want to return for each media type
+        if media_type == 'books':
+            fields_to_include = {
+                'title': 1, 'author': 1, 'release_date': 1, 'image': 1, 
+                'description': 1, 'series': 1, 'slug': 1, 'language': 1, 'publisher': 1, 'hype_score': 1
+            }
+        elif media_type == 'movies':
+            fields_to_include = {
+                'title': 1, 'director': 1, 'release_date': 1, 'image': 1, 
+                'description': 1, 'genres': 1, 'franchise_name': 1, 'slug': 1, 'hype_score': 1
+            }
+        elif media_type == 'tv_seasons':
+            fields_to_include = {
+                'title': 1, 'network_name': 1, 'release_date': 1, 'image': 1, 
+                'description': 1, 'genres': 1, 'slug': 1, 'spoken_languages': 1, 'hype_score': 1
+            }
 
-        # Convert ObjectId to string
-        item['_id'] = str(item['_id'])
-        item['media_type'] = media_type
+        print(f"Searching in collection: {media_type} with Slug: {slug}")
+        item = collection.find_one({"slug": slug}, fields_to_include)
 
-        # 🔹 Standardize creator field
-        item['creator'] = item.get('author') or item.get('director') or item.get('network_name')
-        item['creator_label'] = "Author" if media_type == "books" else "Director" if media_type == "movies" else "Network"
+        if item:
+            item['_id'] = str(item['_id'])  # Convert ObjectId to string
+            item['media_type'] = media_type  # Add media_type to response
 
-        # ✅ Step 2: Check Cached Hype Score First
-        hype_cache_key = f"hype_meter:{media_type}:{item['_id']}"
-        cached_hype = redis_client.get(hype_cache_key) if redis_client else None
+            # 🔹 Standardize field names for consistency in the frontend
+            item['creator'] = item.get('author') or item.get('director') or item.get('network_name')
+            item['creator_label'] = "Author" if media_type == "books" else "Director" if media_type == "movies" else "Network"
 
-        if cached_hype:
-            print(f"⚡ Using cached Hype Meter for {item['_id']}")
-            item["hype_meter_percentage"] = int(cached_hype)
-        else:
-            # ✅ Step 3: Get Raw Hype Score from MongoDB
-            raw_hype_score = item.get("hype_score", 0)  # Default to 0 if missing
+            # ✅ Check Redis cache for hype percentage first (24-hour cache)
+            hype_cache_key = f"hype_meter:{media_type}:{item['_id']}"
+            cached_hype = redis_client.get(hype_cache_key) if redis_client else None
 
-            # ✅ Convert Raw Score to Percentage
-            if raw_hype_score == 0:
-                # Randomly assign 25% or 40% for missing or zero scores
-                hype_meter_percentage = random.choice([25, 40])
-            elif raw_hype_score >= 0.8:
-                hype_meter_percentage = 100
-            elif raw_hype_score >= 0.5:
-                hype_meter_percentage = 80
-            elif raw_hype_score >= 0.3:
-                hype_meter_percentage = 60
-            elif raw_hype_score >= 0.1:
-                hype_meter_percentage = 40
+            if cached_hype:
+                print(f"⚡ Using cached Hype Meter for {item['_id']}")
+                item["hype_meter_percentage"] = int(cached_hype)
             else:
-                hype_meter_percentage = 25
+                # ✅ Get raw hype score from MongoDB
+                raw_hype_score = item.get("hype_score", 0)  # Default to 0 if missing
 
-            # ✅ Cache the hype percentage for 24 hours
+                # ✅ Convert raw hype score to percentage
+                if raw_hype_score is None or raw_hype_score == 0:
+                    hype_meter_percentage = random.choice([25, 40])  # Random assignment for 0/missing values
+                elif raw_hype_score >= 0.8:
+                    hype_meter_percentage = 100
+                elif raw_hype_score >= 0.5:
+                    hype_meter_percentage = 80
+                elif raw_hype_score >= 0.3:
+                    hype_meter_percentage = 60
+                elif raw_hype_score >= 0.1:
+                    hype_meter_percentage = 40
+                else:
+                    hype_meter_percentage = 25
+
+                # ✅ Cache hype percentage for 24 hours
+                if redis_client:
+                    redis_client.setex(hype_cache_key, 86400, hype_meter_percentage)
+
+                item["hype_meter_percentage"] = hype_meter_percentage
+
+            # 🔹 Format release date properly (remove timestamp)
+            if 'release_date' in item and isinstance(item['release_date'], str):
+                item['release_date'] = item['release_date'].split(' ')[1:4]  # Extract only Date (no timestamp)
+                item['release_date'] = " ".join(item['release_date'])  # Convert list back to string
+
+            # ✅ Cache media details for 6 hours
             if redis_client:
-                redis_client.setex(hype_cache_key, 86400, hype_meter_percentage)
+                redis_client.setex(media_cache_key, 21600, json.dumps(item))  # 6-hour cache
 
-            item["hype_meter_percentage"] = hype_meter_percentage
-
-        # 🔹 Format release date properly (remove timestamp)
-        if 'release_date' in item and isinstance(item['release_date'], str):
-            item['release_date'] = item['release_date'].split(' ')[1:4]  # Extract only Date (no timestamp)
-            item['release_date'] = " ".join(item['release_date'])  # Convert list back to string
-
-        # ✅ Store media in Redis (cache for 6 hours)
-        if redis_client:
-            redis_client.setex(cache_key, 21600, json.dumps(item))  # 6-hour cache
-
-        return jsonify(item), 200
-
+            return jsonify(item), 200
+        else:
+            return jsonify({"error": "Media not found"}), 404
     except Exception as e:
-        print(f"❌ Error in get_media_by_slug: {str(e)}")
+        print(f"Error: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
-
-
 
     
 
