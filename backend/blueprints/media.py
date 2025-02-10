@@ -88,17 +88,21 @@ def get_recommendations(media_type, item_id):
         db = mongo.cx["QueuedUpDBnew"]
         watchlist_collection = db["userwatchlist"]
 
-        # 🔹 Check if item_id is already a valid ObjectId
-        if ObjectId.is_valid(item_id):
-            item_id = ObjectId(item_id)
-        else:
-            print(f"❌ Invalid ObjectId: {item_id}")
-            return jsonify({"error": "Invalid item ID format"}), 400
+        # 🔹 Remove accidental trailing whitespace or newline characters
+        item_id = item_id.strip()
 
-        print(f"✅ Converted item_id to ObjectId: {item_id}")
+        print(f"📌 Received item_id: {item_id}")
+
+        # 🔹 Fix: Handle IDs stored as either ObjectId or String in MongoDB
+        object_id_format = ObjectId.is_valid(item_id)
+
+        # Use ObjectId only if it's in the correct format
+        query_item_id = ObjectId(item_id) if object_id_format else item_id
+
+        print(f"✅ Querying MongoDB with: {query_item_id} (ObjectId? {object_id_format})")
 
         # Step 1: Find all users who have this item in their watchlist
-        users_with_item = list(watchlist_collection.find({"item_id": item_id, "media_type": media_type}, {"user_id": 1}))
+        users_with_item = list(watchlist_collection.find({"item_id": query_item_id, "media_type": media_type}, {"user_id": 1}))
         user_ids = [user["user_id"] for user in users_with_item]
 
         if not user_ids:
@@ -118,7 +122,10 @@ def get_recommendations(media_type, item_id):
         recommendations = []
         for rec in recommended_items:
             try:
-                media_item = db[media_type].find_one({"_id": ObjectId(rec["_id"])}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
+                # Ensure `rec["_id"]` is treated correctly as ObjectId or string
+                query_id = ObjectId(rec["_id"]) if ObjectId.is_valid(rec["_id"]) else rec["_id"]
+
+                media_item = db[media_type].find_one({"_id": query_id}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
                 if media_item:
                     media_item["_id"] = str(media_item["_id"])
                     recommendations.append(media_item)
