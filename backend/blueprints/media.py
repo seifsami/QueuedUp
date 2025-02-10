@@ -85,6 +85,8 @@ def get_media_by_slug(media_type, slug):
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
     
 
+
+
 @media_blueprint.route('/recommendations/<media_type>/<item_id>', methods=['GET'])
 def get_recommendations(media_type, item_id):
     """Finds media that users also have in their watchlist, filtered by media type."""
@@ -122,7 +124,7 @@ def get_recommendations(media_type, item_id):
                 {"$match": {"user_id": {"$in": user_ids}, "media_type": media_type}},
                 {"$group": {"_id": "$item_id", "count": {"$sum": 1}}},
                 {"$sort": {"count": -1}},
-                {"$limit": 4}
+                {"$limit": 5}
             ]))
 
             print(f"🔎 Found {len(recommended_items)} recommended items before filtering.")
@@ -144,8 +146,8 @@ def get_recommendations(media_type, item_id):
                     print(f"❌ Error fetching media item: {str(e)}")
 
         # Step 4: If we have fewer than 5 recommendations, add random ones
-        if len(recommendations) < 4:
-            missing_count = 4 - len(recommendations)
+        if len(recommendations) < 5:
+            missing_count = 5 - len(recommendations)
             print(f"⚠️ Not enough recommendations ({len(recommendations)} found), adding {missing_count} random items.")
 
             random_items = list(db[media_type].aggregate([
@@ -161,8 +163,7 @@ def get_recommendations(media_type, item_id):
         print(f"✅ Returning {len(recommendations)} recommendations.")
 
         # ✅ Step 5: Store Recommendations in Redis (6 Hours)
-        
-        
+    
 
         def serialize_datetime(obj):
             """Convert datetime objects to ISO format for JSON serialization."""
@@ -173,7 +174,6 @@ def get_recommendations(media_type, item_id):
         # ✅ Store Recommendations in Redis (6 Hours), handling datetime
         if redis_client:
             redis_client.setex(cache_key, 21600, json.dumps(recommendations, default=serialize_datetime))
-        # 21600 sec = 6 hours
 
         return jsonify({"recommendations": recommendations}), 200
     except Exception as e:
