@@ -153,10 +153,20 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
               : type.charAt(0).toUpperCase() + type.slice(1)}
           </Text>
           {groupedResults[type].slice(0, 2).map((item) => ( // Limit to 2 results per category
-            <WatchlistPreviewCard key={item._id || item.id} item={item} showDelete={false} openModal={(detailedItem) => {
-              setSelectedItem(detailedItem);
-              setModalOpen(true);
-            }} />
+            <WatchlistPreviewCard
+            key={item._id || item.id}
+            item={item}
+            showDelete={false}
+            onClick={() => {
+              console.log("🔍 Clicked search result:", item);
+              
+              if (item.slug) {
+                navigate(`/media/${item.media_type}/${item.slug}`);
+              } else {
+                console.error("🚨 Missing slug! Can't navigate.");
+              }
+            }}
+          />
           ))}
         </Box>
       ));

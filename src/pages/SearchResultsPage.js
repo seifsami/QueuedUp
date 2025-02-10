@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Flex, VStack, Heading, useBreakpointValue, Text } from '@chakra-ui/react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import Header from '../components/Header';
@@ -15,6 +15,7 @@ const SearchResultsPage = ({ currentUser }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('query') || '';
   const typeFromParams = searchParams.get('type') || 'all';
+  const navigate = useNavigate();
 
   const [searchResults, setSearchResults] = useState([]); // API results
   const [filteredResults, setFilteredResults] = useState([]); // Filtered results based on type
@@ -101,7 +102,22 @@ const SearchResultsPage = ({ currentUser }) => {
               <Text>Loading...</Text>
             ) : filteredResults.length ? (
               filteredResults.map((item) => (
-                <WatchlistPreviewCard key={item._id || item.id} item={item} showDelete={false} width="full" />
+                <WatchlistPreviewCard 
+                  key={item._id || item.id} 
+                  item={item} 
+                  showDelete={false} 
+                  width="full" 
+                  onClick={() => {
+                    console.log("🔍 Clicked search result:", item);
+
+                    if (item.slug) {
+                      navigate(`/media/${item.media_type}/${item.slug}`);
+                    } else {
+                      console.error("🚨 Missing slug! Can't navigate.");
+                    }
+                  }} 
+                />
+
               ))
             ) : (
               <NoResults />
