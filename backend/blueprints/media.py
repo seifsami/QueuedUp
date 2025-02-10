@@ -91,8 +91,9 @@ def get_media_by_slug(media_type, slug):
                 item["hype_meter_percentage"] = int(cached_hype)
             else:
                 # ✅ Get raw hype score from MongoDB
-                console.log(item.get("hype_score"))
+                print(f"⚡ Retrieved hype_score for {slug}: {item.get("hype_score")}")
                 raw_hype_score = item.get("hype_score", 0)  # Default to 0 if missing
+                print(f"⚡ Retrieved hype_score for {slug}: {raw_hype_score}")
 
                 # ✅ Convert raw hype score to percentage
                 if raw_hype_score is None or raw_hype_score == 0:
