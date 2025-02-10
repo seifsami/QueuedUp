@@ -35,6 +35,9 @@ from blueprints.cron import cron_blueprint
 from blueprints.search import search_blueprint
 from blueprints.emailnotifs import emailnotifs_blueprint
 from blueprints.requests import request_blueprint
+from blueprints.hype import hype_blueprint
+
+
 
 
 
@@ -46,6 +49,7 @@ app.register_blueprint(cron_blueprint, url_prefix='/cron')
 app.register_blueprint(search_blueprint, url_prefix='/api')
 app.register_blueprint(emailnotifs_blueprint, url_prefix='/api')
 app.register_blueprint(request_blueprint, url_prefix='/api')
+app.register_blueprint(hype_blueprint, url_prefix='/hype')
 
 
 @app.route('/')
