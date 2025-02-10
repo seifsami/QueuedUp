@@ -4,6 +4,8 @@ from bson import ObjectId
 from app import mongo
 import json
 import time
+import datetime
+
 
 media_blueprint = Blueprint('media_blueprint', __name__)
 
@@ -159,8 +161,19 @@ def get_recommendations(media_type, item_id):
         print(f"✅ Returning {len(recommendations)} recommendations.")
 
         # ✅ Step 5: Store Recommendations in Redis (6 Hours)
+        
+        
+
+        def serialize_datetime(obj):
+            """Convert datetime objects to ISO format for JSON serialization."""
+            if isinstance(obj, datetime.datetime):
+                return obj.isoformat()
+            raise TypeError("Type not serializable")
+
+        # ✅ Store Recommendations in Redis (6 Hours), handling datetime
         if redis_client:
-            redis_client.setex(cache_key, 21600, json.dumps(recommendations))  # 21600 sec = 6 hours
+            redis_client.setex(cache_key, 21600, json.dumps(recommendations, default=serialize_datetime))
+        # 21600 sec = 6 hours
 
         return jsonify({"recommendations": recommendations}), 200
     except Exception as e:
