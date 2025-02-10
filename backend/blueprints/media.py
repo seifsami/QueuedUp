@@ -80,6 +80,7 @@ def get_media_by_slug(media_type, slug):
         print(f"Error: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
     
+from bson import ObjectId
 
 @media_blueprint.route('/recommendations/<media_type>/<item_id>', methods=['GET'])
 def get_recommendations(media_type, item_id):
@@ -88,26 +89,28 @@ def get_recommendations(media_type, item_id):
         db = mongo.cx["QueuedUpDBnew"]
         watchlist_collection = db["userwatchlist"]
 
-        # 🔹 Remove accidental trailing whitespace or newline characters
+        # 🔹 Strip any whitespace or newline characters
         item_id = item_id.strip()
-
         print(f"📌 Received item_id: {item_id}")
 
-        # 🔹 Fix: Handle IDs stored as either ObjectId or String in MongoDB
-        object_id_format = ObjectId.is_valid(item_id)
-
-        # Use ObjectId only if it's in the correct format
-        query_item_id = ObjectId(item_id) if object_id_format else item_id
-
-        print(f"✅ Querying MongoDB with: {query_item_id} (ObjectId? {object_id_format})")
-
         # Step 1: Find all users who have this item in their watchlist
-        users_with_item = list(watchlist_collection.find({"item_id": query_item_id, "media_type": media_type}, {"user_id": 1}))
+        users_with_item = list(watchlist_collection.find(
+            {"item_id": item_id, "media_type": media_type}, {"user_id": 1}
+        ))
         user_ids = [user["user_id"] for user in users_with_item]
 
         if not user_ids:
-            print("⚠️ No users found with this item.")
-            return jsonify({"recommendations": []}), 200
+            print("⚠️ No users found with this item. Returning random recommendations.")
+            random_items = list(db[media_type].aggregate([{"$sample": {"size": 3}}]))
+
+            recommendations = []
+            for item in random_items:
+                item["_id"] = str(item["_id"])
+                recommendations.append(item)
+
+            return jsonify({"recommendations": recommendations}), 200
+
+        print(f"👥 Found {len(user_ids)} users with this item.")
 
         # Step 2: Find other items these users also have
         recommended_items = list(watchlist_collection.aggregate([
@@ -122,7 +125,7 @@ def get_recommendations(media_type, item_id):
         recommendations = []
         for rec in recommended_items:
             try:
-                # Ensure `rec["_id"]` is treated correctly as ObjectId or string
+                # ✅ Convert `rec["_id"]` from string to ObjectId when querying the media collection
                 query_id = ObjectId(rec["_id"]) if ObjectId.is_valid(rec["_id"]) else rec["_id"]
 
                 media_item = db[media_type].find_one({"_id": query_id}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
@@ -132,10 +135,11 @@ def get_recommendations(media_type, item_id):
             except Exception as e:
                 print(f"❌ Error fetching media item: {str(e)}")
 
-        # Step 3: If not enough recommendations, get random items from the same media type
+        # Step 3: If not enough recommendations, add random ones
         if len(recommendations) < 3:
-            print("⚠️ Not enough recommendations, adding random items.")
-            random_items = db[media_type].aggregate([{"$sample": {"size": 3}}])
+            print(f"⚠️ Not enough recommendations ({len(recommendations)} found), adding random items.")
+            random_items = list(db[media_type].aggregate([{"$sample": {"size": 3}}]))
+
             for item in random_items:
                 if item not in recommendations:
                     item["_id"] = str(item["_id"])
