@@ -84,6 +84,7 @@ def search():
                         "director": 1,          # Include for movies
                         "network_name": 1,      # Include for TV seasons
                         "media_type": { "$literal": collection_name },
+                        "slug":1
                         "score": {"$meta": "searchScore"}
                     }
                 }
