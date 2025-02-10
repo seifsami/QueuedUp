@@ -2,6 +2,8 @@
 from flask import Blueprint, jsonify
 from bson import ObjectId
 from app import mongo
+import json
+import time
 
 media_blueprint = Blueprint('media_blueprint', __name__)
 
@@ -80,7 +82,6 @@ def get_media_by_slug(media_type, slug):
         print(f"Error: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
     
-from bson import ObjectId
 
 @media_blueprint.route('/recommendations/<media_type>/<item_id>', methods=['GET'])
 def get_recommendations(media_type, item_id):
@@ -91,54 +92,63 @@ def get_recommendations(media_type, item_id):
 
         # 🔹 Strip any whitespace or newline characters
         item_id = item_id.strip()
+        cache_key = f"cached_recommendations:{media_type}:{item_id}"
+
+        # ✅ Step 1: Check Redis Cache
+        if redis_client:
+            cached_data = redis_client.get(cache_key)
+            if cached_data:
+                print(f"⚡ Returning cached recommendations for {item_id}")
+                return jsonify({"recommendations": json.loads(cached_data)}), 200
+
         print(f"📌 Received item_id: {item_id}")
 
-        # Step 1: Find all users who have this item in their watchlist
+        # Step 2: Find all users who have this item in their watchlist
         users_with_item = list(watchlist_collection.find(
             {"item_id": item_id, "media_type": media_type}, {"user_id": 1}
         ))
         user_ids = [user["user_id"] for user in users_with_item]
 
-        if not user_ids:
-            print("⚠️ No users found with this item. Returning random recommendations.")
-            random_items = list(db[media_type].aggregate([{"$sample": {"size": 3}}]))
-
-            recommendations = []
-            for item in random_items:
-                item["_id"] = str(item["_id"])
-                recommendations.append(item)
-
-            return jsonify({"recommendations": recommendations}), 200
-
-        print(f"👥 Found {len(user_ids)} users with this item.")
-
-        # Step 2: Find other items these users also have
-        recommended_items = list(watchlist_collection.aggregate([
-            {"$match": {"user_id": {"$in": user_ids}, "media_type": media_type}},  # Only same media type
-            {"$group": {"_id": "$item_id", "count": {"$sum": 1}}},
-            {"$sort": {"count": -1}},
-            {"$limit": 5}  # Return top 5 recommendations
-        ]))
-
-        print(f"🔎 Found {len(recommended_items)} recommended items.")
-
         recommendations = []
-        for rec in recommended_items:
-            try:
-                # ✅ Convert `rec["_id"]` from string to ObjectId when querying the media collection
-                query_id = ObjectId(rec["_id"]) if ObjectId.is_valid(rec["_id"]) else rec["_id"]
 
-                media_item = db[media_type].find_one({"_id": query_id}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
-                if media_item:
-                    media_item["_id"] = str(media_item["_id"])
-                    recommendations.append(media_item)
-            except Exception as e:
-                print(f"❌ Error fetching media item: {str(e)}")
+        if user_ids:
+            print(f"👥 Found {len(user_ids)} users with this item.")
 
-        # Step 3: If not enough recommendations, add random ones
-        if len(recommendations) < 3:
-            print(f"⚠️ Not enough recommendations ({len(recommendations)} found), adding random items.")
-            random_items = list(db[media_type].aggregate([{"$sample": {"size": 3}}]))
+            # Step 3: Find other items these users also have
+            recommended_items = list(watchlist_collection.aggregate([
+                {"$match": {"user_id": {"$in": user_ids}, "media_type": media_type}},
+                {"$group": {"_id": "$item_id", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}},
+                {"$limit": 5}
+            ]))
+
+            print(f"🔎 Found {len(recommended_items)} recommended items before filtering.")
+
+            for rec in recommended_items:
+                try:
+                    query_id = ObjectId(rec["_id"]) if ObjectId.is_valid(rec["_id"]) else rec["_id"]
+
+                    # 🔹 Ensure we exclude the current item
+                    if str(query_id) == item_id:
+                        print(f"🚨 Skipping current item {query_id}")
+                        continue
+
+                    media_item = db[media_type].find_one({"_id": query_id}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
+                    if media_item:
+                        media_item["_id"] = str(media_item["_id"])
+                        recommendations.append(media_item)
+                except Exception as e:
+                    print(f"❌ Error fetching media item: {str(e)}")
+
+        # Step 4: If we have fewer than 5 recommendations, add random ones
+        if len(recommendations) < 5:
+            missing_count = 5 - len(recommendations)
+            print(f"⚠️ Not enough recommendations ({len(recommendations)} found), adding {missing_count} random items.")
+
+            random_items = list(db[media_type].aggregate([
+                {"$match": {"_id": {"$ne": ObjectId(item_id)}}},  # Exclude the current item
+                {"$sample": {"size": missing_count}}
+            ]))
 
             for item in random_items:
                 if item not in recommendations:
@@ -146,6 +156,11 @@ def get_recommendations(media_type, item_id):
                     recommendations.append(item)
 
         print(f"✅ Returning {len(recommendations)} recommendations.")
+
+        # ✅ Step 5: Store Recommendations in Redis (6 Hours)
+        if redis_client:
+            redis_client.setex(cache_key, 21600, json.dumps(recommendations))  # 21600 sec = 6 hours
+
         return jsonify({"recommendations": recommendations}), 200
     except Exception as e:
         print(f"❌ Error in recommendations: {str(e)}")

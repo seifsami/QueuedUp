@@ -2,12 +2,18 @@ from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 import os
+import redis
+
+
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 MONGO_URI = os.getenv("MONGO_URI")
 if not MONGO_URI:
     print("🚨 ERROR: MONGO_URI is NOT set in environment variables!")
+redis_url = os.getenv("REDIS_URL")
+redis_client = redis.from_url(redis_url, decode_responses=True) if redis_url else None
 
 app.config["MONGO_URI"] = MONGO_URI
 mongo = PyMongo(app)

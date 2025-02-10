@@ -85,7 +85,7 @@ const MediaDetailPage = () => {
       async function fetchRecommendations() {
         try {
           setLoadingRecs(true);
-          const recResponse = await axios.get(`https://queuedup-backend-6d9156837adf.herokuapp.com/recommendations/${mediaType}/${media._id}`);
+          const recResponse = await axios.get(`https://queuedup-backend-6d9156837adf.herokuapp.com/media/recommendations/${mediaType}/${media._id}`);
           console.log("Recommendations Data:", recResponse.data.recommendations);
           setRecommendations(recResponse.data.recommendations);
         } catch (error) {
