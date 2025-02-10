@@ -10,6 +10,7 @@ import random
 
 
 
+
 media_blueprint = Blueprint('media_blueprint', __name__)
 
 @media_blueprint.route('/<media_type>/<item_id>', methods=['GET'])
@@ -72,10 +73,7 @@ def get_media_by_slug(media_type, slug):
         item['creator'] = item.get('author') or item.get('director') or item.get('network_name')
         item['creator_label'] = "Author" if media_type == "books" else "Director" if media_type == "movies" else "Network"
 
-        # ✅ Step 2: Get Hype Score from MongoDB (Calculated via `update_hype_score`)
-        raw_hype_score = item.get("hype_score", None)  # Stored in DB after `update_hype_score` runs
-
-        # ✅ Step 3: Convert Raw Score to Percentage
+        # ✅ Step 2: Check Cached Hype Score First
         hype_cache_key = f"hype_meter:{media_type}:{item['_id']}"
         cached_hype = redis_client.get(hype_cache_key) if redis_client else None
 
@@ -83,7 +81,11 @@ def get_media_by_slug(media_type, slug):
             print(f"⚡ Using cached Hype Meter for {item['_id']}")
             item["hype_meter_percentage"] = int(cached_hype)
         else:
-            if raw_hype_score is None or raw_hype_score == 0:
+            # ✅ Step 3: Get Raw Hype Score from MongoDB
+            raw_hype_score = item.get("hype_score", 0)  # Default to 0 if missing
+
+            # ✅ Convert Raw Score to Percentage
+            if raw_hype_score == 0:
                 # Randomly assign 25% or 40% for missing or zero scores
                 hype_meter_percentage = random.choice([25, 40])
             elif raw_hype_score >= 0.8:
@@ -117,6 +119,7 @@ def get_media_by_slug(media_type, slug):
     except Exception as e:
         print(f"❌ Error in get_media_by_slug: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
 
 
     
