@@ -72,25 +72,25 @@ def get_media_by_slug(media_type, slug):
             item['creator'] = item.get('author') or item.get('director') or item.get('network_name')
             item['creator_label'] = "Author" if media_type == "books" else "Director" if media_type == "movies" else "Network"
 
-            try:
-                hype_url = f"https://queuedup-backend-6d9156837adf.herokuapp.com/hype/{media_type}/{item['_id']}"
-                hype_response = requests.get(hype_url, timeout=5)  # Add timeout to avoid hanging
-                if hype_response.status_code == 200:
-                    hype_data = hype_response.json()
-                    item["hype_meter_percentage"] = hype_data.get("hype_meter_percentage", 25)  # Default if missing
-                else:
-                    print(f"⚠️ Failed to fetch hype meter ({hype_response.status_code}): {hype_response.text}")
-                    item["hype_meter_percentage"] = 25  # Default value if the request fails
-            except requests.RequestException as e:
-                print(f"❌ Error fetching hype meter: {str(e)}")
-                item["hype_meter_percentage"] = 25  # Default value in case of exception
+           try:
+            hype_url = f"https://queuedup-backend-6d9156837adf.herokuapp.com/hype/{media_type}/{item['_id']}"
+            hype_response = requests.get(hype_url, timeout=5)
+            
+            if hype_response.status_code == 200:
+                hype_data = hype_response.json()
+                item["hype_meter_percentage"] = hype_data.get("hype_meter_percentage", 25)
+            else:
+                print(f"⚠️ Failed to fetch hype meter ({hype_response.status_code}): {hype_response.text}")
+                item["hype_meter_percentage"] = 25
 
-            # 🔹 Format release date properly (remove timestamp)
-            if 'release_date' in item and isinstance(item['release_date'], str):
-                item['release_date'] = item['release_date'].split(' ')[1:4]  # Extract only Date (no timestamp)
-                item['release_date'] = " ".join(item['release_date'])  # Convert list back to string
+        except requests.RequestException as e:
+            print(f"❌ Error fetching hype meter: {str(e)}")
+            item["hype_meter_percentage"] = 25
 
-            return jsonify(item), 200
+        # 🔹 LOG FINAL RESPONSE TO DEBUG
+        print(f"✅ Final Media Response: {json.dumps(item, indent=2)}")
+        return jsonify(item), 200
+
         else:
             return jsonify({"error": "Media not found"}), 404
     except Exception as e:
