@@ -20,6 +20,7 @@ import {
 import { FaBook, FaTv, FaFilm, FaTrash, FaEllipsisV, FaTimes } from 'react-icons/fa';
 import axios from 'axios'; // ✅ Import Axios for API calls
 import DetailsModal from './DetailsModal';
+import { useNavigate } from 'react-router-dom'
 
 
 const mediaTypeIcons = {
@@ -46,6 +47,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   const [fadeOut, setFadeOut] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const isMobile = useBreakpointValue({ base: true, md: false });
+  const navigate = useNavigate();
 
 
 
@@ -153,39 +155,17 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   };
 
   // 🟢 Fetch full item details when card is clicked
-  const handleCardClick = async (event) => {
+  const handleCardClick = (event) => {
     event.preventDefault();
     event.stopPropagation();
-  
-    console.log("Card clicked, opening modal...");
-  
-    // 🔥 Ensure search input keeps focus
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-      setTimeout(() => searchInput.focus(), 50); // Delay a bit to prevent flickering
-    }
-  
-    let itemToShow = item;
-  
-    if (!item.description) {
-      try {
-        const { data } = await axios.get(
-          `https://queuedup-backend-6d9156837adf.herokuapp.com/media/${item.media_type}/${item._id || item.item_id}`
-        );
-        console.log("Fetched detailed item:", data);
-        setDetailedItem(data);
-      } catch (error) {
-        console.error("Error fetching detailed item:", error);
-        setDetailedItem(item);
-      }
+
+    console.log("🟢 WatchlistPreviewCard Clicked!", item);
+
+    if (item.slug) {
+      console.log("🔗 Navigating to:", `/media/${item.media_type}/${item.slug}`);
+      navigate(`/media/${item.media_type}/${item.slug}`);
     } else {
-      setDetailedItem(item);
-    }
-  
-    if (openModal) {
-      openModal(itemToShow);
-    } else {
-      setModalOpen(true);
+      console.error("🚨 Missing slug for item:", item);
     }
   };
   

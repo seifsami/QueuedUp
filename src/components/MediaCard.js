@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Image, Text, Button, VStack, HStack, Icon } from '@chakra-ui/react';
-import { FaEye } from 'react-icons/fa';
+import { Box, Image, Text, Button, VStack, HStack } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 import Countdown from 'react-countdown';
 import NotifyMeButton from './NotifyMeButton';
 
@@ -11,8 +11,10 @@ const defaultImages = {
 };
 
 const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
+  const navigate = useNavigate();
   const imageContainerHeight = '338px'; 
 
+  // Format release date function
   const formatReleaseDate = (dateStr) => {
     if (!dateStr) return 'N/A';
     try {
@@ -30,6 +32,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
     }
   };
 
+  // Countdown renderer
   const renderer = ({ days, hours, minutes, completed }) => {
     if (completed) {
       return <Text fontSize="sm">Released!</Text>;
@@ -38,20 +41,44 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
     }
   };
 
+  // 🚀 Click Handler: Open Modal or Navigate
+  const handleCardClick = (e) => {
+    console.log("🖱 Click Event Triggered:", e.target);  // Log what was clicked
+
+    if (e.target.closest(".view-more-btn")) {
+      // 🎯 Navigate to details page
+      console.log("🔍 Navigating to:", `/media/${item.media_type}/${item.slug}`);
+
+      if (item.slug) {
+        navigate(`/media/${item.media_type}/${item.slug}`);
+      } else {
+        console.error("❌ Missing slug for item:", item);
+      }
+    } else {
+      // 🎯 Open Modal
+      console.log("📌 Opening Modal for:", item.title);
+      onOpenModal(item);
+    }
+  };
+
+
   return (
     <Box
       borderWidth="1px"
       borderRadius="lg"
       overflow="hidden"
       bg="white"
-      boxShadow="md"  // Default shadow
+      boxShadow="md"
       transition="transform 0.2s, box-shadow 0.2s"
       _hover={{ transform: "translateY(-4px)", boxShadow: "lg", cursor: "pointer" }}
       w="220px"
       h="500px"
       m="0 8px"
-      onClick={() => onOpenModal(item)}
+      onClick={handleCardClick}
     >
+      {/* Debugging Slug */}
+      {console.log("🛠 MediaCard Item:", item)}
+
       <Box 
         height={imageContainerHeight}
         position="relative"
@@ -70,7 +97,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
       </Box>
 
       <VStack align="start" p={2} spacing="1">
-        {/* Title container with fixed height */}
+        {/* Title */}
         <Box w="full" h="3.5rem" overflow="hidden">
           <Text 
             fontSize="lg" 
@@ -81,6 +108,8 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
             {item.title}
           </Text>
         </Box>
+
+        {/* Release Date & Countdown */}
         <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
         {item.release_date && item.release_date !== 'N/A' ? (
           <Countdown date={formatReleaseDate(item.release_date)} renderer={renderer} />
@@ -89,7 +118,7 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
         )}
 
         <HStack justifyContent="space-between" width="full">
-          {/* Wrap each button in a Box with fixed width */}
+          {/* Notify Button */}
           <Box width="48%" onClick={(e) => e.stopPropagation()}>
             <NotifyMeButton
               item={item}
@@ -99,30 +128,26 @@ const MediaCard = ({ item, onOpenModal, userWatchlist, refetchWatchlist }) => {
               buttonProps={{ width: "100%", size: "sm" }}
             />
           </Box>
-          <Box width="48%">
+
+          {/* View More Button - Navigates to MediaDetailPage */}
+          <Box width="48%" onClick={(e) => e.stopPropagation()}>
             <Button 
+              className="view-more-btn"
               variant="outline" 
               borderColor="brand.100"
               color="brand.100"
               bg="white"
-              _hover={{ 
-                bg: 'gray.100',
-                color: 'brand.100',
-                borderColor: 'brand.100',
-              }}
-              _active={{
-                bg: 'gray.200',
-                color: 'brand.500',
-                borderColor: 'brand.100',
-              }}
+              _hover={{ bg: 'gray.100', color: 'brand.100', borderColor: 'brand.100' }}
+              _active={{ bg: 'gray.200', color: 'brand.500', borderColor: 'brand.100' }}
               size="sm"
               width="100%"
               onClick={(e) => {
+                console.log("🛠 View More Clicked!", item);
                 e.stopPropagation();
-                onOpenModal(item);
+                handleCardClick(e);
               }}
             >
-              View Details
+              View More
             </Button>
           </Box>
         </HStack>

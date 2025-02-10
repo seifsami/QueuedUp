@@ -70,6 +70,7 @@ const HomePage = ({ user }) => {
     return items.map(item => ({
       ...item,
       media_type: mediaType,
+      slug: item.slug || ""
     }));
   };
 
@@ -96,6 +97,8 @@ const HomePage = ({ user }) => {
           // Use cached data if available.
           const { trending, upcoming } = cachedData[mediaType];
           setTrendingData(trending);
+          console.log("about to print")
+          console.log(trendingData);
           setUpcomingReleasesData(upcoming);
           setLoadingTrending(false);
           setLoadingUpcoming(false);

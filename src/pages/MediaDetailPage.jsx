@@ -19,6 +19,7 @@ import { FaCalendarAlt, FaTv, FaGlobe, FaFilm, FaUser, FaBook } from 'react-icon
 import NotifyMeButton from '../components/NotifyMeButton';
 import Carousel from '../components/Carousel';
 import HypeMeter from '../components/HypeMeter';
+import Header from '../components/Header';
 
 const defaultImages = {
   books: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
@@ -110,6 +111,8 @@ const MediaDetailPage = () => {
   if (error || !media) return <Text>Media not found.</Text>;
   console.log("Carousel received items:", recommendations);
   return (
+    <>
+    <Header />
     <Flex direction="column" p={8} gap={6}>
       <Flex direction={{ base: "column", md: "row" }} gap={6} alignItems="start">
         {/* Left: Poster */}
@@ -206,6 +209,7 @@ const MediaDetailPage = () => {
         )
       )}
     </Flex>
+    </>
   );
   
 };

@@ -26,8 +26,10 @@ def get_user_watchlist(user_id):
             "title": media_details.get("title", "Unknown Title"),
             "image": media_details.get("image", ""),
             "release_date": media_details.get("release_date", "Unknown Date"),
-            "media_type": item["media_type"]
+            "media_type": item["media_type"],
+            "slug": media_details.get("slug", None)  # ✅ Add slug
         }
+
 
         if item['media_type'] == 'books':
             detailed_item["author"] = media_details.get("author", "Unknown Author")
