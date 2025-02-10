@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspence } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Box,
@@ -16,9 +16,9 @@ import {
 import axios from 'axios';
 import Countdown from 'react-countdown';
 import { FaCalendarAlt, FaTv, FaGlobe, FaFilm, FaUser, FaBook } from 'react-icons/fa';
-import NotifyMeButton from '../components/NotifyMeButton';
-import Carousel from '../components/Carousel';
-import HypeMeter from '../components/HypeMeter';
+const NotifyMeButton = lazy(() => import('../components/NotifyMeButton'));
+const Carousel = lazy(() => import('../components/Carousel'));
+const HypeMeter = lazy(() => import('../components/HypeMeter'));
 
 const defaultImages = {
   books: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
@@ -70,41 +70,24 @@ const MediaDetailPage = () => {
  
 
   useEffect(() => {
-    async function fetchMediaDetails() {
+    async function fetchData() {
       try {
-        const response = await axios.get(
-          `https://queuedup-backend-6d9156837adf.herokuapp.com/media/slug/${mediaType}/${slug}`
-        );
-        console.log("✅ API Response:", response.data);  // 🔹 LOG RESPONSE
-        setMedia(response.data);
+        const [mediaRes, recsRes] = await Promise.all([
+          axios.get(`https://queuedup-backend-6d9156837adf.herokuapp.com/media/slug/${mediaType}/${slug}`),
+          axios.get(`https://queuedup-backend-6d9156837adf.herokuapp.com/media/recommendations/${mediaType}/${slug}`)
+        ]);
+  
+        setMedia(mediaRes.data);
+        setRecommendations(recsRes.data.recommendations);
       } catch (error) {
-        console.error("❌ Error fetching media:", error);
+        console.error("Error fetching data:", error);
         setError(true);
       } finally {
         setLoading(false);
       }
     }
-    fetchMediaDetails();
+    fetchData();
   }, [mediaType, slug]);
-  
-
-  useEffect(() => {
-    if (media) {
-      async function fetchRecommendations() {
-        try {
-          setLoadingRecs(true);
-          const recResponse = await axios.get(`https://queuedup-backend-6d9156837adf.herokuapp.com/media/recommendations/${mediaType}/${media._id}`);
-          console.log("Recommendations Data:", recResponse.data.recommendations);
-          setRecommendations(recResponse.data.recommendations);
-        } catch (error) {
-          console.error("Error fetching recommendations:", error);
-        } finally {
-          setLoadingRecs(false);
-        }
-      }
-      fetchRecommendations();
-    }
-  }, [media]);
 
   if (loading) return <Text>Loading...</Text>;
   if (error || !media) return <Text>Media not found.</Text>;
@@ -115,7 +98,7 @@ const MediaDetailPage = () => {
       <Flex direction={{ base: "column", md: "row" }} gap={6} alignItems="start">
         {/* Left: Poster */}
         <Box flex="1" maxW="400px">
-          <Image src={media.image || defaultImages[mediaType]} alt={media.title} borderRadius="lg" boxShadow="lg" />
+          <Image src={media.image || defaultImages[mediaType]} alt={media.title} borderRadius="lg" boxShadow="lg" loading="lazy" />
         </Box>
   
         {/* Right: Title, Countdown, Metadata */}
@@ -164,7 +147,9 @@ const MediaDetailPage = () => {
           )}
   
           <Divider my={4} />
-          <HypeMeter hypeMeterPercentage={hypeMeterPercentage} />
+          <Suspense fallback={<Spinner size="lg" />}>
+            <HypeMeter hypeMeterPercentage={hypeMeterPercentage} />
+          </Suspense>
           {/* Description Section */}
           {media.description && (
             <Box>
