@@ -40,4 +40,8 @@ def update_hype_scores():
         if result.matched_count > 0:
             print(f"✅ Updated hype_score for {media_type} {item_id}: {raw_hype_score}")
 
-        # ✅ Cache raw hype sco
+        # ✅ Cache raw hype score in Redis (24 hours)
+        cache_key = f"hype_score:{media_type}:{item_id}"
+        redis_client.setex(cache_key, 86400, raw_hype_score)
+
+    return jsonify({"message": "Hype scores updated successfully"}), 200
