@@ -8,6 +8,8 @@ const Carousel = ({ items, onOpenModal, userWatchlist, refetchWatchlist }) => {
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const imageHeight = 338;
+  console.log("Rendering item:", items);
+
 
   const checkScrollPosition = () => {
     if (scrollContainer.current) {

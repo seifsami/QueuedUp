@@ -79,6 +79,9 @@ def get_media_by_slug(media_type, slug):
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
+    
+
+
 @media_blueprint.route('/recommendations/<media_type>/<item_id>', methods=['GET'])
 def get_recommendations(media_type, item_id):
     """Finds media that users also have in their watchlist, filtered by media type."""
@@ -86,9 +89,14 @@ def get_recommendations(media_type, item_id):
         db = mongo.cx["QueuedUpDBnew"]
         watchlist_collection = db["userwatchlist"]
 
+        # Convert `item_id` to ObjectId
+        try:
+            item_id = ObjectId(item_id)
+        except Exception as e:
+            return jsonify({"error": "Invalid item ID format"}), 400
+
         # Step 1: Find all users who have this item in their watchlist
         users_with_item = watchlist_collection.find({"item_id": item_id, "media_type": media_type}, {"user_id": 1})
-
         user_ids = [user["user_id"] for user in users_with_item]
 
         if not user_ids:
@@ -104,10 +112,13 @@ def get_recommendations(media_type, item_id):
 
         recommendations = []
         for rec in recommended_items:
-            media_item = db[media_type].find_one({"_id": ObjectId(rec["_id"])}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
-            if media_item:
-                media_item["_id"] = str(media_item["_id"])
-                recommendations.append(media_item)
+            try:
+                media_item = db[media_type].find_one({"_id": ObjectId(rec["_id"])}, {"title": 1, "image": 1, "slug": 1, "media_type": 1})
+                if media_item:
+                    media_item["_id"] = str(media_item["_id"])
+                    recommendations.append(media_item)
+            except Exception as e:
+                print(f"Error fetching media item: {str(e)}")
 
         # Step 3: If not enough recommendations, get random items from the same media type
         if len(recommendations) < 3:

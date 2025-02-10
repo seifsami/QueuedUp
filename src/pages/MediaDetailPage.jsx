@@ -86,6 +86,7 @@ const MediaDetailPage = () => {
         try {
           setLoadingRecs(true);
           const recResponse = await axios.get(`https://queuedup-backend-6d9156837adf.herokuapp.com/recommendations/${mediaType}/${media._id}`);
+          console.log("Recommendations Data:", recResponse.data.recommendations);
           setRecommendations(recResponse.data.recommendations);
         } catch (error) {
           console.error("Error fetching recommendations:", error);
@@ -99,6 +100,7 @@ const MediaDetailPage = () => {
 
   if (loading) return <Text>Loading...</Text>;
   if (error || !media) return <Text>Media not found.</Text>;
+  console.log("Carousel received items:", recommendations);
 
   return (
     <Flex direction="column" p={8} gap={6}>
