@@ -83,7 +83,10 @@ def search():
                         "adjusted_score": {
                             "$add": [
                                 {"$multiply": [{"$meta": "searchScore"}, 0.8]},  # 80% relevance
-                                {"$multiply": [{"$ln": {"$add": ["$hype_score", 1]}}, 0.2]}  # 20% hype score
+                               "$multiply": [
+                                    {"$ln": {"$add": [{"$ifNull": ["$hype_score", 0]}, 1]}},  # ✅ Replace None with 0
+                                    0.2
+                                ]  # 20% hype score
                             ]
                         }
                     }
