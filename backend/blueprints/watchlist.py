@@ -8,49 +8,61 @@ user_watchlist_blueprint = Blueprint('user_watchlist_blueprint', __name__)
 @user_watchlist_blueprint.route('/<user_id>', methods=['GET'])
 def get_user_watchlist(user_id):
     db = mongo.cx["QueuedUpDBnew"]
-    user_watchlist = list(db.userwatchlist.find({"user_id": user_id}))  # Convert cursor to list
-    detailed_watchlist = []
+    
+    # Fetch all watchlist items in ONE query
+    user_watchlist = list(db.userwatchlist.find({"user_id": user_id}, {"item_id": 1, "media_type": 1, "_id": 0}))
+    
+    if not user_watchlist:
+        return jsonify([]), 200  # Return early if watchlist is empty
 
     print(f"Full watchlist for {user_id}: {user_watchlist}")
 
+    # Group item IDs by media type to batch fetch them
+    media_type_map = {}
     for item in user_watchlist:
-        collection = db[item['media_type']]
-        media_details = collection.find_one({"_id": ObjectId(item['item_id'])})
-        
-        if not media_details:
-            print(f"Warning: Missing media details for {item['item_id']} in {item['media_type']} collection.")
-            continue
+        media_type_map.setdefault(item["media_type"], []).append(ObjectId(item["item_id"]))
 
-        detailed_item = {
-            "item_id": str(item['item_id']),
-            "title": media_details.get("title", "Unknown Title"),
-            "image": media_details.get("image", ""),
-            "release_date": media_details.get("release_date", "Unknown Date"),
-            "media_type": item["media_type"],
-            "slug": media_details.get("slug", None)  # ✅ Add slug
-        }
+    detailed_watchlist = []
+    
+    # Batch fetch media details for each media type
+    for media_type, item_ids in media_type_map.items():
+        collection = db[media_type]
+        media_details_list = list(collection.find({"_id": {"$in": item_ids}}, {
+            "_id": 1, "title": 1, "image": 1, "release_date": 1, "slug": 1,
+            "author": 1, "director": 1, "network_name": 1, "description": 1
+        }))
 
+        # Map results by ID for quick lookup
+        media_details_map = {str(media["_id"]): media for media in media_details_list}
 
-        if item['media_type'] == 'books':
-            detailed_item["author"] = media_details.get("author", "Unknown Author")
-        elif item['media_type'] == 'movies':
-            detailed_item["director"] = media_details.get("director", "Unknown Director")
-        elif item['media_type'] == 'tv_seasons':
-            detailed_item["network_name"] = media_details.get("network_name", "Unknown Network")
-        if item['media_type'] == 'books':
-            detailed_item["author"] = media_details.get("author", "Unknown Author")
-            detailed_item["description"] = media_details.get("description", media_details.get("synopsis", "No Description Available"))
+        # Build detailed watchlist response
+        for item in user_watchlist:
+            if item["media_type"] != media_type:
+                continue
 
-        elif item['media_type'] == 'movies':
-            detailed_item["director"] = media_details.get("director", "Unknown Director")
-            detailed_item["description"] = media_details.get("description", "No Description Available")
+            media_details = media_details_map.get(item["item_id"])
+            if not media_details:
+                print(f"Warning: Missing media details for {item['item_id']} in {media_type} collection.")
+                continue
 
-        elif item['media_type'] == 'tv_seasons':
-            detailed_item["network_name"] = media_details.get("network_name", "Unknown Network")
-            detailed_item["description"] = media_details.get("description", "No Description Available")
+            detailed_item = {
+                "item_id": str(media_details["_id"]),
+                "title": media_details.get("title", "Unknown Title"),
+                "image": media_details.get("image", ""),
+                "release_date": media_details.get("release_date", "Unknown Date"),
+                "media_type": media_type,
+                "slug": media_details.get("slug", None),
+                "description": media_details.get("description", "No Description Available")
+            }
 
+            if media_type == 'books':
+                detailed_item["author"] = media_details.get("author", "Unknown Author")
+            elif media_type == 'movies':
+                detailed_item["director"] = media_details.get("director", "Unknown Director")
+            elif media_type == 'tv_seasons':
+                detailed_item["network_name"] = media_details.get("network_name", "Unknown Network")
 
-        detailed_watchlist.append(detailed_item)
+            detailed_watchlist.append(detailed_item)
 
     print(f"Total detailed items in watchlist for user {user_id}: {len(detailed_watchlist)}")
     return jsonify(detailed_watchlist), 200

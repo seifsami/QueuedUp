@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Text, Spinner, Center } from '@chakra-ui/react';
 import Header from '../components/Header';
 import ContentToggle from '../components/ContentToggle';
@@ -9,25 +9,25 @@ import DetailsModal from '../components/DetailsModal';
 import { getTrendingMedia, getUpcomingMedia, getUserWatchlist } from '../services/api';
 
 const HomePage = ({ user }) => {
-  // Current mediaType for visible carousel (initially TV shows)
-  const [mediaType, setMediaType] = useState('tv_seasons');
-  // Data for current mediaType
+  // Load last selected tab from localStorage
+  const getInitialMediaType = () => {
+    const storedType = localStorage.getItem('selectedMediaType');
+    return storedType && ['tv_seasons', 'movies', 'books'].includes(storedType)
+      ? storedType
+      : 'tv_seasons'; // Default to TV Shows if missing or invalid
+  };
+
+  const [mediaType, setMediaType] = useState(getInitialMediaType);
   const [trendingData, setTrendingData] = useState([]);
   const [upcomingReleasesData, setUpcomingReleasesData] = useState([]);
-  // Global featured item (prefetched across all media types)
   const [featuredItem, setFeaturedItem] = useState(null);
-  // Loading states for current mediaType
   const [loadingTrending, setLoadingTrending] = useState(true);
   const [loadingUpcoming, setLoadingUpcoming] = useState(true);
   const [error, setError] = useState(null);
-  // User's watchlist
   const [userWatchlist, setUserWatchlist] = useState([]);
-  // Cached data for each media type
   const [cachedData, setCachedData] = useState({});
 
-  
-
-
+  // ✅ Function to fetch and update user watchlist
   const fetchUserWatchlist = async () => {
     if (!user) return;
     try {
@@ -38,7 +38,20 @@ const HomePage = ({ user }) => {
     }
   };
 
-  // Helper functions for data processing.
+  useEffect(() => {
+    fetchUserWatchlist(); // Fetch watchlist once when user logs in
+  }, [user]);
+
+  // ✅ Function to format media items before storing
+  const formatMediaItems = (items, mediaType) => {
+    return items.map(item => ({
+      ...item,
+      media_type: mediaType,
+      slug: item.slug || "",
+    }));
+  };
+
+  // ✅ Function to parse and normalize release dates
   const normalizeDate = (dateStr) => {
     if (!dateStr) return null;
     if (typeof dateStr === 'string' && dateStr.includes(',')) {
@@ -55,62 +68,62 @@ const HomePage = ({ user }) => {
     }));
   };
 
-  const formatMediaItems = (items, mediaType) => {
-    return items.map(item => ({
-      ...item,
-      media_type: mediaType,
-      slug: item.slug || ""
-    }));
-  };
-
-  // Helper function to fetch data for a given media type.
+  // ✅ Fetch data for a given media type (single API call at a time)
   const fetchDataForType = async (type) => {
-    const trendingMedia = await getTrendingMedia(type);
-    const formattedTrending = formatMediaItems(trendingMedia, type);
-    const parsedTrending = parseReleaseDates(formattedTrending);
+    const trendingPromise = getTrendingMedia(type);
+    const upcomingPromise = getUpcomingMedia(type);
 
-    const upcomingMedia = await getUpcomingMedia(type);
-    const formattedUpcoming = formatMediaItems(upcomingMedia, type);
-    const parsedUpcoming = parseReleaseDates(formattedUpcoming);
+    const trendingMedia = await trendingPromise;
+    const formattedTrending = parseReleaseDates(formatMediaItems(trendingMedia, type));
 
-    return { trending: parsedTrending, upcoming: parsedUpcoming };
+    const upcomingMedia = await upcomingPromise;
+    const formattedUpcoming = parseReleaseDates(formatMediaItems(upcomingMedia, type));
+
+    return { trending: formattedTrending, upcoming: formattedUpcoming };
   };
 
-  // Fetch carousel data for the current mediaType.
+  // ✅ Fetch and cache media data when mediaType changes
   useEffect(() => {
+    let timeoutId;
+  
     const fetchMediaData = async () => {
-      try {
-        setLoadingTrending(true);
-        setLoadingUpcoming(true);
-        if (cachedData[mediaType]) {
-          // Use cached data if available.
-          const { trending, upcoming } = cachedData[mediaType];
-          setTrendingData(trending);
-          setUpcomingReleasesData(upcoming);
-          setLoadingTrending(false);
-          setLoadingUpcoming(false);
-        } else {
-          // Otherwise, fetch data and cache it.
-          const data = await fetchDataForType(mediaType);
-          setTrendingData(data.trending);
-          setUpcomingReleasesData(data.upcoming);
-          setCachedData(prev => ({ ...prev, [mediaType]: data }));
+      if (!mediaType || !['tv_seasons', 'movies', 'books'].includes(mediaType)) return;
+  
+      setLoadingTrending(true);
+      setLoadingUpcoming(true);
+  
+      timeoutId = setTimeout(async () => {
+        try {
+          if (cachedData[mediaType]) {
+            // 🏎️ Use cached data first for a fast load
+            const { trending, upcoming } = cachedData[mediaType];
+            setTrendingData(trending);
+            setUpcomingReleasesData(upcoming);
+          } else {
+            // ⏳ Fetch one by one (staggered API calls)
+            const data = await fetchDataForType(mediaType);
+            setTrendingData(data.trending);
+            setUpcomingReleasesData(data.upcoming);
+            setCachedData(prev => ({ ...prev, [mediaType]: data }));
+          }
+        } catch (err) {
+          setError('Failed to fetch media');
+        } finally {
           setLoadingTrending(false);
           setLoadingUpcoming(false);
         }
-      } catch (err) {
-        setError('Failed to fetch media');
-        setLoadingTrending(false);
-        setLoadingUpcoming(false);
-      }
+      }, 100);
     };
 
     fetchMediaData();
-    fetchUserWatchlist();
-  }, [mediaType, user]);
-  
+    return () => clearTimeout(timeoutId);
+  }, [mediaType]);
 
-  // Prefetch data for all media types (runs only once on mount).
+  // ✅ Memoize parsed data so React doesn’t keep recalculating
+  const memoizedTrendingData = useMemo(() => trendingData, [trendingData]);
+  const memoizedUpcomingData = useMemo(() => upcomingReleasesData, [upcomingReleasesData]);
+
+  // ✅ Prefetch all media types (only once)
   useEffect(() => {
     const prefetchAllTypes = async () => {
       try {
@@ -139,9 +152,7 @@ const HomePage = ({ user }) => {
     prefetchAllTypes();
   }, []);
 
-
-
-  // Once all media types are cached, compute the global featured item.
+  // ✅ Select a random featured item from cached data
   useEffect(() => {
     const allTypes = ['books', 'movies', 'tv_seasons'];
     const isAllCached = allTypes.every(type => cachedData[type]);
@@ -151,12 +162,21 @@ const HomePage = ({ user }) => {
         return [...trending, ...upcoming];
       });
       if (combined.length > 0) {
-        const randomIndex = Math.floor(Math.random() * combined.length);
-        setFeaturedItem(combined[randomIndex]);
+        setFeaturedItem(combined[Math.floor(Math.random() * combined.length)]);
       }
     }
   }, [cachedData]);
 
+  // ✅ Avoid UI blocking on tab switch
+  const handleMediaTypeChange = (newType) => {
+    if (!['tv_seasons', 'movies', 'books'].includes(newType)) return;
+    setMediaType(newType);
+    setTimeout(() => {
+      localStorage.setItem('selectedMediaType', newType);
+    }, 10);
+  };
+
+  // 🛑 Error UI
   if (error) {
     return (
       <Center>
@@ -171,14 +191,14 @@ const HomePage = ({ user }) => {
       <Box maxW={{ xl: '1200px' }} mx="auto" bg="white">
         {/* Sticky Content Toggle with margin top */}
         <Box position="sticky" top="2px" zIndex="100" bg="white">
-          <ContentToggle setMediaType={setMediaType} />
+          <ContentToggle setMediaType={handleMediaTypeChange} />
         </Box>
 
         {featuredItem && (
           <FeaturedRelease
             item={featuredItem}
             userWatchlist={userWatchlist}
-            refetchWatchlist={fetchUserWatchlist}
+            refetchWatchlist={fetchUserWatchlist} // ✅ FIXED: refetchWatchlist is now a function
             mediaType={mediaType}
           />
         )}
@@ -187,35 +207,13 @@ const HomePage = ({ user }) => {
           <Text fontSize="2xl" fontWeight="bold" mt={2} mb={4}>
             Upcoming Releases
           </Text>
-          {loadingUpcoming ? (
-            <Center>
-              <Spinner size="xl" />
-            </Center>
-          ) : (
-            <Carousel
-              items={upcomingReleasesData}
-              userWatchlist={userWatchlist}
-              refetchWatchlist={fetchUserWatchlist}
-            />
-          )}
+          {loadingUpcoming ? <Spinner size="xl" /> : <Carousel items={memoizedUpcomingData} userWatchlist={userWatchlist} refetchWatchlist={fetchUserWatchlist}/>}
           <Text fontSize="2xl" fontWeight="bold" mb={4}>
             Trending
           </Text>
-          {loadingTrending ? (
-            <Center>
-              <Spinner size="xl" />
-            </Center>
-          ) : (
-            <Carousel
-              items={trendingData}
-              userWatchlist={userWatchlist}
-              refetchWatchlist={fetchUserWatchlist}
-              mediaType={mediaType}
-            />
-          )}
+          {loadingTrending ? <Spinner size="xl" /> : <Carousel items={memoizedTrendingData} userWatchlist={userWatchlist}refetchWatchlist={fetchUserWatchlist} />}
           <WatchlistPreview watchlist={userWatchlist} mediaType={mediaType} userId={user?.uid} />
         </Box>
-        
       </Box>
     </>
   );
