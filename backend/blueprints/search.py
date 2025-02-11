@@ -53,7 +53,7 @@ def search():
                                         "score": {"boost": {"value": 15}}
                                     }
                                 },
-                                # 🔥 2. Prefix match (STARTS WITH the query) - FIXED
+                                # 🔥 2. Prefix match (STARTS WITH the query)
                                 {
                                     "phrase": {
                                         "query": query,
@@ -61,16 +61,16 @@ def search():
                                         "score": {"boost": {"value": 10}}
                                     }
                                 },
-                                # 🔥 3. Partial text match (Lower weight)
+                                # 🔥 3. Autocomplete on title only (Fixed)
                                 {
                                     "autocomplete": {
                                         "query": query,
-                                        "path": ["title", "author", "franchise_name"],
+                                        "path": "title",  # ✅ FIX: Must be a string, NOT a list
                                         "fuzzy": {"maxEdits": 1},
                                         "score": {"boost": {"value": 5}}
                                     }
                                 },
-                                # 🔥 4. General match on author, franchise (Lowest Weight)
+                                # 🔥 4. General match on author/franchise (Separate text search)
                                 {
                                     "text": {
                                         "query": query,
