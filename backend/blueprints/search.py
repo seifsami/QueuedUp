@@ -43,20 +43,48 @@ def search():
 
             return [
                 {
-                    "$search": {
-                        "index": index_name,
-                        "compound": {
-                            "should": [
-                                {
-                                    "autocomplete": {
-                                        "query": query,
-                                        "path": field,
-                                        "fuzzy": {"maxEdits": 2},  # Allows minor typos
-                                        "score": {"boost": {"value": boost}}
+                    {
+                        "$search": {
+                            "index": index_name,
+                            "compound": {
+                                "should": [
+                                    # 🔥 1. Exact title match (HIGH BOOST)
+                                    {
+                                        "text": {
+                                            "query": query,
+                                            "path": "title",
+                                            "score": { "boost": { "value": 15 } }  # ✅ Prioritize exact title matches
+                                        }
+                                    },
+                                    # 🔥 2. Prefix match (STARTS WITH the query)
+                                    {
+                                        "phrase": {
+                                            "query": query,
+                                            "path": "title",
+                                            "position": 0,  # ✅ Ensures match starts at the beginning of the title
+                                            "score": { "boost": { "value": 10 } }
+                                        }
+                                    },
+                                    # 🔥 3. Partial text match (Lower weight)
+                                    {
+                                        "autocomplete": {
+                                            "query": query,
+                                            "path": ["title", "author", "franchise_name"],
+                                            "fuzzy": { "maxEdits": 1 },  # ✅ Reduce fuzzy edits (less randomness)
+                                            "score": { "boost": { "value": 5 } }
+                                        }
+                                    },
+                                    # 🔥 4. General match on author, franchise (Lowest Weight)
+                                    {
+                                        "text": {
+                                            "query": query,
+                                            "path": ["author", "franchise_name"],
+                                            "score": { "boost": { "value": 3 } }
+                                        }
                                     }
-                                }
-                                for field, boost in boosts.items()
-                            ]
+                                ],
+                                "minimumShouldMatch": 1  # ✅ Ensures at least one condition must match
+                            }
                         }
                     }
                 },
