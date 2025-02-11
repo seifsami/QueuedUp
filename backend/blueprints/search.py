@@ -60,19 +60,24 @@ def search():
                         }
                     }
                 },
-                {
-                    "$match": {
-                        "$or": [
-                            {"release_date": None},  # Keep items with no release date
-                            {"release_date": "N/A"},  # Keep explicitly marked as "N/A"
+               {
+            "$match": {
+                "$or": [
+                    {"release_date": None},  
+                    {"release_date": "N/A"},  
+                    {
+                        "$and": [
+                            {"release_date": {"$exists": True, "$ne": None}},  # ✅ Ensure date exists
                             {
                                 "$expr": {
-                                    "$gt": [{"$toDate": "$release_date"}, now]  # Keep valid future release dates
+                                    "$gt": [{"$toDate": "$release_date"}, now]  # ✅ Only convert valid dates
                                 }
                             }
                         ]
                     }
-                },
+                ]
+            }
+        },
                 {
                     "$addFields": {
                         "adjusted_score": {

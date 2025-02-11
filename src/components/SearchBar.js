@@ -48,6 +48,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
   const handleSearch = (e) => {
     if (e.key === 'Enter') {
       navigate(`/search?query=${searchQuery}&type=${mediaType}`);
+      
     }
     setShowDropdown(true);
   };
@@ -135,52 +136,24 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
     if (!searchResults.length) {
       return <Text p="4">No results found.</Text>;
     }
-  
-    const groupedResults = searchResults.reduce((group, item) => {
-      const type = item.media_type || 'unknown';
-      group[type] = group[type] || [];
-      group[type].push(item);
-      return group;
-    }, {});
-  
-    if (mediaType === 'all') {
-      // Truncate results to 2 per category
-      return Object.keys(groupedResults).map((type) => (
-        <Box key={type}>
-          <Text fontSize="lg" fontWeight="bold" p="2">
-            {type === 'tv_seasons'
-              ? 'TV Shows'
-              : type.charAt(0).toUpperCase() + type.slice(1)}
-          </Text>
-          {groupedResults[type].slice(0, 2).map((item) => ( // Limit to 2 results per category
-            <WatchlistPreviewCard
-            key={item._id || item.id}
-            item={item}
-            showDelete={false}
-            onClick={() => {
-              console.log("🔍 Clicked search result:", item);
-              
-              if (item.slug) {
-                navigate(`/media/${item.media_type}/${item.slug}`);
-              } else {
-                console.error("🚨 Missing slug! Can't navigate.");
-              }
-            }}
-          />
-          ))}
-        </Box>
-      ));
-    } else {
-      // Limit to 6 total for specific media type
-      const filteredResults = groupedResults[mediaType] || [];
-      return filteredResults.slice(0, 6).map((item) => (
-        <WatchlistPreviewCard key={item._id || item.id} item={item} openModal={(detailedItem) => {
-          setSelectedItem(detailedItem);
-          setModalOpen(true);
-        }} />
-      ));
-    }
-  };
+
+    return searchResults.slice(0, 6).map((item) => ( // Show top 6
+      <WatchlistPreviewCard
+        key={item._id || item.id}
+        item={item}
+        showDelete={false}
+        onClick={() => {
+          console.log("🔍 Clicked search result:", item);
+          
+          if (item.slug) {
+            navigate(`/media/${item.media_type}/${item.slug}`);
+          } else {
+            console.error("🚨 Missing slug! Can't navigate.");
+          }
+        }}
+      />
+    ));
+};
   
 
   return (
