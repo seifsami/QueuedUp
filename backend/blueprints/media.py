@@ -6,6 +6,7 @@ import json
 import time
 import datetime
 import random
+from tasks.featured_release import get_featured_slug
 
 media_blueprint = Blueprint('media_blueprint', __name__)
 
@@ -243,4 +244,30 @@ def get_recommendations(media_type, item_id):
         return jsonify({"recommendations": recommendations}), 200
     except Exception as e:
         print(f"❌ Error in recommendations: {str(e)}")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
+
+@media_blueprint.route('/featured/<media_type>', methods=['GET'])
+def get_featured_release(media_type):
+    """Fetch the manually set featured release for the current week."""
+    try:
+        db = mongo.cx["QueuedUpDBnew"]
+        collection = db[media_type]
+
+        slug = get_featured_slug(media_type)
+        if not slug:
+            return jsonify({"error": "No featured release found"}), 404
+
+        fields_to_include = {
+            "title": 1, "release_date": 1, "image": 1, "description": 1, "slug": 1
+        }
+        item = collection.find_one({"slug": slug}, fields_to_include)
+
+        if item:
+            item['_id'] = str(item['_id'])  # Convert ObjectId to string
+            item['media_type'] = media_type  # Ensure media type is included
+            return jsonify(item), 200
+        else:
+            return jsonify({"error": "Featured release not found"}), 404
+    except Exception as e:
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
