@@ -108,10 +108,10 @@ def search():
         if media_type and media_type != 'all':
             if media_type not in ['books', 'movies', 'tv_seasons']:
                 return jsonify({"error": "Invalid media type."}), 400
-            pipelines.append((media_type, build_pipeline(media_type)))
+            pipelines.append((media_type, build_pipeline(media_type, query)))
         else:
             for collection_name in ['books', 'movies', 'tv_seasons']:
-                pipelines.append((collection_name, build_pipeline(collection_name)))
+                 pipelines.append((collection_name, build_pipeline(collection_name, query)))
 
         # Execute the search across collections
         results = []
