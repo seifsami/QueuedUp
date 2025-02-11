@@ -179,20 +179,26 @@ const MediaDetailPage = ({ user }) => {
               </Tag>
             )}
             <HStack>
-                <Tooltip 
+                {media.release_date && media.release_date.toLowerCase() !== "n/a" ? (
+                    <Tag size="md" bg="gray.100" color="gray.700">
+                    <Icon as={FaCalendarAlt} mr={1} /> {formatReleaseDate(media.release_date)}
+                    </Tag>
+                ) : (
+                    <Tooltip 
                     hasArrow 
                     label="No release date yet. Add to your watchlist & we’ll notify you the second it’s announced!" 
                     bg="gray.700" 
                     color="white"
                     placement="top"
-                    isDisabled={media.release_date && media.release_date.toLowerCase() !== "n/a"}
-                >
+                    >
                     <Tag size="md" bg="gray.100" color="gray.700" cursor="pointer">
-                    <Icon as={FaCalendarAlt} mr={1} /> TBD
-                    <Icon as={FaInfoCircle} ml={1} color="gray.500" />
+                        <Icon as={FaCalendarAlt} mr={1} /> TBD
+                        <Icon as={FaInfoCircle} ml={1} color="gray.500" />
                     </Tag>
-                </Tooltip>
-            </HStack>
+                    </Tooltip>
+                )}
+                </HStack>
+
 
             {media.language && media.language.toLowerCase() !== 'en' && (
               <Tag size="md" bg="blue.100" color="blue.700">

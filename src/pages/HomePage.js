@@ -23,6 +23,7 @@ const HomePage = ({ user }) => {
   const [featuredItem, setFeaturedItem] = useState(null);
   const [loadingTrending, setLoadingTrending] = useState(true);
   const [loadingUpcoming, setLoadingUpcoming] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userWatchlist, setUserWatchlist] = useState([]);
   const [cachedData, setCachedData] = useState({});
@@ -154,18 +155,24 @@ const HomePage = ({ user }) => {
 
   // ✅ Select a random featured item from cached data
   useEffect(() => {
-    const allTypes = ['books', 'movies', 'tv_seasons'];
-    const isAllCached = allTypes.every(type => cachedData[type]);
-    if (isAllCached) {
-      const combined = allTypes.flatMap(type => {
-        const { trending, upcoming } = cachedData[type];
-        return [...trending, ...upcoming];
-      });
-      if (combined.length > 0) {
-        setFeaturedItem(combined[Math.floor(Math.random() * combined.length)]);
+    if (!mediaType) return; // Ensure media type is selected
+  
+    const fetchFeaturedRelease = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/featured/${mediaType}`);
+        if (!response.ok) throw new Error("Failed to fetch featured release");
+        const data = await response.json();
+        setFeaturedItem(data);
+      } catch (error) {
+        console.error("Error fetching featured release:", error);
+      } finally {
+        setLoading(false);
       }
-    }
-  }, [cachedData]);
+    };
+  
+    fetchFeaturedRelease();
+  }, [mediaType]);
 
   // ✅ Avoid UI blocking on tab switch
   const handleMediaTypeChange = (newType) => {
