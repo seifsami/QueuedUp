@@ -7,9 +7,7 @@ search_blueprint = Blueprint('search', __name__)
 
 # Utility function to clean and serialize results
 def clean_result(result):
-    """
-    Convert ObjectId to string for JSON serialization and remove unwanted fields.
-    """
+    """ Convert ObjectId to string for JSON serialization and remove unwanted fields. """
     if "_id" in result:
         result["_id"] = str(result["_id"])
     return result
@@ -34,78 +32,76 @@ def search():
             
             # Define boost values for relevant fields
             field_boosts = {
-                "books": {"title": 10, "author": 3, "series": 5},
-                "movies": {"title": 10, "franchise_name": 5},
-                "tv_seasons": {"title": 10}
+                "books": {"title": 15, "author": 3, "series": 5},
+                "movies": {"title": 15, "franchise_name": 5},
+                "tv_seasons": {"title": 15}
             }
             boosts = field_boosts.get(collection_name, {})
             now = datetime.utcnow()  # current UTC time
 
             return [
                 {
-                    {
-                        "$search": {
-                            "index": index_name,
-                            "compound": {
-                                "should": [
-                                    # 🔥 1. Exact title match (HIGH BOOST)
-                                    {
-                                        "text": {
-                                            "query": query,
-                                            "path": "title",
-                                            "score": { "boost": { "value": 15 } }  # ✅ Prioritize exact title matches
-                                        }
-                                    },
-                                    # 🔥 2. Prefix match (STARTS WITH the query)
-                                    {
-                                        "phrase": {
-                                            "query": query,
-                                            "path": "title",
-                                            "position": 0,  # ✅ Ensures match starts at the beginning of the title
-                                            "score": { "boost": { "value": 10 } }
-                                        }
-                                    },
-                                    # 🔥 3. Partial text match (Lower weight)
-                                    {
-                                        "autocomplete": {
-                                            "query": query,
-                                            "path": ["title", "author", "franchise_name"],
-                                            "fuzzy": { "maxEdits": 1 },  # ✅ Reduce fuzzy edits (less randomness)
-                                            "score": { "boost": { "value": 5 } }
-                                        }
-                                    },
-                                    # 🔥 4. General match on author, franchise (Lowest Weight)
-                                    {
-                                        "text": {
-                                            "query": query,
-                                            "path": ["author", "franchise_name"],
-                                            "score": { "boost": { "value": 3 } }
-                                        }
+                    "$search": {
+                        "index": index_name,
+                        "compound": {
+                            "should": [
+                                # 🔥 1. Exact title match (HIGH BOOST)
+                                {
+                                    "text": {
+                                        "query": query,
+                                        "path": "title",
+                                        "score": {"boost": {"value": 15}}
                                     }
-                                ],
-                                "minimumShouldMatch": 1  # ✅ Ensures at least one condition must match
-                            }
+                                },
+                                # 🔥 2. Prefix match (STARTS WITH the query)
+                                {
+                                    "phrase": {
+                                        "query": query,
+                                        "path": "title",
+                                        "position": 0,
+                                        "score": {"boost": {"value": 10}}
+                                    }
+                                },
+                                # 🔥 3. Partial text match (Lower weight)
+                                {
+                                    "autocomplete": {
+                                        "query": query,
+                                        "path": ["title", "author", "franchise_name"],
+                                        "fuzzy": {"maxEdits": 1},
+                                        "score": {"boost": {"value": 5}}
+                                    }
+                                },
+                                # 🔥 4. General match on author, franchise (Lowest Weight)
+                                {
+                                    "text": {
+                                        "query": query,
+                                        "path": ["author", "franchise_name"],
+                                        "score": {"boost": {"value": 3}}
+                                    }
+                                }
+                            ],
+                            "minimumShouldMatch": 1
                         }
                     }
                 },
-               {
-            "$match": {
-                "$or": [
-                    {"release_date": None},  
-                    {"release_date": "N/A"},  
-                    {
-                        "$and": [
-                            {"release_date": {"$exists": True, "$ne": None}},  # ✅ Ensure date exists
+                {
+                    "$match": {
+                        "$or": [
+                            {"release_date": None},  
+                            {"release_date": "N/A"},  
                             {
-                                "$expr": {
-                                    "$gt": [{"$toDate": "$release_date"}, now]  # ✅ Only convert valid dates
-                                }
+                                "$and": [
+                                    {"release_date": {"$exists": True, "$ne": None}},  
+                                    {
+                                        "$expr": {
+                                            "$gt": [{"$toDate": "$release_date"}, now]
+                                        }
+                                    }
+                                ]
                             }
                         ]
                     }
-                ]
-            }
-        },
+                },
                 {
                     "$addFields": {
                         "adjusted_score": {
@@ -113,7 +109,7 @@ def search():
                                 {"$multiply": [{"$meta": "searchScore"}, 0.8]},  
                                 {
                                     "$multiply": [
-                                        {"$ln": {"$add": [{"$ifNull": ["$hype_score", 0]}, 1]}},  # ✅ Replace None with 0
+                                        {"$ln": {"$add": [{"$ifNull": ["$hype_score", 0]}, 1]}},  
                                         0.2
                                     ]
                                 }
@@ -121,17 +117,17 @@ def search():
                         }
                     }
                 },
-                {"$sort": {"adjusted_score": -1}},  # Sort by final score (higher = better)
-                {"$limit": 10},  # Limit results to 10
+                {"$sort": {"adjusted_score": -1}},  
+                {"$limit": 10},  
                 {
                     "$project": {
                         "title": 1,
                         "image": 1,
                         "release_date": 1,
-                        "author": 1,            # Include for books
-                        "franchise_name": 1,      # Include for movies
-                        "director": 1,          # Include for movies
-                        "network_name": 1,      # Include for TV seasons
+                        "author": 1,
+                        "franchise_name": 1,
+                        "director": 1,
+                        "network_name": 1,
                         "media_type": {"$literal": collection_name},
                         "slug": 1,
                         "score": {"$meta": "searchScore"},
@@ -139,7 +135,6 @@ def search():
                     }
                 }
             ]
-
 
         # Handle media_type filtering
         pipelines = []
