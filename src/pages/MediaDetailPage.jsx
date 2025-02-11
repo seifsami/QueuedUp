@@ -12,11 +12,12 @@ import {
   Icon,
   Divider,
   Spinner,
-  useToast
+  useToast,
+  Tooltip
 } from '@chakra-ui/react';
 import axios from 'axios';
 import Countdown from 'react-countdown';
-import { FaCalendarAlt, FaTv, FaGlobe, FaFilm, FaUser, FaBook } from 'react-icons/fa';
+import { FaCalendarAlt, FaTv, FaGlobe, FaFilm, FaUser, FaBook, FaInfoCircle } from 'react-icons/fa';
 import NotifyMeButton from '../components/NotifyMeButton';
 import Carousel from '../components/Carousel';
 import HypeMeter from '../components/HypeMeter';
@@ -44,10 +45,12 @@ const getAmazonDomain = () => {
 
 // Helper function to format release date properly
 const formatReleaseDate = (dateString) => {
-  if (!dateString) return "Unknown";
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-};
+    if (!dateString || dateString.toLowerCase() === "n/a") {
+      return "TBD";
+    }
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  };
 
 const CountdownRenderer = ({ days, hours, minutes, completed }) => {
   if (completed) {
@@ -175,11 +178,22 @@ const MediaDetailPage = ({ user }) => {
                 <Icon as={FaUser} mr={1} /> {media.creator_label}: {media.creator}
               </Tag>
             )}
-            {media.release_date && (
-              <Tag size="md" bg="gray.100" color="gray.700">
-                <Icon as={FaCalendarAlt} mr={1} /> {formatReleaseDate(media.release_date)}
-              </Tag>
-            )}
+            <HStack>
+                <Tooltip 
+                    hasArrow 
+                    label="No release date yet. Add to your watchlist & we’ll notify you the second it’s announced!" 
+                    bg="gray.700" 
+                    color="white"
+                    placement="top"
+                    isDisabled={media.release_date && media.release_date.toLowerCase() !== "n/a"}
+                >
+                    <Tag size="md" bg="gray.100" color="gray.700" cursor="pointer">
+                    <Icon as={FaCalendarAlt} mr={1} /> TBD
+                    <Icon as={FaInfoCircle} ml={1} color="gray.500" />
+                    </Tag>
+                </Tooltip>
+            </HStack>
+
             {media.language && media.language.toLowerCase() !== 'en' && (
               <Tag size="md" bg="blue.100" color="blue.700">
                 <Icon as={FaGlobe} mr={1} /> Language: {media.language}

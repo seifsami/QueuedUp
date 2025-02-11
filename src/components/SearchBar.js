@@ -137,7 +137,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
       return <Text p="4">No results found.</Text>;
     }
 
-    return searchResults.slice(0, 6).map((item) => ( // Show top 6
+    return searchResults.slice(0, 4).map((item) => ( // Show top 6
       <WatchlistPreviewCard
         key={item._id || item.id}
         item={item}
