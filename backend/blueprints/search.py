@@ -53,12 +53,11 @@ def search():
                                         "score": {"boost": {"value": 15}}
                                     }
                                 },
-                                # 🔥 2. Prefix match (STARTS WITH the query)
+                                # 🔥 2. Prefix match (STARTS WITH the query) - FIXED
                                 {
                                     "phrase": {
                                         "query": query,
                                         "path": "title",
-                                        "position": 0,
                                         "score": {"boost": {"value": 10}}
                                     }
                                 },
