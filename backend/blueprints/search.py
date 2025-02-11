@@ -29,8 +29,9 @@ def search():
         db = mongo.cx["QueuedUpDBnew"]
 
         # Define the search pipeline
-        def build_pipeline(collection_name):
+        def build_pipeline(collection_name, query):
             index_name = f"{collection_name}_search_index"
+            
             # Define boost values for relevant fields
             field_boosts = {
                 "books": {"title": 10, "author": 3, "series": 5},
@@ -47,9 +48,10 @@ def search():
                         "compound": {
                             "should": [
                                 {
-                                    "text": {
+                                    "autocomplete": {
                                         "query": query,
                                         "path": field,
+                                        "fuzzy": {"maxEdits": 2},  # Allows minor typos
                                         "score": {"boost": {"value": boost}}
                                     }
                                 }
@@ -58,22 +60,31 @@ def search():
                         }
                     }
                 },
-                # After $search, add a $match stage to only include documents whose
-                # release_date (converted to a date) is in the future.
                 {
                     "$match": {
                         "$or": [
-                            { "release_date": None },  # Keep items with no release date
-                            { "release_date": "N/A" },  # Keep items explicitly marked as "N/A"
+                            {"release_date": None},  # Keep items with no release date
+                            {"release_date": "N/A"},  # Keep explicitly marked as "N/A"
                             {
                                 "$expr": {
-                                    "$gt": [{ "$toDate": "$release_date" }, now]  # Keep valid future release dates
+                                    "$gt": [{"$toDate": "$release_date"}, now]  # Keep valid future release dates
                                 }
                             }
                         ]
                     }
                 },
-                { "$limit": 10 },
+                {
+                    "$addFields": {
+                        "adjusted_score": {
+                            "$add": [
+                                {"$multiply": [{"$meta": "searchScore"}, 0.8]},  # 80% relevance
+                                {"$multiply": [{"$ln": {"$add": ["$hype_score", 1]}}, 0.2]}  # 20% hype score
+                            ]
+                        }
+                    }
+                },
+                {"$sort": {"adjusted_score": -1}},  # Sort by final score (higher = better)
+                {"$limit": 10},  # Limit results to 10
                 {
                     "$project": {
                         "title": 1,
@@ -83,12 +94,14 @@ def search():
                         "franchise_name": 1,      # Include for movies
                         "director": 1,          # Include for movies
                         "network_name": 1,      # Include for TV seasons
-                        "media_type": { "$literal": collection_name },
-                        "slug":1,
-                        "score": {"$meta": "searchScore"}
+                        "media_type": {"$literal": collection_name},
+                        "slug": 1,
+                        "score": {"$meta": "searchScore"},
+                        "adjusted_score": 1
                     }
                 }
             ]
+
 
         # Handle media_type filtering
         pipelines = []
