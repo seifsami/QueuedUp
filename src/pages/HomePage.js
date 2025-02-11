@@ -6,7 +6,7 @@ import FeaturedRelease from '../components/FeaturedRelease';
 import WatchlistPreview from '../components/WatchlistPreview';
 import Carousel from '../components/Carousel';
 import DetailsModal from '../components/DetailsModal';
-import { getTrendingMedia, getUpcomingMedia, getUserWatchlist } from '../services/api';
+import { getTrendingMedia, getUpcomingMedia, getUserWatchlist, getFeaturedRelease } from '../services/api';
 
 const HomePage = ({ user }) => {
   // Load last selected tab from localStorage
@@ -153,19 +153,19 @@ const HomePage = ({ user }) => {
     prefetchAllTypes();
   }, []);
 
-  // ✅ Select a random featured item from cached data
+
   useEffect(() => {
-    if (!mediaType) return; // Ensure media type is selected
+    if (!mediaType) return;
   
     const fetchFeaturedRelease = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/featured/${mediaType}`);
-        if (!response.ok) throw new Error("Failed to fetch featured release");
-        const data = await response.json();
+        console.log(`📡 Fetching Featured Release: ${mediaType}`);
+        const data = await getFeaturedRelease(mediaType);
+        console.log("✅ Featured Release Data:", data);
         setFeaturedItem(data);
       } catch (error) {
-        console.error("Error fetching featured release:", error);
+        console.error("🚨 Error fetching featured release:", error);
       } finally {
         setLoading(false);
       }

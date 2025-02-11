@@ -75,3 +75,13 @@ export const submitRequest = async (requestData) => {
     throw new Error('Failed to submit request');
   }
 };
+
+export const getFeaturedRelease = async (mediaType) => {
+  try {
+      const response = await axios.get(`${API_BASE_URL}/media/featured/${mediaType}`);
+      return response.data;
+  } catch (error) {
+      console.error(`🚨 Error fetching featured release for ${mediaType}:`, error);
+      throw new Error('Failed to fetch featured release');
+  }
+};
