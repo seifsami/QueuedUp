@@ -122,7 +122,7 @@ const DetailsModal = ({ isOpen, onClose, item, refetchWatchlist }) => {
     ? item.description.substring(0, 300) + '...'
     : item.description;
   
-  console.log("Item being passed to NotifyMeButton from DetailsModal:", item);
+  
   
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size={{ base: "sm", md: "lg" }} isCentered closeOnOverlayClick={true} >

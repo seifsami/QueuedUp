@@ -7,26 +7,21 @@ const NotifyMeButton = ({ item, userWatchlist, refetchWatchlist, buttonProps }) 
   const { currentUser, openModalWithItem } = useModal();
   const toast = useToast();
 
-  console.log("🔍 NotifyMeButton received item:", item);
-  console.log("📌 User's Watchlist:", userWatchlist);
+  
 
   // ✅ Check watchlist by comparing `_id` (backend uses item_id)
   const isInWatchlist =
     Array.isArray(userWatchlist) &&
     userWatchlist.some((watchlistItem) => watchlistItem.item_id === item._id);
 
-  console.log("🛠 isInWatchlist?", isInWatchlist);
+  
 
   const handleNotifyClick = async () => {
     if (!currentUser) {
       openModalWithItem(item);
     } else {
       try {
-        console.log("Attempting to add to watchlist:", {
-          userId: currentUser.uid,
-          itemId: item._id,
-          mediaType: item.media_type,
-        });
+        
   
         await addToWatchlist(currentUser.uid, item._id, item.media_type);
   

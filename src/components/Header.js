@@ -9,7 +9,6 @@ import { FaSearch } from 'react-icons/fa'
 
 const Header = ({ searchQuery: initialSearchQuery, user }) => {
   const { openModal, currentUser } = useModal();
-  console.log("Current User in Header:", currentUser);
   const navigate = useNavigate();
   const [mediaType, setMediaType] = useState('all');
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
@@ -44,7 +43,6 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
   };
 
   const handleLoginClick = () => {
-    console.log("Login button clicked");
     openModal();
   };
 

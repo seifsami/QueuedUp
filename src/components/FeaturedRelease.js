@@ -11,7 +11,6 @@ const FeaturedRelease = ({ item, userWatchlist, refetchWatchlist, mediaType }) =
   // 🚀 Click handler to navigate to MediaDetailPage
   const handleNavigate = () => {
     if (item.slug) {
-      console.log("🔍 Navigating to:", `/media/${item.media_type}/${item.slug}`);
       navigate(`/media/${item.media_type}/${item.slug}`);
     } else {
       console.error("❌ Missing slug for item:", item);

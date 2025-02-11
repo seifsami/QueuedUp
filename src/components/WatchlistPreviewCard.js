@@ -59,15 +59,15 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   const toast = useToast();
 
   
+
+  
   if (isHidden) return null; 
-  console.log("🔍 Full Item Object in WatchlistPreviewCard:", item);
-  console.log("🛠 Extracted item_id:", item._id || item.id); 
+ 
 
 
   const handleRemoveClick = async () => {
     const itemId = item.item_id || item._id || item.id;  // ✅ Ensure we extract correctly
-    console.log("🛠 Removing item:", item);
-    console.log("🛠 Extracted item_id:", itemId);  // ✅ Now this should print the correct ID
+    // ✅ Now this should print the correct ID
   
     if (!itemId) {
       console.error("🚨 ERROR: item_id is undefined!");
@@ -87,7 +87,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
           data: { item_id: itemId }  // ✅ Send correct item_id
         });
   
-        console.log("API Response:", response.data); // ✅ Check Heroku logs
+        
         refetchWatchlist && refetchWatchlist();
       } catch (error) {
         console.error("Error removing item:", error);
@@ -151,7 +151,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   
   const handleShareClick = (event) => {
     event.stopPropagation();
-    console.log(`Sharing ${item.title}`);
+    
   };
 
   // 🟢 Fetch full item details when card is clicked
@@ -159,10 +159,10 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
     event.preventDefault();
     event.stopPropagation();
 
-    console.log("🟢 WatchlistPreviewCard Clicked!", item);
+    
 
     if (item.slug) {
-      console.log("🔗 Navigating to:", `/media/${item.media_type}/${item.slug}`);
+      
       navigate(`/media/${item.media_type}/${item.slug}`);
     } else {
       console.error("🚨 Missing slug for item:", item);
@@ -170,23 +170,24 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   };
   
 
-  const formatReleaseDate = (dateStr) => {
-    if (!dateStr) return 'N/A';
+  const formatReleaseDate = (dateString) => {
+    if (!dateString) return 'N/A';
     try {
-      let parsedDate = new Date(Date.parse(dateStr));
-      if (isNaN(parsedDate.getTime())) throw new Error("Invalid Date");
-      return parsedDate.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric', 
-        timeZone: 'UTC' 
-      });
+        let date = new Date(Date.parse(dateString));
+        if (isNaN(date.getTime())) throw new Error("Invalid Date");
+        return date.toLocaleDateString('en-US', { 
+            month: 'long', 
+            day: 'numeric', 
+            year: 'numeric', 
+            timeZone: 'UTC'  // ✅ Ensures consistent UTC formatting
+        });
     } catch (error) {
-      console.error("Error parsing date:", dateStr);
-      return 'Invalid Date';
+        console.error("Error parsing date:", dateString);
+        return 'Invalid Date';
     }
-  };
-  console.log("Item passed to DetailsModal from WatchlistPreviewCard:", detailedItem);
+};
+
+  
 
 
   return (
@@ -293,7 +294,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
             </Text>
             <Text fontSize="sm">{item.author || item.director || item.network_name || 'N/A'}</Text>
             <Text fontSize="sm">{item.series}</Text>
-            <Text fontSize="sm">{item.release_date ? new Date(item.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</Text>
+            <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
           </Box>
         </HStack>
 
@@ -318,3 +319,6 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
 };
 
 export default WatchlistPreviewCard;
+
+
+

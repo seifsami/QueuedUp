@@ -12,9 +12,11 @@ const defaultImages = {
 
 const MediaCard = ({ item, userWatchlist, refetchWatchlist }) => {
   const navigate = useNavigate();
+ 
 
   // Format release date function
   const formatReleaseDate = (dateStr) => {
+   
     if (!dateStr) return 'N/A';
     try {
       let parsedDate = new Date(Date.parse(dateStr));
@@ -42,10 +44,10 @@ const MediaCard = ({ item, userWatchlist, refetchWatchlist }) => {
 
   // ✅ Navigate Immediately When Clicking the Card
   const handleCardClick = () => {
-    console.log("🖱 Card Clicked:", item);
+    
     
     if (item.slug) {
-      console.log("🔍 Navigating to:", `/media/${item.media_type}/${item.slug}`);
+      
       navigate(`/media/${item.media_type}/${item.slug}`);
     } else {
       console.error("❌ Missing slug for item:", item);
@@ -122,7 +124,7 @@ const MediaCard = ({ item, userWatchlist, refetchWatchlist }) => {
               size="sm"
               width="100%"
               onClick={(e) => {
-                console.log("🛠 View More Clicked!", item);
+               
                 e.stopPropagation();
                 navigate(`/media/${item.media_type}/${item.slug}`); // ✅ Navigate immediately
               }}
