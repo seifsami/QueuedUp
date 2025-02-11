@@ -114,19 +114,24 @@ def search():
                  pipelines.append((collection_name, build_pipeline(collection_name, query)))
 
         # Execute the search across collections
-        results = []
+        all_results = []
         for collection_name, pipeline in pipelines:
-            collection = db[collection_name]
-            raw_results = list(collection.aggregate(pipeline))
-            cleaned_results = [clean_result(item) for item in raw_results]
-            results.extend(cleaned_results)
+            try:
+                collection = db[collection_name]
+                print(f"🚀 Running search on {collection_name} with pipeline: {pipeline}")
+                raw_results = list(collection.aggregate(pipeline))
+                cleaned_results = [clean_result(item) for item in raw_results]
+                all_results.extend(cleaned_results)
+            except Exception as e:
+                print(f"❌ ERROR: Failed to query {collection_name} | {str(e)}")
+                return jsonify({"error": f"Search failed for {collection_name}", "details": str(e)}), 500
 
-        # Sort results by search score in descending order
-        results = sorted(results, key=lambda x: x.get('score', 0), reverse=True)
+        # 🔥 Sort merged results by final weighted score (searchScore + hype_score)
+        all_results = sorted(all_results, key=lambda x: x.get('adjusted_score', 0), reverse=True)
 
-        # Return combined results
-        return jsonify(results), 200
+        # 🔥 Return only the top 10 results
+        return jsonify(all_results[:10]), 200
 
     except Exception as e:
-        print(f"Error during search: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+        print(f"❌ Critical Error in Search: {str(e)}")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
