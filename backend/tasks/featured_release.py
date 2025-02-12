@@ -3,7 +3,7 @@ from datetime import datetime
 # Define a static schedule for featured releases (4 weeks of data)
 FEATURED_RELEASES = {
     "books": [
-        "promise-me-sunshine-a-novel-books",
+        "promise-me-sunshine-books",
         "sunrise-on-the-reaping-a-hunger-games-novel-books",
         "great-big-beautiful-life-books",
         "say-you-ll-remember-me-books"
