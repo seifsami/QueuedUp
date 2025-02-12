@@ -213,7 +213,7 @@ def get_recommendations(media_type, item_id):
                 random_items = list(db[collection_name].aggregate([
                     {"$match": {"_id": {"$ne": ObjectId(item_id)}}},  # Exclude the current item
                     {"$sample": {"size": missing_count}},
-                    {"$project": {"title": 1, "image": 1, "slug": 1}}
+                    {"$project": {"title": 1, "image": 1, "slug": 1, "release_date":1}}
                 ]))
 
 
