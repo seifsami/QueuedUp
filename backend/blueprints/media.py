@@ -193,7 +193,7 @@ def get_recommendations(media_type, item_id):
                     for collection_name in ["books", "movies", "tv_seasons"]:
                         media_item = db[collection_name].find_one(
                             {"_id": ObjectId(query_id)},
-                            {"title": 1, "image": 1, "slug": 1}
+                            {"title": 1, "image": 1, "slug": 1, "release_date":1}
                         )
                         if media_item:
                             media_item["_id"] = str(media_item["_id"])
