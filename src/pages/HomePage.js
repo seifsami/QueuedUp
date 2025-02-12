@@ -122,7 +122,13 @@ const HomePage = ({ user }) => {
 
   // ✅ Memoize parsed data so React doesn’t keep recalculating
   const memoizedTrendingData = useMemo(() => trendingData, [trendingData]);
-  const memoizedUpcomingData = useMemo(() => upcomingReleasesData, [upcomingReleasesData]);
+  const memoizedUpcomingData = useMemo(() => {
+    return [...upcomingReleasesData].sort((a, b) => {
+      if (!a.releaseDate) return 1; // Move items without releaseDate to the end
+      if (!b.releaseDate) return -1;
+      return new Date(a.releaseDate) - new Date(b.releaseDate); // Sort by soonest releaseDate
+    });
+  }, [upcomingReleasesData]);
 
   // ✅ Prefetch all media types (only once)
   useEffect(() => {
