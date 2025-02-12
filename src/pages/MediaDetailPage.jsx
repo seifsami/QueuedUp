@@ -98,15 +98,15 @@ const MediaDetailPage = ({ user }) => {
 
   const fetchWatchlist = async () => {
     if (!user) {
-      console.log("⚠️ No user logged in, skipping watchlist fetch.");
+      
       return;
     }
   
     try {
-      console.log("🔄 Fetching watchlist for user:", user.uid);
+      
       const { data } = await axios.get(`${API_BASE_URL}/watchlist/${user.uid}`);
       
-      console.log("📌 Fetched Watchlist Data:", data);
+      
       
       if (!Array.isArray(data)) {
         console.error("🚨 Error: Watchlist API response is not an array!", data);
@@ -114,7 +114,7 @@ const MediaDetailPage = ({ user }) => {
       }
   
       setUserWatchlist(data);
-      console.log("✅ Updated userWatchlist state:", data);
+      
     } catch (error) {
       console.error("❌ Error fetching watchlist:", error);
     }
@@ -135,7 +135,7 @@ const MediaDetailPage = ({ user }) => {
           const recResponse = await axios.get(
             `https://queuedup-backend-6d9156837adf.herokuapp.com/media/recommendations/${mediaType}/${media._id}`
           );
-          console.log("Recommendations Data:", recResponse.data.recommendations);
+          
           setRecommendations(recResponse.data.recommendations);
         } catch (error) {
           console.error("Error fetching recommendations:", error);
@@ -150,7 +150,7 @@ const MediaDetailPage = ({ user }) => {
 
   if (loading) return <Text>Loading...</Text>;
   if (error || !media) return <Text>Media not found.</Text>;
-  console.log("Carousel received items:", recommendations);
+  
   return (
     <>
     <Header />

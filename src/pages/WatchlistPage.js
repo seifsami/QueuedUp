@@ -43,7 +43,7 @@ const WatchlistPage = ({ user }) => {
     try {
       setLoading(true);
       const { data } = await getUserWatchlist(user.uid);
-      console.log('Fetched watchlist:', data);
+      
       setWatchlistData(data); // Update state with fetched data
       setLoading(false);
     } catch (err) {

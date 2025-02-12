@@ -160,9 +160,9 @@ const HomePage = ({ user }) => {
     const fetchFeaturedRelease = async () => {
       setLoading(true);
       try {
-        console.log(`📡 Fetching Featured Release: ${mediaType}`);
+       
         const data = await getFeaturedRelease(mediaType);
-        console.log("✅ Featured Release Data:", data);
+        
         setFeaturedItem(data);
       } catch (error) {
         console.error("🚨 Error fetching featured release:", error);

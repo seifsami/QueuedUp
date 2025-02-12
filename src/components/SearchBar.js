@@ -55,7 +55,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
 
   useEffect(() => {
     const fetchSearchResults = async () => {
-      console.log('Search Query:', searchQuery, 'Media Type:', mediaType)
+      
       if (!searchQuery.trim()) {
         setSearchResults([]);
         return;
@@ -66,7 +66,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
         const response = await axios.get(
           `${API_BASE}/api/search?q=${searchQuery}&type=${mediaType}`
         );
-        console.log('API Response:', response.data)
+        
         setSearchResults(response.data); // Update the search results
       } catch (error) {
         console.error('Error fetching search results:', error);
@@ -106,15 +106,15 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
     setTimeout(() => {
       const newFocusElement = document.activeElement;
   
-      console.log("handleBlur fired! New focus element:", newFocusElement);
+      
   
       // 🔥 If the modal is open, do NOT close the search
       if (document.querySelector('.chakra-modal__content')) {
-        console.log("Modal is open, ignoring handleBlur.");
+       
         return;
       }
   
-      console.log("handleBlur closing search dropdown.");
+     
       setShowDropdown(false);
       setIsFocused(false);
       onFocusChange(false);
@@ -143,7 +143,7 @@ const SearchBar = ({ mediaType, setMediaType, searchQuery, setSearchQuery, onFoc
         item={item}
         showDelete={false}
         onClick={() => {
-          console.log("🔍 Clicked search result:", item);
+          
           
           if (item.slug) {
             navigate(`/media/${item.media_type}/${item.slug}`);

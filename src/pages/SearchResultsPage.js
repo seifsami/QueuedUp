@@ -108,7 +108,7 @@ const SearchResultsPage = ({ currentUser }) => {
                   showDelete={false} 
                   width="full" 
                   onClick={() => {
-                    console.log("🔍 Clicked search result:", item);
+                    
 
                     if (item.slug) {
                       navigate(`/media/${item.media_type}/${item.slug}`);

@@ -113,7 +113,6 @@ function OnboardingModal() {
       });
 
       if (itemToAdd) {
-        console.log('Item added:', itemToAdd.title);
         toast({
           title: 'Success!',
           description: `${itemToAdd.title} has been added.`,
@@ -155,7 +154,7 @@ function OnboardingModal() {
       const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
       const firebaseUser = userCredential.user;
 
-      console.log('Firebase user created:', firebaseUser.uid.trim());
+      
 
       // Go to personalization step (Step 2)
       setCurrentStep(2);
@@ -309,13 +308,6 @@ function OnboardingModal() {
         notification_preferences: notificationPreference,
       };
 
-      console.log('Sending user data:', {
-        email: firebaseUser.email,
-        firebase_id: firebaseUserId,
-        username,
-        phone_number: phoneNumber,
-        notification_preferences: notificationPreference,
-      });
 
       await registerUser(userData); // Backend API call to register user
 
