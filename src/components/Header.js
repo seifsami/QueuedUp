@@ -5,6 +5,7 @@ import SearchBar from './SearchBar';
 import { useModal } from '../ModalContext'
 import firebase from '../firebaseConfig'; 
 import { FaSearch } from 'react-icons/fa'
+import DismissibleBanner from './DismissibleBanner';
 
 
 const Header = ({ searchQuery: initialSearchQuery, user }) => {
@@ -83,7 +84,14 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
            >
              QueuedUp
            </Button>
-           <Text fontSize="sm" fontWeight="medium" color="brand.200">Never Miss A Release</Text>
+           <Text 
+              fontSize="sm" 
+              fontWeight="bold" 
+              fontStyle="italic" 
+              color="brand.200" 
+              textShadow="1px 1px 2px rgba(0,0,0,0.3)"
+            >
+            Never Miss A Release!</Text>
          </VStack>
        </Box>
       )}
