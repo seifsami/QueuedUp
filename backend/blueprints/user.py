@@ -2,19 +2,30 @@ from flask import Blueprint, request, jsonify
 from pymongo.errors import DuplicateKeyError
 from bson import ObjectId
 from datetime import datetime, timezone
-
 import requests
 from app import mongo
 
 
 
 def get_user_country():
-    """Gets the user's country using a free IP lookup service."""
+    """Gets the user's country using request IP or a fallback IP service."""
     try:
-        ip = requests.get("https://api64.ipify.org?format=json").json()["ip"]  # Get the user's IP
-        response = requests.get(f"http://ip-api.com/json/{ip}")  # Get country info
+        # Get the user's IP from the request
+        user_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+        if not user_ip:
+            return "US"  # Default if no IP found
+        
+        # Call IP-API to get the country code
+        response = requests.get(f"http://ip-api.com/json/{user_ip}")
         data = response.json()
-        return data.get("countryCode", "US")  # Returns country code (e.g., "US", "CA", "GB")
+        
+        # Check if the API returned a valid response
+        if data.get("status") == "fail":
+            print(f"IP-API Error: {data.get('message')}")
+            return "US"
+
+        return data.get("countryCode", "US")
+    
     except Exception as e:
         print("Error getting country:", e)
         return "US"  # Default fallback to US
