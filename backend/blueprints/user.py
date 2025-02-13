@@ -1,12 +1,28 @@
 from flask import Blueprint, request, jsonify
 from pymongo.errors import DuplicateKeyError
 from bson import ObjectId
+from datetime import datetime, timezone
+
+import requests
 from app import mongo
 
 
 
+def get_user_country():
+    """Gets the user's country using a free IP lookup service."""
+    try:
+        ip = requests.get("https://api64.ipify.org?format=json").json()["ip"]  # Get the user's IP
+        response = requests.get(f"http://ip-api.com/json/{ip}")  # Get country info
+        data = response.json()
+        return data.get("countryCode", "US")  # Returns country code (e.g., "US", "CA", "GB")
+    except Exception as e:
+        print("Error getting country:", e)
+        return "US"  # Default fallback to US
+
+
 
 user_blueprint = Blueprint('user_blueprint', __name__)
+
 
 
 @user_blueprint.route('/register', methods=['POST'])
@@ -22,6 +38,8 @@ def register_user():
     if not data.get('email') or not data.get('firebase_id'):
         return jsonify({"error": "Missing email or Firebase ID"}), 400
 
+    country_code = get_user_country()
+
     new_user = {
         "email": data['email'],
         "firebase_id": data['firebase_id'],
@@ -29,7 +47,9 @@ def register_user():
         "last_name": data.get('last_name'),
         "username": data.get('username'),
         "phone_number": data.get('phone_number', None),
-        "notification_preferences": data.get('notification_preferences', [])
+        "notification_preferences": data.get('notification_preferences', []),
+        "created_at": datetime.now(timezone.utc),
+        "country": country_code
         # Add other fields as per your User model
     }
 
