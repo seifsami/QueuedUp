@@ -121,18 +121,9 @@ const RequestNowButton = ({ currentUser }) => {
               width="full"
               onClick={handleSubmit}
               _hover={{ bg: 'brand.700' }} 
+             
             >
               Submit Request
-            </Button>
-            <Button
-              variant="ghost"
-              mt={2} 
-              color="brand.500"
-              width="full"
-              _hover={{ textDecoration: 'underline', color: 'gray.800' }} 
-              onClick={onClose}
-            >
-              Cancel
             </Button>
           </ModalFooter>
         </ModalContent>

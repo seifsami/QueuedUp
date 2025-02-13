@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { Flex, Box, Icon, useBreakpointValue, Button, Avatar, Menu, MenuButton, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react';
+import { Flex, Box, Icon, useBreakpointValue, Button, Avatar, Menu, MenuButton, MenuList, MenuItem, MenuDivider, Text, VStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import { useModal } from '../ModalContext'
@@ -70,19 +70,22 @@ const Header = ({ searchQuery: initialSearchQuery, user }) => {
     >
       {/* Logo: Always Visible on Desktop, Conditional on Mobile */}
       {(!(isMobile && (isSearchBarFocused || showMobileSearch))) && (
-        <Box flexShrink={0}>
-          <Button 
-            fontSize="2xl" 
-            fontWeight="bold" 
-            variant="ghost" 
-            color="white" 
-            onClick={handleHomeClick}
-            _hover={{ bg: 'transparent' }} 
-            _active={{ bg: 'transparent' }}
-          >
-            QueuedUp
-          </Button>
-        </Box>
+         <Box flexShrink={0}>
+         <VStack spacing={0} align="center"> {/* Stack elements vertically */}
+           <Button 
+             fontSize="2xl" 
+             fontWeight="bold" 
+             variant="ghost" 
+             color="white" 
+             onClick={handleHomeClick}
+             _hover={{ bg: 'transparent' }} 
+             _active={{ bg: 'transparent' }}
+           >
+             QueuedUp
+           </Button>
+           <Text fontSize="sm" fontWeight="medium" color="brand.200">Never Miss A Release</Text>
+         </VStack>
+       </Box>
       )}
   
       {/* Search Bar or Search Icon Based on Mobile/Focus */}
