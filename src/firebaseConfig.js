@@ -4,7 +4,7 @@ import 'firebase/compat/auth';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDA_TmrkW5vCQ6PbOmE5lPoM8R-0JbujSI",
-    authDomain: "queuedup-a7344.firebaseapp.com",
+    authDomain: "auth.queuedup.co",
     projectId: "queuedup-a7344",
     storageBucket: "queuedup-a7344.appspot.com",
     messagingSenderId: "1086094219051",
