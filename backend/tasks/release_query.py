@@ -57,16 +57,12 @@ def get_users_with_watchlist_items(releasing_items):
             watchlist_entries = db.userwatchlist.find({"item_id": item_id, "media_type": media_type})
 
             for entry in watchlist_entries:
-                user_id = entry["user_id"]
+                firebase_id = entry["user_id"]  # This is a Firebase ID, NOT a MongoDB ObjectId
 
-                # Fetch user email **(ensure ObjectId conversion is correct)**
-                try:
-                    user = db.users.find_one({"_id": ObjectId(user_id)})
-                except:
-                    print(f"⚠️ Skipping invalid user_id: {user_id}")
-                    continue  # Skip invalid ObjectIds
-
+                # 🔥 FIX: Find user using firebase_id instead of _id
+                user = db.users.find_one({"firebase_id": firebase_id})
                 if not user or "email" not in user:
+                    print(f"⚠️ Skipping missing user for firebase_id: {firebase_id}")
                     continue
 
                 user_email = user["email"].strip().lower()
@@ -97,4 +93,5 @@ def get_users_with_watchlist_items(releasing_items):
                 users_to_notify[user_email][media_type].append(formatted_item)
 
     return users_to_notify
+
 
