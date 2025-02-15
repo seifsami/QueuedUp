@@ -17,7 +17,7 @@ def send_email(to_email, subject, html_content):
     sg = sendgrid.SendGridAPIClient(SENDGRID_API_KEY)
     
     email = Mail(
-        from_email=SENDER_EMAIL,
+        from_email=("QueuedUp", SENDER_EMAIL),
         to_emails=to_email,
         subject=subject,
         html_content=html_content
