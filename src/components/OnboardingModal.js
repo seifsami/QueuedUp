@@ -298,10 +298,13 @@ function OnboardingModal() {
       const firebaseUser = firebase.auth().currentUser;
       const firebaseUserId = firebaseUser.uid.trim();
 
-      const params = new URLSearchParams(window.location.search);
-      const utm_source = params.get('utm_source') || '';
-      const utm_medium = params.get('utm_medium') || '';
-      const utm_campaign = params.get('utm_campaign') || '';
+      const urlParts = window.location.href.split('#')[0]; // Get only the part before #
+      const url = new URL(urlParts);
+      const utm_source = url.searchParams.get('utm_source') || '';
+      const utm_medium = url.searchParams.get('utm_medium') || '';
+      const utm_campaign = url.searchParams.get('utm_campaign') || '';
+
+      console.log("Extracted UTM Params:", { utm_source, utm_medium, utm_campaign, url });
 
       const userData = {
         email: firebaseUser.email,
