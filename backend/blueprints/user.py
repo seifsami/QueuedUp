@@ -60,7 +60,10 @@ def register_user():
         "phone_number": data.get('phone_number', None),
         "notification_preferences": data.get('notification_preferences', []),
         "created_at": datetime.now(timezone.utc),
-        "country": country_code
+        "country": country_code,
+        "utm_source": data.get('utm_source', ''),  # ✅ Store UTM source
+        "utm_medium": data.get('utm_medium', ''),  # ✅ Store UTM medium
+        "utm_campaign": data.get('utm_campaign', '')  # ✅ Store UTM campaign
         # Add other fields as per your User model
     }
 

@@ -298,6 +298,11 @@ function OnboardingModal() {
       const firebaseUser = firebase.auth().currentUser;
       const firebaseUserId = firebaseUser.uid.trim();
 
+      const params = new URLSearchParams(window.location.search);
+      const utm_source = params.get('utm_source') || '';
+      const utm_medium = params.get('utm_medium') || '';
+      const utm_campaign = params.get('utm_campaign') || '';
+
       const userData = {
         email: firebaseUser.email,
         firebase_id: firebaseUserId,
@@ -306,6 +311,9 @@ function OnboardingModal() {
         last_name: lastName,
         phone_number: phoneNumber,
         notification_preferences: notificationPreference,
+        utm_source, 
+        utm_medium, 
+        utm_campaign,
       };
 
 
