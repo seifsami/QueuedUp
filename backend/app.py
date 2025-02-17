@@ -1,8 +1,9 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 import os
 import redis
+import requests
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -79,6 +80,33 @@ def test_mongo_connection():
         return jsonify({"status": "success", "collections": collection_names}), 200
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
+
+@app.route('/proxy-image/<path:image_path>')
+def proxy_image(image_path):
+    try:
+        # Construct the full TMDB image URL
+        tmdb_url = f'https://image.tmdb.org/t/p/{image_path}'
+        
+        # Forward the request to TMDB
+        response = requests.get(tmdb_url, stream=True)
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Forward the image response with proper headers
+            return Response(
+                response.raw.read(),
+                content_type=response.headers['content-type'],
+                headers={
+                    'Access-Control-Allow-Origin': '*',
+                    'Cache-Control': 'public, max-age=31536000'
+                }
+            )
+        else:
+            return jsonify({'error': 'Failed to fetch image'}), response.status_code
+            
+    except Exception as e:
+        print(f"Error proxying image: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 

@@ -17,6 +17,9 @@ import {
 import Header from '../components/Header';
 import WatchlistPreviewCard from '../components/WatchlistPreviewCard';
 import { getUserWatchlist } from '../services/api';
+import { FaShare } from 'react-icons/fa';
+import { Icon } from '@chakra-ui/react';
+import SharePreviewModal from '../components/SharePreviewModal';
 
 const filterOptions = [
   { value: 'all', label: 'All' },
@@ -36,6 +39,9 @@ const WatchlistPage = ({ user }) => {
   const [sortCriterion, setSortCriterion] = useState('dateAdded');
   const [releaseStatus, setReleaseStatus] = useState('upcoming');
   const [loading, setLoading] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Fetch the user's watchlist from the backend
   const fetchUserWatchlist = async () => {
@@ -62,6 +68,25 @@ const WatchlistPage = ({ user }) => {
 
   const handleSortChange = (e) => {
     setSortCriterion(e.target.value);
+  };
+
+  const handleItemSelect = (itemId) => {
+    setSelectedItems(prev => {
+      if (prev.includes(itemId)) {
+        return prev.filter(id => id !== itemId);
+      }
+      if (prev.length >= 12) return prev;
+      return [...prev, itemId];
+    });
+  };
+
+  const handleShareClick = () => {
+    setIsSelectionMode(true);
+    setSelectedItems([]);
+  };
+
+  const handleGeneratePreview = () => {
+    setIsShareModalOpen(true);
   };
 
   // Filter and sort logic
@@ -101,9 +126,30 @@ const WatchlistPage = ({ user }) => {
       <>
         <Header />
         <Container maxW="1200px" mx="auto" p={4} bg="brand.400" borderRadius="xl" boxShadow="md">
-          <Heading as="h2" size="xl" mb={4} color="brand.500">
-            My Tracking List
-          </Heading>
+          <HStack justify="space-between" mb={4}>
+            <Heading as="h2" size="xl" color="brand.500">
+              My Tracking List
+            </Heading>
+            {!isSelectionMode ? (
+              <Button
+                onClick={handleShareClick}
+                colorScheme="brand"
+                size="sm"
+                leftIcon={<Icon as={FaShare} />}
+              >
+                Share Watchlist
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setIsSelectionMode(false)}
+                colorScheme="brand"
+                size="sm"
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            )}
+          </HStack>
   
           {/* Tabs with Custom Colors */}
           <Tabs index={tabIndex} onChange={setTabIndex} variant="soft-rounded" colorScheme="brand" pb={2}>
@@ -186,6 +232,22 @@ const WatchlistPage = ({ user }) => {
             </Select>
           </HStack>
   
+          {isSelectionMode && (
+            <HStack justify="space-between" mb={4} p={2} bg="gray.100" borderRadius="md">
+              <Text color="brand.500">
+                {selectedItems.length}/12 selected
+              </Text>
+              <Button
+                colorScheme="brand"
+                size="sm"
+                isDisabled={selectedItems.length === 0}
+                onClick={handleGeneratePreview}
+              >
+                Generate Preview
+              </Button>
+            </HStack>
+          )}
+
           {/* Content Section */}
           {loading ? (
             <Center>
@@ -193,9 +255,20 @@ const WatchlistPage = ({ user }) => {
             </Center>
           ) : (
             <VStack spacing={4} align="stretch">
-              {filteredData.map((item) => (
-                <WatchlistPreviewCard key={item._id} item={item} userId={user?.uid}/>
-              ))}
+              {filteredData.map((item) => {
+                return (
+                  <WatchlistPreviewCard 
+                    key={item.item_id} 
+                    item={item} 
+                    userId={user?.uid}
+                    isSelectionMode={isSelectionMode}
+                    isSelected={selectedItems.includes(item.item_id)}
+                    onSelect={() => handleItemSelect(item.item_id)}
+                    showDelete={true}
+                    refetchWatchlist={fetchUserWatchlist}
+                  />
+                );
+              })}
               {filteredData.length === 0 && (
                 <Text py={10} textAlign="center" color="brand.500">
                   Your watchlist is currently empty.
@@ -204,6 +277,12 @@ const WatchlistPage = ({ user }) => {
             </VStack>
           )}
         </Container>
+
+        <SharePreviewModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          selectedItems={selectedItems.map(id => filteredData.find(item => item.item_id === id))}
+        />
       </>
     );
   };

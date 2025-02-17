@@ -14,8 +14,8 @@ import {
   Menu,
   MenuButton,
   MenuList,
-  MenuItem
- 
+  MenuItem,
+  Checkbox
 } from '@chakra-ui/react';
 import { FaBook, FaTv, FaFilm, FaTrash, FaEllipsisV, FaTimes } from 'react-icons/fa';
 import axios from 'axios'; // ✅ Import Axios for API calls
@@ -36,7 +36,17 @@ const defaultImages = {
   tv_seasons: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 };
 
-const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal, showDelete = true, userId }) => {
+const WatchlistPreviewCard = ({ 
+  item, 
+  userWatchlist, 
+  refetchWatchlist, 
+  openModal, 
+  showDelete = true, 
+  userId,
+  isSelectionMode = false,
+  isSelected = false,
+  onSelect
+}) => {
   const bg = useColorModeValue('white', 'gray.700');
   const hoverBg = useColorModeValue('gray.100', 'gray.600');
   const shareIconSize = useBreakpointValue({ base: 'md', md: 'lg' });
@@ -159,10 +169,12 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
     event.preventDefault();
     event.stopPropagation();
 
-    
+    if (isSelectionMode) {
+      onSelect?.();
+      return;
+    }
 
     if (item.slug) {
-      
       navigate(`/media/${item.media_type}/${item.slug}`);
     } else {
       console.error("🚨 Missing slug for item:", item);
@@ -193,7 +205,6 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
   return (
     <>
       <Box position="relative" width="full">
-        {/* 🗑️ Delete/Options Button (Top Right) */}
         {showDelete && (
           isMobile ? (
             <Menu>
@@ -207,21 +218,21 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
                 bg="transparent"
                 color="gray.500"
                 _hover={{ color: "gray.700", bg: "transparent" }}
-                onClick={(e) => e.stopPropagation()} // Prevents card click
+                onClick={(e) => e.stopPropagation()}
+                zIndex="1"
               />
               <MenuList
-                   minW="120px" // ✅ Keeps it compact
-                   borderRadius="md"
-                   boxShadow="0px 4px 12px rgba(0,0,0,0.15)" // ✅ Smooth shadow
-                   zIndex="1000"
-                   transform="translateY(-5px)"  // ✅ Ensures it stays above everything
+                minW="120px"
+                borderRadius="md"
+                boxShadow="0px 4px 12px rgba(0,0,0,0.15)"
+                zIndex="1000"
               >
                 <MenuItem
                   icon={<FaTrash />}
-                  color="red.500" // ✅ Make the trash icon red for clarity
-                  fontSize="sm" // ✅ Reduce font size to match design better
-                  p="8px 12px" // ✅ More compact padding
-                  _hover={{ bg: "red.50", color: "red.600" }} // ✅ Subtle hover effect
+                  color="red.500"
+                  fontSize="sm"
+                  p="8px 12px"
+                  _hover={{ bg: "red.50", color: "red.600" }}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveClick();
@@ -234,12 +245,12 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
           ) : (
             <Tooltip
               label="Remove from Watchlist"
-              bg="#F5F5F5" // ✅ Light gray for contrast
-              color="#333" // ✅ Darker text for readability
+              bg="#F5F5F5"
+              color="#333"
               fontSize="xs"
               borderRadius="md"
               p={2}
-              boxShadow="0px 4px 10px rgba(0,0,0,0.1)" // ✅ Subtle shadow for depth
+              boxShadow="0px 4px 10px rgba(0,0,0,0.1)"
             >
               <IconButton
                 aria-label="Remove"
@@ -255,6 +266,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
                   e.stopPropagation();
                   handleRemoveClick();
                 }}
+                zIndex="1"
               />
             </Tooltip>
           )
@@ -273,31 +285,53 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
           _hover={{ bg: hoverBg }}
           onClick={handleCardClick}
           style={{
-            opacity: fadeOut ? 0 : 1, // 🔥 Gradual fade-out
-            transition: "opacity 0.4s ease-in-out", // 🔥 Smooth transition over 400ms
-            
+            opacity: fadeOut ? 0 : 1,
+            transition: "opacity 0.4s ease-in-out",
           }}
           cursor="pointer"
+          position="relative"
         >
-          <Icon as={mediaTypeIcons[item.media_type]} boxSize={6} mr={2} />
-          <Image
-            src={item.image || defaultImages[item.media_type || "books"]}
-            alt={item.title}
-            htmlWidth="80px"
-            htmlHeight="120px"
-            objectFit="cover"
-            borderRadius="md"
-          />
-          <Box flex="1" pl={2} minWidth={0}>
-            <Text fontWeight="bold" noOfLines={2} lineHeight="tall" overflow="hidden">
-              {item.title}
-            </Text>
-            <Text fontSize="sm">{item.author || item.director || item.network_name || 'N/A'}</Text>
-            <Text fontSize="sm">{item.series}</Text>
-            <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
-          </Box>
+          {isSelectionMode && (
+            <Box 
+              position="absolute" 
+              left="2" 
+              top="50%" 
+              transform="translateY(-50%)"
+              zIndex="1"
+            >
+              <Checkbox 
+                isChecked={isSelected}
+                colorScheme="brand"
+                size="lg"
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onSelect?.();
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </Box>
+          )}
+          
+          <HStack pl={isSelectionMode ? "40px" : "0"} width="100%">
+            <Icon as={mediaTypeIcons[item.media_type]} boxSize={6} mr={2} />
+            <Image
+              src={item.image || defaultImages[item.media_type || "books"]}
+              alt={item.title}
+              htmlWidth="80px"
+              htmlHeight="120px"
+              objectFit="cover"
+              borderRadius="md"
+            />
+            <Box flex="1" pl={2} minWidth={0}>
+              <Text fontWeight="bold" noOfLines={2} lineHeight="tall" overflow="hidden">
+                {item.title}
+              </Text>
+              <Text fontSize="sm">{item.author || item.director || item.network_name || 'N/A'}</Text>
+              <Text fontSize="sm">{item.series}</Text>
+              <Text fontSize="sm">{formatReleaseDate(item.release_date)}</Text>
+            </Box>
+          </HStack>
         </HStack>
-
       </Box>
   
       {/* Details Modal */}
@@ -311,11 +345,7 @@ const WatchlistPreviewCard = ({ item, userWatchlist, refetchWatchlist, openModal
         />
       )}
     </>
-);
-
-
-
-  
+  );
 };
 
 export default WatchlistPreviewCard;
