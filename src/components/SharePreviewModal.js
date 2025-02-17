@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -18,10 +18,17 @@ import {
   IconButton,
   Divider,
   Switch,
-  Icon
+  Icon,
+  Input
 } from '@chakra-ui/react';
-import { FaTwitter, FaFacebook, FaReddit, FaInstagram, FaTiktok, FaSun, FaMoon, FaDownload, FaPencilAlt } from 'react-icons/fa';
+import { FaTwitter, FaFacebook, FaReddit, FaInstagram, FaTiktok, FaSun, FaMoon, FaDownload, FaPencilAlt, FaTimes } from 'react-icons/fa';
 import domtoimage from 'dom-to-image';
+
+const defaultImages = {
+  movie: 'https://via.placeholder.com/300x450?text=Movie',
+  tv: 'https://via.placeholder.com/300x450?text=TV+Show',
+  book: 'https://via.placeholder.com/300x450?text=Book'
+};
 
 const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
   const previewRef = useRef(null);
@@ -29,8 +36,10 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
   const [isDark, setIsDark] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadedImages, setLoadedImages] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
   const [title, setTitle] = useState('My Most Anticipated Releases');
   const [isEditing, setIsEditing] = useState(false);
+  const MAX_TITLE_LENGTH = 30;
 
   const formatReleaseDate = (dateString) => {
     if (!dateString) return 'Release date TBA';
@@ -74,7 +83,7 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
         selectedItems.map(
           (item) =>
             new Promise((resolve, reject) => {
-              const img = new window.Image();  // Use native Image constructor
+              const img = new window.Image();
               const proxiedUrl = getProxiedImageUrl(item.image);
               img.crossOrigin = "anonymous";
               img.onload = () => {
@@ -92,12 +101,20 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
       );
       
       setLoadedImages(loadedImagesMap);
+      setIsLoading(false);
       console.log('All images preloaded successfully');
     } catch (error) {
       console.error('Error preloading images:', error);
+      setIsLoading(false);
       throw error;
     }
   };
+
+  useEffect(() => {
+    if (isOpen && selectedItems.length > 0) {
+      preloadImages();
+    }
+  }, [isOpen, selectedItems]);
 
   const handleSaveTitle = () => {
     setIsEditing(false);
@@ -108,18 +125,35 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
     setIsEditing(false);
   };
 
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value;
+    if (newTitle.length <= MAX_TITLE_LENGTH) {
+      setTitle(newTitle);
+    }
+  };
+
   const generateImage = async () => {
     try {
       setIsGenerating(true);
-      setIsEditing(false); // Ensure editing is off
+      setIsEditing(false);
       console.log('Starting image generation...');
 
-      // First preload all images
-      await preloadImages();
+      // Ensure all images are loaded
+      if (isLoading) {
+        await preloadImages();
+      }
 
-      // Use dom-to-image to generate the canvas
-      const dataUrl = await domtoimage.toPng(previewRef.current);
-      console.log('Image generated successfully');
+      // Generate the image exactly as it appears
+      const dataUrl = await domtoimage.toPng(previewRef.current, {
+        quality: 1,
+        bgcolor: isDark ? '#171923' : '#FFFFFF',
+        height: previewRef.current.offsetHeight,
+        width: previewRef.current.offsetWidth,
+        style: {
+          'border-radius': '0.5rem'
+        }
+      });
+      
       setIsGenerating(false);
       return dataUrl;
     } catch (error) {
@@ -155,7 +189,7 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "2xl" }}>
       <ModalOverlay />
       <ModalContent bg={isDark ? "gray.900" : "white"}>
         <ModalHeader display="flex" justifyContent="space-between" alignItems="center" pr={16}>
@@ -177,53 +211,52 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
             <Box 
               ref={previewRef}
               bg={isDark ? "gray.900" : "gray.100"}
-              p={8}
+              p={{ base: 4, md: 6 }}
               borderRadius="lg"
               width="100%"
-              maxW="800px"
+              maxW="600px"
+              mx="auto"
             >
-              <VStack spacing={6} align="stretch">
-                <HStack justifyContent="center" alignItems="center" mb={4}>
-                  {isEditing ? (
-                    <>
-                      <input 
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value.slice(0, 30))} // Limit to 30 characters
-                        style={{
-                          fontSize: '3xl',
-                          fontWeight: 'bold',
-                          textAlign: 'center',
-                          color: isDark ? 'white' : 'gray.800',
-                          background: 'transparent',
-                          border: 'none',
-                          outline: 'none',
-                          width: '100%',
-                          maxWidth: '100%',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}
-                      />
-                      <Text fontSize="sm" color="gray.500">{title.length}/30</Text>
-                      <Button size="sm" onClick={handleSaveTitle} colorScheme="brand">Save</Button>
-                      <Button size="sm" onClick={handleCancelEdit} variant="outline">Cancel</Button>
-                    </>
-                  ) : (
-                    <Text 
-                      fontSize="3xl" 
-                      fontWeight="bold" 
-                      textAlign="center"
-                      color={isDark ? "white" : "gray.800"}
-                      onClick={() => setIsEditing(true)}
-                      cursor="pointer"
-                    >
-                      {title}
-                    </Text>
-                  )}
-                </HStack>
+              <VStack spacing={{ base: 3, md: 4 }} align="stretch">
+                {isEditing ? (
+                  <HStack width="100%" justifyContent="center" alignItems="center">
+                    <input 
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value.slice(0, 30))}
+                      style={{
+                        fontSize: '3xl',
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        color: isDark ? 'white' : 'gray.800',
+                        background: 'transparent',
+                        border: 'none',
+                        outline: 'none',
+                        width: '100%',
+                        maxWidth: '100%',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    />
+                    <Text fontSize="sm" color="gray.500">{title.length}/30</Text>
+                    <Button size="sm" onClick={handleSaveTitle} colorScheme="brand">Save</Button>
+                    <Button size="sm" onClick={handleCancelEdit} variant="outline">Cancel</Button>
+                  </HStack>
+                ) : (
+                  <Text 
+                    fontSize={{ base: "xl", md: "2xl" }}
+                    fontWeight="bold"
+                    textAlign="center"
+                    color={isDark ? "white" : "gray.800"}
+                    onClick={() => setIsEditing(true)}
+                    cursor="pointer"
+                  >
+                    {title}
+                  </Text>
+                )}
                 
                 <Grid 
-                  templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }}
-                  gap={6}
+                  templateColumns="repeat(3, 1fr)"
+                  gap={{ base: 2, md: 4 }}
                 >
                   {selectedItems.map((item) => (
                     <GridItem key={item.item_id}>
@@ -231,11 +264,11 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
                         bg={isDark ? "gray.800" : "white"}
                         borderRadius="lg"
                         overflow="hidden"
-                        height="260px"
+                        height={{ base: "180px", md: "260px" }}
                         border={isDark ? "none" : "1px solid #E2E8F0"}
                       >
                         <VStack height="100%" spacing={0}>
-                          <Box width="100%" height="180px" position="relative" pb={0}>
+                          <Box width="100%" height={{ base: "120px", md: "180px" }} position="relative">
                             <Image
                               src={loadedImages[item.item_id] || getProxiedImageUrl(item.image)}
                               alt={item.title}
@@ -244,64 +277,61 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
                               objectFit="cover"
                               loading="eager"
                               crossOrigin="anonymous"
+                              onError={(e) => {
+                                console.error(`Error loading image for ${item.title}`);
+                                e.target.src = defaultImages[item.media_type];
+                              }}
                             />
                           </Box>
-                          <Box p={3} width="100%" minH="70px" display="flex" flexDirection="column" justifyContent="space-between">
+                          <Box p={3} width="100%" minH={{ base: "auto", md: "70px" }} display="flex" flexDirection="column" justifyContent="space-between">
                             <Text 
-                              fontSize="sm"
+                              fontSize={{ base: "2xs", md: "sm" }}
                               fontWeight="bold"
                               color={isDark ? "white" : "gray.800"}
-                              textAlign="left"
-                              overflow="hidden"
-                              display="-webkit-box"
-                              WebkitLineClamp={2}
-                              WebkitBoxOrient="vertical"
+                              noOfLines={2}
                               lineHeight="1.2em"
                               height="2.4em"
+                              mb="auto"
                             >
                               {item.title}
                             </Text>
-
                             <Text 
-                              fontSize="xs"
+                              fontSize={{ base: "3xs", md: "xs" }}
                               color="brand.100"
                               fontWeight="semibold"
-                              textAlign="left"
                             >
                               {formatReleaseDate(item.release_date)}
                             </Text>
                           </Box>
-
                         </VStack>
                       </Box>
                     </GridItem>
                   ))}
                 </Grid>
 
-                <Divider borderColor="brand.100" opacity={0.3} my={2} />
+                <Divider borderColor="brand.100" opacity={0.3} my={{ base: 1, md: 2 }} />
                 
                 <HStack justify="space-between" align="center">
-                  <Text fontSize="2xl" fontWeight="bold" color="brand.100">
+                  <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="brand.100">
                     QueuedUp
                   </Text>
-                  <Text fontSize="md" color="brand.100">
+                  <Text fontSize={{ base: "xs", md: "sm" }} color="brand.100">
                     Track your own at QueuedUp.com
                   </Text>
                 </HStack>
               </VStack>
             </Box>
 
-            {/* Share Buttons */}
-            <HStack spacing={4} justify="center" pt={4}>
-              <IconButton
-                icon={<FaDownload />}
-                aria-label="Download Preview"
-                colorScheme="brand"
-                onClick={handleDownload}
-                size="lg"
-                isLoading={isGenerating}
-              />
-            </HStack>
+            <Button
+              leftIcon={<FaDownload />}
+              colorScheme="brand"
+              onClick={handleDownload}
+              isLoading={isGenerating}
+              size="lg"
+              width={{ base: "full", md: "auto" }}
+            >
+              Generate Image
+            </Button>
           </VStack>
         </ModalBody>
       </ModalContent>
