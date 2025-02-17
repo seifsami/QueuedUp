@@ -21,7 +21,7 @@ import {
   Icon
 } from '@chakra-ui/react';
 import { FaTwitter, FaFacebook, FaReddit, FaInstagram, FaTiktok, FaSun, FaMoon, FaDownload } from 'react-icons/fa';
-import html2canvas from 'html2canvas';
+import domtoimage from 'dom-to-image';
 
 const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
   const previewRef = useRef(null);
@@ -66,7 +66,7 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
         selectedItems.map(
           (item) =>
             new Promise((resolve, reject) => {
-              const img = new Image();
+              const img = new window.Image();  // Use native Image constructor
               const proxiedUrl = getProxiedImageUrl(item.image);
               img.crossOrigin = "anonymous";
               img.onload = () => {
@@ -99,22 +99,11 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
       // First preload all images
       await preloadImages();
 
-      // Then generate the canvas
-      const canvas = await html2canvas(previewRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: isDark ? '#1A202C' : '#FFFFFF',
-        allowTaint: false,
-        foreignObjectRendering: false,
-        logging: true,
-        width: previewRef.current.offsetWidth,
-        height: previewRef.current.offsetHeight,
-        imageTimeout: 30000,
-      });
-      
-      console.log('Canvas generated successfully');
+      // Use dom-to-image to generate the canvas
+      const dataUrl = await domtoimage.toPng(previewRef.current);
+      console.log('Image generated successfully');
       setIsGenerating(false);
-      return canvas.toDataURL('image/png');
+      return dataUrl;
     } catch (error) {
       console.error('Error in generateImage:', error);
       setIsGenerating(false);
@@ -244,11 +233,11 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
             >
               <VStack spacing={6} align="stretch">
                 <Text 
-                  fontSize="3xl" 
+                  fontSize="4xl" 
                   fontWeight="bold" 
                   textAlign="center"
                   color={isDark ? "white" : "gray.800"}
-                  whiteSpace="nowrap"
+                  mb={4}
                 >
                   My Most Anticipated Releases
                 </Text>
@@ -263,10 +252,10 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
                         bg={isDark ? "gray.800" : "gray.50"}
                         borderRadius="lg"
                         overflow="hidden"
-                        height="280px"
+                        height="260px"
                       >
                         <VStack height="100%" spacing={0}>
-                          <Box width="100%" height="200px" position="relative">
+                          <Box width="100%" height="180px" position="relative" pb={0}>
                             <Image
                               src={loadedImages[item.item_id] || getProxiedImageUrl(item.image)}
                               alt={item.title}
@@ -277,31 +266,39 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
                               crossOrigin="anonymous"
                             />
                           </Box>
-                          <Box p={4} width="100%">
+                          <Box p={3} width="100%" minH="70px" display="flex" flexDirection="column" justifyContent="space-between">
                             <Text 
-                              fontSize="md" 
-                              fontWeight="bold" 
+                              fontSize="sm"
+                              fontWeight="bold"
                               color={isDark ? "white" : "gray.800"}
-                              noOfLines={1}
-                              mb={1}
+                              textAlign="left"
+                              overflow="hidden"
+                              display="-webkit-box"
+                              WebkitLineClamp={2}
+                              WebkitBoxOrient="vertical"
+                              lineHeight="1.2em"
+                              height="2.4em"
                             >
                               {item.title}
                             </Text>
+
                             <Text 
-                              fontSize="sm" 
+                              fontSize="xs"
                               color="brand.100"
                               fontWeight="semibold"
+                              textAlign="left"
                             >
                               {formatReleaseDate(item.release_date)}
                             </Text>
                           </Box>
+
                         </VStack>
                       </Box>
                     </GridItem>
                   ))}
                 </Grid>
 
-                <Divider borderColor="brand.100" opacity={0.3} />
+                <Divider borderColor="brand.100" opacity={0.3} my={2} />
                 
                 <HStack justify="space-between" align="center">
                   <Text fontSize="2xl" fontWeight="bold" color="brand.100">

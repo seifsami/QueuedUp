@@ -84,11 +84,20 @@ def test_mongo_connection():
 @app.route('/proxy-image/<path:image_path>')
 def proxy_image(image_path):
     try:
-        # Construct the full TMDB image URL
-        tmdb_url = f'https://image.tmdb.org/t/p/{image_path}'
+        # Determine the source and construct the appropriate URL
+        if image_path.startswith('tmdb/'):
+            # Remove the 'tmdb/' prefix and construct TMDB URL
+            tmdb_path = image_path[5:]  # Remove 'tmdb/'
+            source_url = f'https://image.tmdb.org/t/p/{tmdb_path}'
+        elif image_path.startswith('isbndb/'):
+            # Remove the 'isbndb/' prefix and construct ISBNDB URL
+            isbndb_path = image_path[7:]  # Remove 'isbndb/'
+            source_url = f'https://{isbndb_path}'
+        else:
+            return jsonify({'error': 'Invalid image source'}), 400
         
-        # Forward the request to TMDB
-        response = requests.get(tmdb_url, stream=True)
+        # Forward the request to the source
+        response = requests.get(source_url, stream=True)
         
         # Check if the request was successful
         if response.status_code == 200:
