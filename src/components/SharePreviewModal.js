@@ -20,7 +20,7 @@ import {
   Switch,
   Icon
 } from '@chakra-ui/react';
-import { FaTwitter, FaFacebook, FaReddit, FaInstagram, FaTiktok, FaSun, FaMoon, FaDownload } from 'react-icons/fa';
+import { FaTwitter, FaFacebook, FaReddit, FaInstagram, FaTiktok, FaSun, FaMoon, FaDownload, FaPencilAlt } from 'react-icons/fa';
 import domtoimage from 'dom-to-image';
 
 const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
@@ -29,6 +29,8 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
   const [isDark, setIsDark] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadedImages, setLoadedImages] = useState({});
+  const [title, setTitle] = useState('My Most Anticipated Releases');
+  const [isEditing, setIsEditing] = useState(false);
 
   const formatReleaseDate = (dateString) => {
     if (!dateString) return 'Release date TBA';
@@ -47,12 +49,18 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
   };
 
   const getProxiedImageUrl = (originalUrl) => {
+    console.log('calling function')
     if (!originalUrl) return null;
+    // Check for ISBNDB URL
+    if (originalUrl.includes('isbndb.com')) {
+      const imagePath = originalUrl.split('isbndb.com')[1];
+      return `https://queuedup-backend-6d9156837adf.herokuapp.com/proxy-image/isbndb/images.isbndb.com${imagePath}`;
+    }
     // Extract the image path from TMDB URL
     const match = originalUrl.match(/\/t\/p\/\w+\/.+/);
     if (match) {
       const imagePath = match[0];
-      return `https://queuedup-backend-6d9156837adf.herokuapp.com/proxy-image${imagePath}`;
+      return `https://queuedup-backend-6d9156837adf.herokuapp.com/proxy-image/tmdb${imagePath}`;
     }
     return originalUrl;
   };
@@ -91,9 +99,19 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
     }
   };
 
+  const handleSaveTitle = () => {
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setTitle('My Most Anticipated Releases');
+    setIsEditing(false);
+  };
+
   const generateImage = async () => {
     try {
       setIsGenerating(true);
+      setIsEditing(false); // Ensure editing is off
       console.log('Starting image generation...');
 
       // First preload all images
@@ -120,8 +138,8 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
       link.click();
       
       toast({
-        title: "Image downloaded!",
-        description: "Your watchlist preview has been downloaded",
+        title: "Image saved!",
+        description: "Share it anywhere you like",
         status: "success",
         duration: 3000,
       });
@@ -129,73 +147,6 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
       console.error('Error downloading:', error);
       toast({
         title: "Error downloading",
-        description: "Please try again",
-        status: "error",
-        duration: 3000,
-      });
-    }
-  };
-
-  const handleShare = async (platform) => {
-    try {
-      const image = await generateImage();
-      const text = "Check out my most anticipated upcoming releases! 📅 Track your own at QueuedUp: queuedup.com";
-      
-      switch (platform) {
-        case 'twitter':
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
-          break;
-        case 'facebook':
-          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://queuedup.com')}`, '_blank');
-          break;
-        case 'reddit':
-          window.open(`https://reddit.com/submit?url=${encodeURIComponent('https://queuedup.com')}&title=${encodeURIComponent(text)}`, '_blank');
-          break;
-        case 'instagram':
-        case 'tiktok':
-          try {
-            const blob = await fetch(image).then(r => r.blob());
-            const file = new File([blob], 'queuedup-watchlist.png', { type: 'image/png' });
-            
-            if (navigator.share && navigator.canShare({ files: [file] })) {
-              await navigator.share({
-                files: [file],
-                text: text,
-              });
-            } else {
-              // Fallback: download the image
-              const link = document.createElement('a');
-              link.href = image;
-              link.download = 'queuedup-watchlist.png';
-              link.click();
-              
-              toast({
-                title: "Image downloaded!",
-                description: "Share this image on Instagram or TikTok",
-                status: "success",
-                duration: 3000,
-              });
-            }
-          } catch (shareError) {
-            // If sharing fails, fallback to download
-            const link = document.createElement('a');
-            link.href = image;
-            link.download = 'queuedup-watchlist.png';
-            link.click();
-            
-            toast({
-              title: "Image downloaded!",
-              description: "Share this image on Instagram or TikTok",
-              status: "success",
-              duration: 3000,
-            });
-          }
-          break;
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
-      toast({
-        title: "Error sharing",
         description: "Please try again",
         status: "error",
         duration: 3000,
@@ -225,34 +176,63 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
             {/* Preview Section */}
             <Box 
               ref={previewRef}
-              bg={isDark ? "gray.900" : "white"}
+              bg={isDark ? "gray.900" : "gray.100"}
               p={8}
               borderRadius="lg"
               width="100%"
               maxW="800px"
             >
               <VStack spacing={6} align="stretch">
-                <Text 
-                  fontSize="4xl" 
-                  fontWeight="bold" 
-                  textAlign="center"
-                  color={isDark ? "white" : "gray.800"}
-                  mb={4}
-                >
-                  My Most Anticipated Releases
-                </Text>
+                <HStack justifyContent="center" alignItems="center" mb={4}>
+                  {isEditing ? (
+                    <>
+                      <input 
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value.slice(0, 30))} // Limit to 30 characters
+                        style={{
+                          fontSize: '3xl',
+                          fontWeight: 'bold',
+                          textAlign: 'center',
+                          color: isDark ? 'white' : 'gray.800',
+                          background: 'transparent',
+                          border: 'none',
+                          outline: 'none',
+                          width: '100%',
+                          maxWidth: '100%',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      />
+                      <Text fontSize="sm" color="gray.500">{title.length}/30</Text>
+                      <Button size="sm" onClick={handleSaveTitle} colorScheme="brand">Save</Button>
+                      <Button size="sm" onClick={handleCancelEdit} variant="outline">Cancel</Button>
+                    </>
+                  ) : (
+                    <Text 
+                      fontSize="3xl" 
+                      fontWeight="bold" 
+                      textAlign="center"
+                      color={isDark ? "white" : "gray.800"}
+                      onClick={() => setIsEditing(true)}
+                      cursor="pointer"
+                    >
+                      {title}
+                    </Text>
+                  )}
+                </HStack>
                 
                 <Grid 
-                  templateColumns="repeat(3, 1fr)"
+                  templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }}
                   gap={6}
                 >
                   {selectedItems.map((item) => (
                     <GridItem key={item.item_id}>
                       <Box 
-                        bg={isDark ? "gray.800" : "gray.50"}
+                        bg={isDark ? "gray.800" : "white"}
                         borderRadius="lg"
                         overflow="hidden"
                         height="260px"
+                        border={isDark ? "none" : "1px solid #E2E8F0"}
                       >
                         <VStack height="100%" spacing={0}>
                           <Box width="100%" height="180px" position="relative" pb={0}>
@@ -318,52 +298,6 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
                 aria-label="Download Preview"
                 colorScheme="brand"
                 onClick={handleDownload}
-                size="lg"
-                isLoading={isGenerating}
-              />
-              <IconButton
-                icon={<FaTwitter />}
-                aria-label="Share on Twitter"
-                colorScheme="twitter"
-                onClick={() => handleShare('twitter')}
-                size="lg"
-                isLoading={isGenerating}
-              />
-              <IconButton
-                icon={<FaFacebook />}
-                aria-label="Share on Facebook"
-                colorScheme="facebook"
-                onClick={() => handleShare('facebook')}
-                size="lg"
-                isLoading={isGenerating}
-              />
-              <IconButton
-                icon={<FaReddit />}
-                aria-label="Share on Reddit"
-                bg="brand.100"
-                color="white"
-                _hover={{ bg: "brand.200" }}
-                onClick={() => handleShare('reddit')}
-                size="lg"
-                isLoading={isGenerating}
-              />
-              <IconButton
-                icon={<FaInstagram />}
-                aria-label="Share on Instagram"
-                bg="brand.100"
-                color="white"
-                _hover={{ bg: "brand.200" }}
-                onClick={() => handleShare('instagram')}
-                size="lg"
-                isLoading={isGenerating}
-              />
-              <IconButton
-                icon={<FaTiktok />}
-                aria-label="Share on TikTok"
-                bg="brand.100"
-                color="white"
-                _hover={{ bg: "brand.200" }}
-                onClick={() => handleShare('tiktok')}
                 size="lg"
                 isLoading={isGenerating}
               />

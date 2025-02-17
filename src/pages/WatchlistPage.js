@@ -80,6 +80,10 @@ const WatchlistPage = ({ user }) => {
     });
   };
 
+  const getSelectedItems = () => {
+    return selectedItems.map(id => watchlistData.find(item => item.item_id === id)).filter(Boolean);
+  };
+
   const handleShareClick = () => {
     setIsSelectionMode(true);
     setSelectedItems([]);
@@ -87,6 +91,11 @@ const WatchlistPage = ({ user }) => {
 
   const handleGeneratePreview = () => {
     setIsShareModalOpen(true);
+  };
+
+  const handleTabChange = (index) => {
+    setTabIndex(index);
+    // No need to clear selected items
   };
 
   // Filter and sort logic
@@ -152,7 +161,7 @@ const WatchlistPage = ({ user }) => {
           </HStack>
   
           {/* Tabs with Custom Colors */}
-          <Tabs index={tabIndex} onChange={setTabIndex} variant="soft-rounded" colorScheme="brand" pb={2}>
+          <Tabs index={tabIndex} onChange={handleTabChange} variant="soft-rounded" colorScheme="brand" pb={2}>
             <TabList>
               {filterOptions.map((filterOption, index) => (
                 <Tab
@@ -281,7 +290,7 @@ const WatchlistPage = ({ user }) => {
         <SharePreviewModal
           isOpen={isShareModalOpen}
           onClose={() => setIsShareModalOpen(false)}
-          selectedItems={selectedItems.map(id => filteredData.find(item => item.item_id === id))}
+          selectedItems={getSelectedItems()}
         />
       </>
     );
