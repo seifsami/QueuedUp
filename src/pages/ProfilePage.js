@@ -97,12 +97,29 @@ const ProfilePage = ({ user }) => {
   };
 
   const toggleNotificationPreference = (preference) => {
-    setNotificationPreferences((prev) =>
-      prev.includes(preference)
-        ? prev.filter((pref) => pref !== preference)
-        : [...prev, preference]
-    );
+    if (preference === 'email') {
+      return; // Email can't be toggled off
+    }
+
+    if (preference === 'sms') {
+      // Only allow SMS toggle if phone number exists
+      if (isEditing && editedData.phone_number || (!isEditing && userData.phone_number)) {
+        setNotificationPreferences((prev) =>
+          prev.includes('sms')
+            ? prev.filter((pref) => pref !== 'sms')
+            : [...prev, 'sms']
+        );
+      }
+    }
   };
+
+  // Add this effect to handle phone number changes
+  useEffect(() => {
+    if (isEditing && !editedData.phone_number) {
+      // Remove 'sms' from notification preferences when phone number is removed
+      setNotificationPreferences(prev => prev.filter(pref => pref !== 'sms'));
+    }
+  }, [isEditing, editedData.phone_number]);
 
   if (!userData) return <Text>Loading...</Text>;
 
@@ -264,48 +281,65 @@ const ProfilePage = ({ user }) => {
         <Divider my={6} />
   
         {/* Notification Preferences */}
-       
-{/* Notification Preferences */}
-{/* Notification Preferences */}
-<Box p={6} borderWidth="1px" borderRadius="lg" boxShadow="md" mb={8}>
-  <Heading as="h2" size="lg" mb={4}>Notification Preferences</Heading>
-  
-  <Flex 
-    direction={{ base: "column", md: "row" }} 
-    justify="flex-start" 
-    align={{ base: "flex-start", md: "center" }} 
-    gap={{ base: 4, md: 8 }}
-  >
-    {/* Email Preference */}
-    <HStack spacing={3}>
-      <Text>Email:</Text>
-      <Switch
-        isChecked={notificationPreferences.includes('email')}
-        onChange={() => toggleNotificationPreference('email')}
-        colorScheme="green"
-        size="md"
-        isDisabled={!isEditing}
-      />
-      {notificationPreferences.includes('email') && <Badge colorScheme="green">ENABLED</Badge>}
-    </HStack>
+        <Box p={6} borderWidth="1px" borderRadius="lg" boxShadow="md" mb={8}>
+          <Heading as="h2" size="lg" mb={4}>Notification Preferences</Heading>
+          
+          <Flex 
+            direction="column"
+            gap={4}
+          >
+            {/* Notification Toggles Row */}
+            <Flex 
+              direction="row" 
+              justify="flex-start" 
+              align="center" 
+              gap={{ base: 4, md: 8 }}
+            >
+              {/* Email Preference */}
+              <HStack spacing={{ base: 2, md: 3 }}>
+                <Text fontSize={{ base: "sm", md: "md" }}>Email:</Text>
+                <Switch
+                  isChecked={true}
+                  colorScheme="green"
+                  size="md"
+                  isDisabled={true}
+                />
+                <Badge colorScheme="green" fontSize={{ base: "xs", md: "sm" }}>ENABLED</Badge>
+              </HStack>
 
-    {/* SMS Preference */}
-    <HStack spacing={3}>
-      <Text>SMS:</Text>
-      <Switch
-        isChecked={notificationPreferences.includes('sms')}
-        onChange={() => toggleNotificationPreference('sms')}
-        colorScheme="green"
-        size="md"
-        isDisabled={!isEditing}
-      />
-      {notificationPreferences.includes('sms') && <Badge colorScheme="green">ENABLED</Badge>}
-    </HStack>
-  </Flex>
-</Box>
+              {/* SMS Preference */}
+              <HStack spacing={{ base: 2, md: 3 }}>
+                <Text fontSize={{ base: "sm", md: "md" }}>SMS:</Text>
+                <Switch
+                  isChecked={notificationPreferences.includes('sms')}
+                  onChange={() => toggleNotificationPreference('sms')}
+                  colorScheme="green"
+                  size="md"
+                  isDisabled={
+                    !isEditing || 
+                    (isEditing && !editedData.phone_number) || 
+                    (!isEditing && !userData.phone_number)
+                  }
+                />
+                {notificationPreferences.includes('sms') && 
+                  <Badge colorScheme="green" fontSize={{ base: "xs", md: "sm" }}>ENABLED</Badge>
+                }
+              </HStack>
+            </Flex>
 
-
-
+            {/* Help Text - Only show when relevant */}
+            {isEditing && !editedData.phone_number && (
+              <Text fontSize="sm" color="gray.500">
+                Enter your phone number to enable SMS notifications (Coming Soon)
+              </Text>
+            )}
+            {notificationPreferences.includes('sms') && editedData.phone_number && (
+              <Text fontSize="sm" color="gray.500">
+                SMS notifications are coming soon! We'll notify you when this feature is live
+              </Text>
+            )}
+          </Flex>
+        </Box>
   
         <Divider my={6} />
   

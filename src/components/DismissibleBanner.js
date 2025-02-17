@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text, CloseButton, Flex, useBreakpointValue, SlideFade } from '@chakra-ui/react';
+import { Box, Text, CloseButton, Slide, Flex, useBreakpointValue } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 
-// Final bounce animation (Stronger, Snappier)
-const bounce = keyframes`
+// Subtle pulse for emoji
+const pulse = keyframes`
   0% { transform: scale(1); }
-  50% { transform: scale(1.8); }
+  50% { transform: scale(1.1); }
   100% { transform: scale(1); }
 `;
 
 const DismissibleBanner = () => {
-  const [isVisible, setIsVisible] = useState(() => {
-    return localStorage.getItem('bannerDismissed') !== 'true';
-  });
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const hasDismissed = localStorage.getItem('bannerDismissed') === 'true';
+
+    if (!hasDismissed) {
+      setTimeout(() => {
+        setIsVisible(true);
+      }, 1500);
+    }
+  }, []);
 
   const isMobile = useBreakpointValue({ base: true, md: false });
 
@@ -22,49 +30,46 @@ const DismissibleBanner = () => {
   };
 
   return (
-    <SlideFade in={isVisible} offsetY="-10px" transition={{ enter: { duration: 0.5 }, exit: { duration: 0.3 } }}>
-      {isVisible && (
-        <Box
-          bg="brand.200"
-          color="brand.600"
-          px={6}
-          py={3}
-          fontSize="15px"
-          fontWeight="bold"
-          textAlign="center"
-          boxShadow="sm"
-          position={isMobile ? "fixed" : "relative"}
-          bottom={isMobile ? "16px" : "auto"}
-          left={isMobile ? "50%" : "auto"}
-          transform={isMobile ? "translateX(-50%)" : "none"}
-          borderRadius={isMobile ? "md" : "none"}
-          width={isMobile ? "90%" : "100vw"}
-          maxW={isMobile ? "400px" : "100%"}
-          zIndex="1000"
-          position="relative"
-        >
-          {/* Corrected text (YOUR EXACT TEXT) */}
-          <Text textAlign="center">
-            🎉 Welcome to <strong>QueuedUp</strong>! Track upcoming movies, TV shows, and books and get notified when they drop!
+    <Slide direction="top" in={isVisible} style={{ zIndex: 99 }}>
+      <Box
+        bg="#FAF3E0"
+        color="#333"
+        boxShadow="md"
+        px={6}
+        py={3}
+        fontSize={{ base: "14px", md: "16px" }}
+        fontWeight="bold"
+        textAlign="center"
+        borderRadius="md"
+        maxW="1200px"
+        mx="auto"
+        mt={4} // ✅ Moves it down so it doesn't cover the search bar
+      >
+        <Flex align="center" justify="space-between">
+          {/* Emoji with subtle animation */}
+          <Text as="span" animation={`${pulse} 1.5s ease-in-out infinite alternate`} mr={2}>
+            📢
           </Text>
 
-          {/* X Button - Now correctly positioned */}
+          {/* Main text (Centered) */}
+          <Text flex="1" textAlign="center">
+            Stay Ahead of New Releases! Add books, TV shows, and movies to your watchlist &{" "}
+            <Text as="span" color="#1D4E2D" fontWeight="extrabold">
+              get reminders when they drop.
+            </Text>
+          </Text>
+
+          {/* Close Button - Now correctly aligned */}
           <CloseButton
-            position="absolute"
-            right="10px" // Tighter to the edge
-            top="50%"
-            transform="translateY(-50%)"
             onClick={handleDismiss}
             color="red.500"
-            boxSize={6} // Keeping it large enough for clarity
-            _hover={{
-              animation: `${bounce} 0.25s ease-in-out`,
-              cursor: "pointer",
-            }}
+            boxSize={5}
+            ml={2}
+            _hover={{ transform: "scale(1.2)", transition: "0.2s", cursor: "pointer" }}
           />
-        </Box>
-      )}
-    </SlideFade>
+        </Flex>
+      </Box>
+    </Slide>
   );
 };
 

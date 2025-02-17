@@ -6,6 +6,7 @@ import FeaturedRelease from '../components/FeaturedRelease';
 import WatchlistPreview from '../components/WatchlistPreview';
 import Carousel from '../components/Carousel';
 import DetailsModal from '../components/DetailsModal';
+import DismissibleBanner from '../components/DismissibleBanner';
 import { getTrendingMedia, getUpcomingMedia, getUserWatchlist, getFeaturedRelease } from '../services/api';
 
 const HomePage = ({ user }) => {
@@ -203,10 +204,11 @@ const HomePage = ({ user }) => {
       <Header />
       <Box maxW={{ xl: '1200px' }} mx="auto" bg="white">
         {/* Sticky Content Toggle with margin top */}
+       
         <Box position="sticky" top="2px" zIndex="100" bg="white">
           <ContentToggle setMediaType={handleMediaTypeChange} />
         </Box>
-
+        
         {featuredItem && (
           <FeaturedRelease
             item={featuredItem}

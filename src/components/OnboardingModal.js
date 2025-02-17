@@ -154,10 +154,40 @@ function OnboardingModal() {
       const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
       const firebaseUser = userCredential.user;
 
+      // Register user immediately after Firebase auth
+      const username = generateUsername(email);
       
+      const urlParts = window.location.href.split('#')[0];
+      const url = new URL(urlParts);
+      const utm_source = url.searchParams.get('utm_source') || '';
+      const utm_medium = url.searchParams.get('utm_medium') || '';
+      const utm_campaign = url.searchParams.get('utm_campaign') || '';
 
-      // Go to personalization step (Step 2)
-      setCurrentStep(2);
+      const userData = {
+        email: firebaseUser.email,
+        firebase_id: firebaseUser.uid.trim(),
+        username,
+        first_name: '',
+        last_name: '',
+        phone_number: '',
+        notification_preferences: ['email'],
+        utm_source,
+        utm_medium,
+        utm_campaign
+      };
+
+      await registerUser(userData);
+
+      toast({
+        title: 'Account Created',
+        description: 'Welcome to QueuedUp!',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+
+      resetModalState();
+      closeModal();
     } catch (error) {
       let errorMessage = error.message;
   
@@ -178,28 +208,27 @@ function OnboardingModal() {
   };
 
   const handleGoogleSignIn = async () => {
-  // Step 1: Detect In-App Browser and Prompt User
-  if (isInAppBrowser()) {
-    toast({
-      title: "Open in Browser",
-      description: "For security reasons, please open this page in your browser to sign in with Google.",
-      status: "warning",
-      duration: 5000,
-      isClosable: true,
-    });
+    if (isInAppBrowser()) {
+      toast({
+        title: "Open in Browser",
+        description: "For security reasons, please open this page in your browser to sign in with Google.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
 
-    // Attempt to open in an external browser (will only work on some devices)
-    const url = window.location.href;
-    window.location.href = `googlechrome://${url.replace(/^https?:\/\//, '')}`;
+      // Attempt to open in an external browser (will only work on some devices)
+      const url = window.location.href;
+      window.location.href = `googlechrome://${url.replace(/^https?:\/\//, '')}`;
 
-    return;  // Exit the function to prevent sign-in from continuing
-  }
+      return;  // Exit the function to prevent sign-in from continuing
+    }
+    
     const provider = new firebase.auth.GoogleAuthProvider();
     try {
       const result = await firebase.auth().signInWithPopup(provider);
       const firebaseUser = result.user;
-
-      const firebaseUserId = firebaseUser.uid.trim(); // Trim any newline characters
+      const firebaseUserId = firebaseUser.uid.trim();
 
       // Check if user exists in backend
       try {
@@ -215,17 +244,41 @@ function OnboardingModal() {
         closeModal();
       } catch (err) {
         if (err.response && err.response.status === 404) {
-          // If user is new
+          // Register new Google user
+          const username = generateUsername(firebaseUser.email);
+          
+          const urlParts = window.location.href.split('#')[0];
+          const url = new URL(urlParts);
+          const utm_source = url.searchParams.get('utm_source') || '';
+          const utm_medium = url.searchParams.get('utm_medium') || '';
+          const utm_campaign = url.searchParams.get('utm_campaign') || '';
+
+          const userData = {
+            email: firebaseUser.email,
+            firebase_id: firebaseUserId,
+            username,
+            first_name: firebaseUser.displayName ? firebaseUser.displayName.split(' ')[0] : '',
+            last_name: firebaseUser.displayName ? firebaseUser.displayName.split(' ').slice(1).join(' ') : '',
+            phone_number: '',
+            notification_preferences: ['email'],
+            utm_source,
+            utm_medium,
+            utm_campaign
+          };
+
+          await registerUser(userData);
+          
           toast({
-            title: 'New User Detected',
-            description: 'Please complete your profile.',
-            status: 'info',
+            title: 'Account Created',
+            description: 'Welcome to QueuedUp!',
+            status: 'success',
             duration: 5000,
             isClosable: true,
           });
-          setCurrentStep(2); // Go to personalization step
+          resetModalState();
+          closeModal();
         } else {
-          throw err; // Handle unexpected errors
+          throw err;
         }
       }
     } catch (error) {
@@ -277,72 +330,6 @@ function OnboardingModal() {
   };
   
 
-  const handlePersonalizationComplete = async () => {
-    
-    if (notificationPreference.includes('mobile') && !phoneNumber) {
-      setPhoneError('A phone number is required for mobile notifications.');
-      toast({
-        title: 'Phone Number Required',
-        description: 'You must provide a phone number to receive SMS notifications.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-      return; // Exit the function to prevent closing the modal
-    }
-
-    setPhoneError(''); // Clear any phone error
-
-    // Register user after personalization step
-    try {
-      const firebaseUser = firebase.auth().currentUser;
-      const firebaseUserId = firebaseUser.uid.trim();
-
-      const urlParts = window.location.href.split('#')[0]; // Get only the part before #
-      const url = new URL(urlParts);
-      const utm_source = url.searchParams.get('utm_source') || '';
-      const utm_medium = url.searchParams.get('utm_medium') || '';
-      const utm_campaign = url.searchParams.get('utm_campaign') || '';
-
-      console.log("Extracted UTM Params:", { utm_source, utm_medium, utm_campaign, url });
-
-      const userData = {
-        email: firebaseUser.email,
-        firebase_id: firebaseUserId,
-        username,
-        first_name: firstName,  // Use `firstName` from the state
-        last_name: lastName,
-        phone_number: phoneNumber,
-        notification_preferences: notificationPreference,
-        utm_source, 
-        utm_medium, 
-        utm_campaign,
-      };
-
-
-      await registerUser(userData); // Backend API call to register user
-
-      toast({
-        title: 'Account Created',
-        description: 'You can now start using QueuedUp!',
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-
-      resetModalState();
-      closeModal();
-    } catch (error) {
-      toast({
-        title: 'Error Saving Profile',
-        description: error.message,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
-
   const switchToSignUp = () => {
     setIsLogin(false); // Switch to the sign-up view
     setCurrentStep(1); // Stay on the first step for the sign-up view
@@ -361,6 +348,14 @@ function OnboardingModal() {
       setPhoneError('');
     }
   }, [notificationPreference, phoneNumber]);
+
+  // Add helper function to generate username
+  const generateUsername = (email) => {
+    // Remove domain and special characters, add random numbers
+    const baseUsername = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+    const randomNum = Math.floor(Math.random() * 1000);
+    return `${baseUsername}${randomNum}`;
+  };
 
   return (
     <Modal isOpen={isModalOpen} onClose={closeModal} isCentered size="lg">
@@ -475,62 +470,6 @@ function OnboardingModal() {
                   )}
                 </VStack>
               </Fade>
-            </ModalBody>
-          </Fade>
-        )}
-  
-        {/* Step 2: Personalization */}
-        {currentStep === 2 && (
-          <Fade in={true}>
-            <ModalBody>
-              <VStack spacing={4}>
-                <FormControl id="first_name" isRequired>
-                  <FormLabel>First Name</FormLabel>
-                  <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                </FormControl>
-                <FormControl id="last_name" isRequired>
-                  <FormLabel>Last Name</FormLabel>
-                  <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                </FormControl>
-                <FormControl id="username" isRequired>
-                  <FormLabel>Username</FormLabel>
-                  <Input value={username} onChange={(e) => setUsername(e.target.value)} />
-                </FormControl>
-                <FormControl id="phoneNumber" isInvalid={phoneError}>
-                  <FormLabel>Phone Number (optional)</FormLabel>
-                  <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-                  {!phoneError ? null : <FormErrorMessage>{phoneError}</FormErrorMessage>}
-                </FormControl>
-                <FormControl id="notificationPreferences">
-                  <HStack spacing={1}>
-                    <FormLabel mr={0.5}>Notification Preferences</FormLabel>
-                    <Tooltip
-                      label="We will notify you about new releases according to your preferences."
-                      hasArrow
-                      shouldWrapChildren
-                    >
-                      <span>
-                        <Icon as={FaInfoCircle} color="gray.500" />
-                      </span>
-                    </Tooltip>
-                  </HStack>
-                  <CheckboxGroup value={notificationPreference} onChange={(values) => setNotificationPreference(values)}>
-                    <HStack>
-                      <Checkbox value="email">Email</Checkbox>
-                      <Checkbox value="mobile">Mobile</Checkbox>
-                    </HStack>
-                  </CheckboxGroup>
-                </FormControl>
-                <Button
-                  color={'white'}
-                  bgColor={'brand.100'}
-                  width="full"
-                  onClick={handlePersonalizationComplete}
-                  isDisabled={phoneError !== ''}
-                >
-                  Finish
-                </Button>
-              </VStack>
             </ModalBody>
           </Fade>
         )}
