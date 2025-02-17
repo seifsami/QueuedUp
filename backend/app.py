@@ -95,10 +95,13 @@ def proxy_image(image_path):
             source_url = f'https://{isbndb_path}'
             print(f"Constructed ISBNDB URL: {source_url}")  # Log the constructed URL
         else:
+            print(f"Invalid image source: {image_path}")  # Log invalid source
             return jsonify({'error': 'Invalid image source'}), 400
         
         # Forward the request to the source
+        print(f"Requesting URL: {source_url}")  # Log the request
         response = requests.get(source_url, stream=True)
+        print(f"Response status code: {response.status_code}")  # Log the response status
         
         # Check if the request was successful
         if response.status_code == 200:
@@ -112,6 +115,7 @@ def proxy_image(image_path):
                 }
             )
         else:
+            print(f"Failed to fetch image: {response.status_code}")  # Log failure
             return jsonify({'error': 'Failed to fetch image'}), response.status_code
             
     except Exception as e:
