@@ -93,6 +93,7 @@ def proxy_image(image_path):
             # Remove the 'isbndb/' prefix and construct ISBNDB URL
             isbndb_path = image_path[7:]  # Remove 'isbndb/'
             source_url = f'https://{isbndb_path}'
+            print(f"Constructed ISBNDB URL: {source_url}")  # Log the constructed URL
         else:
             return jsonify({'error': 'Invalid image source'}), 400
         
