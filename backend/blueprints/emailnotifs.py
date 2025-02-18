@@ -19,7 +19,7 @@ def preview_notifications():
         # 2️⃣ Get users who have those items on their watchlist
         users_to_notify = get_users_with_watchlist_items(today_releases)
 
-        # 3️⃣ Remove users who don’t actually have items releasing
+        # 3️⃣ Remove users who don't actually have items releasing
         filtered_users = {email: items for email, items in users_to_notify.items() if any(items.values())}
 
         return jsonify(filtered_users), 200
@@ -115,4 +115,40 @@ def unsubscribe():
         </body>
     </html>
 '''
+
+@emailnotifs_blueprint.route('/test-email', methods=['POST'])
+def test_email():
+    """Send a test email to verify email functionality."""
+    try:
+        data = request.get_json()
+        if not data or 'email' not in data:
+            return jsonify({"success": False, "error": "Email address required"}), 400
+
+        test_email = data['email']
+        test_content = """
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+            <h1 style="color: #2E8B57;">QueuedUp Test Email</h1>
+            <p>This is a test email to verify the email notification system.</p>
+            <p>If you're receiving this, the email system is working correctly!</p>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                <p style="color: #666;">QueuedUp - Track Your Upcoming Releases</p>
+            </div>
+        </div>
+        """
+
+        success = send_email(test_email, "QueuedUp Test Email", test_content)
+
+        if success:
+            return jsonify({
+                "success": True,
+                "message": f"Test email successfully sent to {test_email}"
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Failed to send test email"
+            }), 500
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
