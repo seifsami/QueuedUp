@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, render_template_string, request
 from tasks.release_query import get_today_releases, get_users_with_watchlist_items
-from tasks.email_formatter import format_email_content
+from tasks.email_formatter import format_email_content, get_amazon_url
 from tasks.email_sender import send_email
 from app import mongo  
 
@@ -138,17 +138,34 @@ def test_email():
         # Get user's country code for the test email
         country_code = get_user_country(test_email)
         
+        # Generate a test Amazon link
+        test_book_title = "The Lord of the Rings"
+        amazon_link = get_amazon_url(test_book_title, country_code)
+        
         test_content = """
         <div style="font-family: Arial, sans-serif; padding: 20px;">
             <h1 style="color: #2E8B57;">QueuedUp Test Email</h1>
             <p>This is a test email to verify the email notification system.</p>
             <p>If you're receiving this, the email system is working correctly!</p>
+            <div style="margin-top: 20px;">
+                <p><strong>Test Amazon Link:</strong></p>
+                <p>The link below should redirect to your local Amazon store ({}):</p>
+                <a href="{}" style="display: inline-block; background-color: #2E8B57; color: white; padding: 10px 20px; 
+                    text-decoration: none; border-radius: 5px; margin: 10px 0;">
+                    Buy {} on Amazon
+                </a>
+            </div>
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
                 <p style="color: #666;">QueuedUp - Track Your Upcoming Releases</p>
                 <p style="color: #666;">Your country setting: {}</p>
             </div>
         </div>
-        """.format(country_code or "US (default)")
+        """.format(
+            country_code or "US (default)",
+            amazon_link,
+            test_book_title,
+            country_code or "US (default)"
+        )
 
         success = send_email(test_email, "QueuedUp Test Email", test_content)
 
