@@ -10,8 +10,47 @@ DEFAULT_IMAGES = {
     "tv_seasons": "https://queuedup-backend-6d9156837adf.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 }
 
+def get_amazon_domain(country_code):
+    """
+    Get the appropriate Amazon domain for a country code.
+    Special cases are handled explicitly, others follow the standard pattern.
+    """
+    if not country_code:
+        return "amazon.com"
+        
+    country_code = country_code.upper()
+    
+    # Special cases
+    special_domains = {
+        "US": "amazon.com",
+        "UK": "amazon.co.uk",
+        "JP": "amazon.co.jp",
+        "BR": "amazon.com.br",
+        "AU": "amazon.com.au",
+        "IN": "amazon.in",
+        "MX": "amazon.com.mx",
+        "SG": "amazon.sg",
+        "AE": "amazon.ae",
+        "SA": "amazon.sa",
+    }
+    
+    if country_code in special_domains:
+        return special_domains[country_code]
+    
+    # European and other countries follow standard pattern (amazon.{country_code.lower()})
+    european_countries = ["DE", "FR", "IT", "ES", "NL", "PL", "SE", "TR", "BE", "CA"]
+    if country_code in european_countries:
+        return f"amazon.{country_code.lower()}"
+        
+    # Default to US store for unsupported countries
+    return "amazon.com"
 
-def build_email_section(items, section_title, media_type):
+def get_amazon_url(title, country_code=None):
+    """Generate appropriate Amazon URL based on user's country"""
+    domain = get_amazon_domain(country_code)
+    return f"https://www.{domain}/s?k={title.replace(' ', '+')}&tag=queuedup0f-20"
+
+def build_email_section(items, section_title, media_type, country_code=None):
     """Generates HTML for each section (Movies, TV, Books)"""
     if not items:
         return ""
@@ -20,19 +59,20 @@ def build_email_section(items, section_title, media_type):
     
     for item in items:
         image_url = item.get("image") or DEFAULT_IMAGES[media_type]
+        amazon_url = get_amazon_url(item['title'], country_code) if media_type == "books" else ""
         section_html += f"""
         <div class="release-item">
             <img src="{image_url}" alt="{item['title']}">
             <div>
                 <div class="release-title">{item['title']}</div>
-                {f'<a href="https://www.amazon.com/s?k={item["title"].replace(" ", "+")}&tag=queuedup0f-20" class="cta-button"> Buy on Amazon</a>' if media_type == "books" else ""}
+                {f'<a href="{amazon_url}" class="cta-button">Buy on Amazon</a>' if media_type == "books" else ""}
             </div>
         </div>
         """
     
     return section_html
 
-def format_email_content(releases,user_email):
+def format_email_content(releases, user_email, country_code=None):
     """Formats today's releases using an external HTML template with dynamic content"""
     try:
         with open(EMAIL_TEMPLATE_PATH, "r", encoding="utf-8") as template_file:
@@ -40,11 +80,10 @@ def format_email_content(releases,user_email):
     except FileNotFoundError:
         return "<p>Error: Email template not found.</p>"
 
-    # Generate dynamic sections
-    books_html = build_email_section(releases["books"], "📚 Books Releasing Today", "books")
+    # Generate dynamic sections with country code
+    books_html = build_email_section(releases["books"], "📚 Books Releasing Today", "books", country_code)
     movies_html = build_email_section(releases["movies"], "🎬 Movies Releasing Today", "movies")
     tv_html = build_email_section(releases["tv_seasons"], "📺 TV Shows Releasing Today", "tv_seasons")
-    
 
     # Replace placeholders with actual HTML content
     email_html = email_html.replace("{{books_section}}", books_html)

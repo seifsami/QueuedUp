@@ -6,6 +6,12 @@ from app import mongo
 
 emailnotifs_blueprint = Blueprint('emailnotifs', __name__)
 
+def get_user_country(email):
+    """Fetch user's country code from the database."""
+    db = mongo.cx["QueuedUpDBnew"]
+    user = db.users.find_one({"email": email}, {"country": 1})
+    return user.get("country") if user else None
+
 #
 # 🔍 **Preview API** (No Emails Sent, Just Data)
 #
@@ -48,15 +54,18 @@ def send_notifications():
             if not any(user_releases.values()):  # Skip users with empty watchlists
                 continue
 
-            # ✅ Pass user_email to format_email_content()
-            email_content = format_email_content(user_releases, user_email)
+            # Get user's country code
+            country_code = get_user_country(user_email)
+            
+            # Format email with country-specific Amazon links
+            email_content = format_email_content(user_releases, user_email, country_code)
 
-            # 📤 Send email
+            # Send email
             success = send_email(user_email, "Your QueuedUp Releases for Today!", email_content)
 
             if success:
                 sent_count += 1
-                print(f"✅ Email successfully sent to {user_email}")
+                print(f"✅ Email successfully sent to {user_email} (Country: {country_code or 'US'})")
             else:
                 failed_count += 1
                 print(f"❌ Failed to send email to {user_email}")
@@ -125,6 +134,10 @@ def test_email():
             return jsonify({"success": False, "error": "Email address required"}), 400
 
         test_email = data['email']
+        
+        # Get user's country code for the test email
+        country_code = get_user_country(test_email)
+        
         test_content = """
         <div style="font-family: Arial, sans-serif; padding: 20px;">
             <h1 style="color: #2E8B57;">QueuedUp Test Email</h1>
@@ -132,9 +145,10 @@ def test_email():
             <p>If you're receiving this, the email system is working correctly!</p>
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
                 <p style="color: #666;">QueuedUp - Track Your Upcoming Releases</p>
+                <p style="color: #666;">Your country setting: {}</p>
             </div>
         </div>
-        """
+        """.format(country_code or "US (default)")
 
         success = send_email(test_email, "QueuedUp Test Email", test_content)
 
