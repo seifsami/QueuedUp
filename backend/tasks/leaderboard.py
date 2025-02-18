@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from bson import ObjectId
 import random
+from flask import current_app
 
 def calculate_hype_score(raw_score):
     """Calculate hype meter percentage from raw score"""
@@ -25,6 +26,7 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
     db = mongo.cx["QueuedUpDBnew"]
     cutoff_date = datetime.now(timezone.utc) - timedelta(days=timeframe_days)
     current_time = datetime.now(timezone.utc)
+    redis_client = current_app.config.get("REDIS_CLIENT")
     
     print(f"Computing {timeframe_days}-day leaderboard for {media_type}")
     
@@ -45,9 +47,6 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
         {"$sort": {"watchlist_count": -1}},
         {"$limit": 100}
     ]))
-    
-    # Get the maximum watchlist count for normalization
-    max_count = ranked_items[0]["watchlist_count"] if ranked_items else 1
     
     # If we have fewer than 100 items, fill with other items
     if len(ranked_items) < 100:
@@ -76,7 +75,7 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
                 "watchlist_count": 0
             })
     
-    # Enrich items with details and calculate hype scores
+    # Enrich items with details and get hype percentages
     enriched_items = []
     for index, item in enumerate(ranked_items, 1):
         item_id = item["_id"]
@@ -84,11 +83,6 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
             # Get full item details
             item_details = db[media_type].find_one({"_id": ObjectId(item_id)})
             if item_details:
-                # Calculate normalized hype score based on watchlist count
-                watchlist_count = item["watchlist_count"]
-                normalized_score = watchlist_count / max_count if max_count > 0 else 0
-                hype_score = calculate_hype_score(normalized_score)
-                
                 # Get creator info based on media type
                 creator = None
                 if media_type == "books":
@@ -98,14 +92,43 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
                 elif media_type == "tv_seasons":
                     creator = item_details.get("network_name")
                 
+                # Check Redis cache for hype percentage first
+                hype_percentage = None
+                if redis_client:
+                    hype_cache_key = f"hype_meter:{media_type}:{str(item_id)}"
+                    cached_hype = redis_client.get(hype_cache_key)
+                    if cached_hype:
+                        print(f"⚡ Using cached Hype Meter for {item_id}")
+                        hype_percentage = int(cached_hype)
+                
+                # If not in cache, calculate it
+                if hype_percentage is None:
+                    raw_hype_score = item_details.get("hype_score", 0)
+                    if raw_hype_score is None or raw_hype_score == 0:
+                        hype_percentage = random.choice([25, 40])
+                    elif raw_hype_score >= 0.8:
+                        hype_percentage = 100
+                    elif raw_hype_score >= 0.5:
+                        hype_percentage = 80
+                    elif raw_hype_score >= 0.3:
+                        hype_percentage = 60
+                    elif raw_hype_score >= 0.1:
+                        hype_percentage = 40
+                    else:
+                        hype_percentage = 25
+                    
+                    # Cache the calculated percentage
+                    if redis_client:
+                        redis_client.setex(hype_cache_key, 86400, hype_percentage)  # 24 hour cache
+                
                 enriched_item = {
                     "rank": index,
                     "item_id": str(item_id),
-                    "watchlist_count": watchlist_count,
+                    "watchlist_count": item["watchlist_count"],
                     "title": item_details.get("title"),
                     "release_date": item_details.get("release_date"),
                     "image": item_details.get("image"),
-                    "hype_score": hype_score,
+                    "hype_meter_percentage": hype_percentage,
                     "slug": item_details.get("slug"),
                     "media_type": media_type,
                     "creator": creator

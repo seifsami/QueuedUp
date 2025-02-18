@@ -142,7 +142,7 @@ const LeaderboardCard = ({
             {/* Hype Meter Section */}
             <Box width="100%" maxW="200px">
               <HypeMeter 
-                hypeMeterPercentage={item.hype_score || 0} 
+                hypeMeterPercentage={item.hype_meter_percentage || 0} 
                 tooltipContent="Hype Score is based on the number of users tracking this item compared to the most-tracked item"
               />
             </Box>
