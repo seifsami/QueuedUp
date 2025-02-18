@@ -46,15 +46,15 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
         {"$limit": 100}
     ]))
     
+    # Get the maximum watchlist count for normalization
+    max_count = ranked_items[0]["watchlist_count"] if ranked_items else 1
+    
     # If we have fewer than 100 items, fill with other items
     if len(ranked_items) < 100:
         print(f"Found {len(ranked_items)} items, filling remaining slots with additional items")
         existing_ids = [item["_id"] for item in ranked_items]
         
         # Get additional items not already in the list
-        # First try to get items with the highest popularity scores that are either:
-        # 1. Unreleased (release_date > current_time)
-        # 2. Have null release_date
         additional_items = list(db[media_type].aggregate([
             {
                 "$match": {
@@ -65,30 +65,9 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
                     ]
                 }
             },
-            {"$sort": {"popularity": -1}},  # Sort by popularity if available
+            {"$sort": {"popularity": -1}},
             {"$limit": 100 - len(ranked_items)}
         ]))
-        
-        # If we still don't have enough, get random items with the same release date criteria
-        if len(additional_items) < (100 - len(ranked_items)):
-            remaining_count = 100 - len(ranked_items) - len(additional_items)
-            existing_ids.extend([item["_id"] for item in additional_items])
-            
-            random_items = list(db[media_type].aggregate([
-                {
-                    "$match": {
-                        "_id": {"$nin": existing_ids},
-                        "$or": [
-                            {"release_date": {"$gt": current_time}},
-                            {"release_date": None}
-                        ]
-                    }
-                },
-                {"$sample": {"size": remaining_count}}
-            ]))
-            additional_items.extend(random_items)
-        
-        print(f"Found {len(additional_items)} additional items to fill the leaderboard")
         
         # Add them to ranked items with 0 watchlist count
         for item in additional_items:
@@ -105,23 +84,31 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
             # Get full item details
             item_details = db[media_type].find_one({"_id": ObjectId(item_id)})
             if item_details:
-                # Calculate hype score
-                raw_hype = item_details.get("hype_score", 0)
-                hype_score = calculate_hype_score(raw_hype)
+                # Calculate normalized hype score based on watchlist count
+                watchlist_count = item["watchlist_count"]
+                normalized_score = watchlist_count / max_count if max_count > 0 else 0
+                hype_score = calculate_hype_score(normalized_score)
+                
+                # Get creator info based on media type
+                creator = None
+                if media_type == "books":
+                    creator = item_details.get("author")
+                elif media_type == "movies":
+                    creator = item_details.get("director")
+                elif media_type == "tv_seasons":
+                    creator = item_details.get("network_name")
                 
                 enriched_item = {
                     "rank": index,
                     "item_id": str(item_id),
-                    "watchlist_count": item["watchlist_count"],
+                    "watchlist_count": watchlist_count,
                     "title": item_details.get("title"),
                     "release_date": item_details.get("release_date"),
                     "image": item_details.get("image"),
                     "hype_score": hype_score,
                     "slug": item_details.get("slug"),
                     "media_type": media_type,
-                    "author": item_details.get("author"),
-                    "director": item_details.get("director"),
-                    "network_name": item_details.get("network_name")
+                    "creator": creator
                 }
                 enriched_items.append(enriched_item)
         except Exception as e:

@@ -9,16 +9,10 @@ import {
   useColorModeValue,
   Tooltip,
 } from '@chakra-ui/react';
-import { FaBook, FaTv, FaFilm, FaInfoCircle, FaCalendarAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaInfoCircle, FaFire } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import NotifyMeButton from './NotifyMeButton';
 import HypeMeter from './HypeMeter';
-
-const mediaTypeIcons = {
-  books: FaBook,
-  tv_seasons: FaTv,
-  movies: FaFilm,
-};
 
 const defaultImages = {
   books: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
@@ -37,23 +31,6 @@ const formatReleaseDate = (dateString) => {
     year: 'numeric', 
     timeZone: 'UTC'
   });
-};
-
-const getCreatorLabel = (mediaType) => {
-  switch (mediaType) {
-    case 'books':
-      return 'Author';
-    case 'movies':
-      return 'Director';
-    case 'tv_seasons':
-      return 'Network';
-    default:
-      return 'Creator';
-  }
-};
-
-const getCreator = (item) => {
-  return item.author || item.director || item.network_name || 'N/A';
 };
 
 const LeaderboardCard = ({ 
@@ -78,8 +55,6 @@ const LeaderboardCard = ({
     }
   };
 
-  const creatorLabel = getCreatorLabel(item.media_type);
-  const creator = getCreator(item);
   const formattedDate = formatReleaseDate(item.release_date);
   const showTBDTooltip = formattedDate === "TBD";
 
@@ -97,7 +72,7 @@ const LeaderboardCard = ({
         borderColor={borderColor}
         borderRadius="lg"
         bg={bg}
-        minHeight="120px"
+        minHeight="160px"
         _hover={{ bg: hoverBg }}
         spacing={4}
         position="relative"
@@ -116,29 +91,20 @@ const LeaderboardCard = ({
         </Box>
 
         <HStack spacing={4} width="100%" pl={12}>
-          {/* Media Type Icon & Image */}
-          <Box position="relative">
-            <Icon 
-              as={mediaTypeIcons[item.media_type]} 
-              position="absolute"
-              top={2}
-              left={2}
-              boxSize={5}
-              color="gray.500"
-              zIndex={1}
-            />
+          {/* Image */}
+          <Box width="120px" height="160px" flexShrink={0}>
             <Image
               src={item.image || defaultImages[item.media_type || "books"]}
               alt={item.title}
-              htmlWidth="80px"
-              htmlHeight="120px"
+              width="100%"
+              height="100%"
               objectFit="cover"
               borderRadius="md"
             />
           </Box>
 
           {/* Content Section */}
-          <VStack align="start" flex={1} spacing={1} minWidth={0}>
+          <VStack align="start" flex={1} spacing={2} minWidth={0}>
             {/* Title and Creator */}
             <Text 
               fontWeight="bold" 
@@ -148,44 +114,38 @@ const LeaderboardCard = ({
               {item.title}
             </Text>
             <Text fontSize="sm" color="gray.500">
-              {creatorLabel}: {creator}
+              {item.creator || 'N/A'}
             </Text>
-            <HStack>
-              {showTBDTooltip ? (
-                <Tooltip 
-                  hasArrow 
-                  label="No release date yet. Add to your watchlist & we'll notify you the second it's announced!" 
-                  bg="gray.700" 
-                  color="white"
-                  placement="top"
-                >
-                  <HStack spacing={1} color="gray.500" fontSize="sm">
-                    <Icon as={FaCalendarAlt} />
-                    <Text>TBD</Text>
-                    <Icon as={FaInfoCircle} />
-                  </HStack>
-                </Tooltip>
-              ) : (
-                <Text fontSize="sm" color="gray.500">
-                  <Icon as={FaCalendarAlt} mr={1} />
-                  {formattedDate}
-                </Text>
-              )}
-            </HStack>
+            
+            {/* Release Date */}
+            {showTBDTooltip ? (
+              <Tooltip 
+                hasArrow 
+                label="No release date yet. Add to your watchlist & we'll notify you the second it's announced!" 
+                bg="gray.700" 
+                color="white"
+                placement="top"
+              >
+                <HStack spacing={2} color="gray.500">
+                  <Icon as={FaCalendarAlt} />
+                  <Text>TBD</Text>
+                  <Icon as={FaInfoCircle} />
+                </HStack>
+              </Tooltip>
+            ) : (
+              <HStack spacing={2} color="gray.500">
+                <Icon as={FaCalendarAlt} />
+                <Text>{formattedDate}</Text>
+              </HStack>
+            )}
 
             {/* Hype Meter Section */}
-            <HStack width="100%" align="center" spacing={2}>
-              <Box flex={1} maxW="200px">
-                <HypeMeter hypeMeterPercentage={item.hype_score || 0} />
-              </Box>
-              <Tooltip
-                label="Hype Score is based on the number of users tracking this item compared to the most-tracked item"
-                placement="top"
-                hasArrow
-              >
-                <Icon as={FaInfoCircle} color="gray.400" />
-              </Tooltip>
-            </HStack>
+            <Box width="100%" maxW="200px">
+              <HypeMeter 
+                hypeMeterPercentage={item.hype_score || 0} 
+                tooltipContent="Hype Score is based on the number of users tracking this item compared to the most-tracked item"
+              />
+            </Box>
           </VStack>
 
           {/* Notify Me Button */}
