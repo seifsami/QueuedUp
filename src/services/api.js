@@ -85,3 +85,15 @@ export const getFeaturedRelease = async (mediaType) => {
       throw new Error('Failed to fetch featured release');
   }
 };
+
+export const getLeaderboardData = async (timeframe, mediaType, page = 1) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/leaderboard/api/leaderboard?timeframe=${timeframe}&media_type=${mediaType}&page=${page}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching leaderboard data:', error);
+    throw new Error('Failed to fetch leaderboard data');
+  }
+};

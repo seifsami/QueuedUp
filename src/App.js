@@ -10,6 +10,7 @@ import WatchlistPage from './pages/WatchlistPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import ProfilePage from './pages/ProfilePage';
 import MediaDetailPage from './pages/MediaDetailPage'; // ✅ Import the new media details page
+import LeaderboardPage from './pages/LeaderboardPage';
 import Footer from './components/Footer';
 import { Box, Flex } from '@chakra-ui/react';  
 
@@ -43,6 +44,7 @@ const App = () => {
               <Route path="/search" element={<SearchResultsPage user={currentUser} />} />
               <Route path="/profile" element={<ProfilePage user={currentUser} />} />
               <Route path="/media/:mediaType/:slug" element={<MediaDetailPage user={currentUser} />} />
+              <Route path="/leaderboard" element={<LeaderboardPage user={currentUser} />} />
             </Routes>
           </Box>
 

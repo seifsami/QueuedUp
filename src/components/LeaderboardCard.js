@@ -7,10 +7,9 @@ import {
   VStack,
   Icon,
   useColorModeValue,
-  useBreakpointValue,
   Tooltip,
 } from '@chakra-ui/react';
-import { FaBook, FaTv, FaFilm, FaInfoCircle } from 'react-icons/fa';
+import { FaBook, FaTv, FaFilm, FaInfoCircle, FaCalendarAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import NotifyMeButton from './NotifyMeButton';
 import HypeMeter from './HypeMeter';
@@ -27,9 +26,38 @@ const defaultImages = {
   tv_seasons: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/ajeet-mestry-UBhpOIHnazM-unsplash.jpg",
 };
 
+const formatReleaseDate = (dateString) => {
+  if (!dateString || dateString.toLowerCase() === "n/a") {
+    return "TBD";
+  }
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { 
+    month: 'long', 
+    day: 'numeric', 
+    year: 'numeric', 
+    timeZone: 'UTC'
+  });
+};
+
+const getCreatorLabel = (mediaType) => {
+  switch (mediaType) {
+    case 'books':
+      return 'Author';
+    case 'movies':
+      return 'Director';
+    case 'tv_seasons':
+      return 'Network';
+    default:
+      return 'Creator';
+  }
+};
+
+const getCreator = (item) => {
+  return item.author || item.director || item.network_name || 'N/A';
+};
+
 const LeaderboardCard = ({ 
   item, 
-  ranking,
   userWatchlist, 
   refetchWatchlist,
 }) => {
@@ -38,23 +66,6 @@ const LeaderboardCard = ({
   const rankingColor = useColorModeValue('brand.500', 'brand.300');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const navigate = useNavigate();
-
-  const formatReleaseDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    try {
-      let date = new Date(Date.parse(dateString));
-      if (isNaN(date.getTime())) throw new Error("Invalid Date");
-      return date.toLocaleDateString('en-US', { 
-        month: 'long', 
-        day: 'numeric', 
-        year: 'numeric', 
-        timeZone: 'UTC'
-      });
-    } catch (error) {
-      console.error("Error parsing date:", dateString);
-      return 'Invalid Date';
-    }
-  };
 
   const handleCardClick = (event) => {
     event.preventDefault();
@@ -66,6 +77,11 @@ const LeaderboardCard = ({
       console.error("Missing slug for item:", item);
     }
   };
+
+  const creatorLabel = getCreatorLabel(item.media_type);
+  const creator = getCreator(item);
+  const formattedDate = formatReleaseDate(item.release_date);
+  const showTBDTooltip = formattedDate === "TBD";
 
   return (
     <Box
@@ -96,7 +112,7 @@ const LeaderboardCard = ({
           color={rankingColor}
           zIndex={1}
         >
-          #{ranking}
+          #{item.rank}
         </Box>
 
         <HStack spacing={4} width="100%" pl={12}>
@@ -132,16 +148,35 @@ const LeaderboardCard = ({
               {item.title}
             </Text>
             <Text fontSize="sm" color="gray.500">
-              {item.author || item.director || item.network_name || 'N/A'}
+              {creatorLabel}: {creator}
             </Text>
-            <Text fontSize="sm" color="gray.500">
-              {formatReleaseDate(item.release_date)}
-            </Text>
+            <HStack>
+              {showTBDTooltip ? (
+                <Tooltip 
+                  hasArrow 
+                  label="No release date yet. Add to your watchlist & we'll notify you the second it's announced!" 
+                  bg="gray.700" 
+                  color="white"
+                  placement="top"
+                >
+                  <HStack spacing={1} color="gray.500" fontSize="sm">
+                    <Icon as={FaCalendarAlt} />
+                    <Text>TBD</Text>
+                    <Icon as={FaInfoCircle} />
+                  </HStack>
+                </Tooltip>
+              ) : (
+                <Text fontSize="sm" color="gray.500">
+                  <Icon as={FaCalendarAlt} mr={1} />
+                  {formattedDate}
+                </Text>
+              )}
+            </HStack>
 
             {/* Hype Meter Section */}
             <HStack width="100%" align="center" spacing={2}>
               <Box flex={1} maxW="200px">
-                <HypeMeter hypeMeterPercentage={item.hype_meter_percentage || 0} />
+                <HypeMeter hypeMeterPercentage={item.hype_score || 0} />
               </Box>
               <Tooltip
                 label="Hype Score is based on the number of users tracking this item compared to the most-tracked item"

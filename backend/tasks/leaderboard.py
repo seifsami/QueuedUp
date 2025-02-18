@@ -2,6 +2,21 @@ from datetime import datetime, timedelta, timezone
 from bson import ObjectId
 import random
 
+def calculate_hype_score(raw_score):
+    """Calculate hype meter percentage from raw score"""
+    if raw_score is None or raw_score == 0:
+        return random.choice([25, 40])  # Random assignment for 0/missing values
+    elif raw_score >= 0.8:
+        return 100
+    elif raw_score >= 0.5:
+        return 80
+    elif raw_score >= 0.3:
+        return 60
+    elif raw_score >= 0.1:
+        return 40
+    else:
+        return 25
+
 def compute_leaderboard(mongo, media_type, timeframe_days):
     """
     Compute leaderboard for a specific media type and timeframe.
@@ -82,12 +97,39 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
                 "watchlist_count": 0
             })
     
-    # Add rank to each item
+    # Enrich items with details and calculate hype scores
+    enriched_items = []
     for index, item in enumerate(ranked_items, 1):
-        item["rank"] = index
+        item_id = item["_id"]
+        try:
+            # Get full item details
+            item_details = db[media_type].find_one({"_id": ObjectId(item_id)})
+            if item_details:
+                # Calculate hype score
+                raw_hype = item_details.get("hype_score", 0)
+                hype_score = calculate_hype_score(raw_hype)
+                
+                enriched_item = {
+                    "rank": index,
+                    "item_id": str(item_id),
+                    "watchlist_count": item["watchlist_count"],
+                    "title": item_details.get("title"),
+                    "release_date": item_details.get("release_date"),
+                    "image": item_details.get("image"),
+                    "hype_score": hype_score,
+                    "slug": item_details.get("slug"),
+                    "media_type": media_type,
+                    "author": item_details.get("author"),
+                    "director": item_details.get("director"),
+                    "network_name": item_details.get("network_name")
+                }
+                enriched_items.append(enriched_item)
+        except Exception as e:
+            print(f"Error enriching item {item_id}: {str(e)}")
+            continue
     
-    print(f"Final leaderboard for {media_type} has {len(ranked_items)} items")
-    return ranked_items
+    print(f"Final leaderboard for {media_type} has {len(enriched_items)} items")
+    return enriched_items
 
 def update_leaderboards(mongo, redis_client=None):
     """
