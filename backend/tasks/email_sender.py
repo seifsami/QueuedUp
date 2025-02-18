@@ -1,6 +1,6 @@
 import os
 import sendgrid
-from sendgrid.helpers.mail import Mail
+from sendgrid.helpers.mail import Mail, Email
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,8 +16,9 @@ def send_email(to_email, subject, html_content):
 
     sg = sendgrid.SendGridAPIClient(SENDGRID_API_KEY)
     
+    from_email = Email(SENDER_EMAIL, name="QueuedUp")
     email = Mail(
-        from_email=SENDER_EMAIL,
+        from_email=from_email,
         to_emails=to_email,
         subject=subject,
         html_content=html_content
