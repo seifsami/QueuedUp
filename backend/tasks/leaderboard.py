@@ -9,6 +9,7 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
     """
     db = mongo.cx["QueuedUpDBnew"]
     cutoff_date = datetime.now(timezone.utc) - timedelta(days=timeframe_days)
+    current_time = datetime.now(timezone.utc)
     
     print(f"Computing {timeframe_days}-day leaderboard for {media_type}")
     
@@ -30,21 +31,49 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
         {"$limit": 100}
     ]))
     
-    # If we have fewer than 100 items, fill with upcoming releases
+    # If we have fewer than 100 items, fill with other items
     if len(ranked_items) < 100:
-        print(f"Found {len(ranked_items)} items, filling remaining slots with upcoming releases")
+        print(f"Found {len(ranked_items)} items, filling remaining slots with additional items")
         existing_ids = [item["_id"] for item in ranked_items]
         
-        # Get upcoming releases not already in the list
+        # Get additional items not already in the list
+        # First try to get items with the highest popularity scores that are either:
+        # 1. Unreleased (release_date > current_time)
+        # 2. Have null release_date
         additional_items = list(db[media_type].aggregate([
             {
                 "$match": {
-                    "release_date": {"$gte": datetime.now(timezone.utc)},
-                    "_id": {"$nin": existing_ids}
+                    "_id": {"$nin": existing_ids},
+                    "$or": [
+                        {"release_date": {"$gt": current_time}},
+                        {"release_date": None}
+                    ]
                 }
             },
-            {"$sample": {"size": 100 - len(ranked_items)}}
+            {"$sort": {"popularity": -1}},  # Sort by popularity if available
+            {"$limit": 100 - len(ranked_items)}
         ]))
+        
+        # If we still don't have enough, get random items with the same release date criteria
+        if len(additional_items) < (100 - len(ranked_items)):
+            remaining_count = 100 - len(ranked_items) - len(additional_items)
+            existing_ids.extend([item["_id"] for item in additional_items])
+            
+            random_items = list(db[media_type].aggregate([
+                {
+                    "$match": {
+                        "_id": {"$nin": existing_ids},
+                        "$or": [
+                            {"release_date": {"$gt": current_time}},
+                            {"release_date": None}
+                        ]
+                    }
+                },
+                {"$sample": {"size": remaining_count}}
+            ]))
+            additional_items.extend(random_items)
+        
+        print(f"Found {len(additional_items)} additional items to fill the leaderboard")
         
         # Add them to ranked items with 0 watchlist count
         for item in additional_items:
@@ -57,6 +86,7 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
     for index, item in enumerate(ranked_items, 1):
         item["rank"] = index
     
+    print(f"Final leaderboard for {media_type} has {len(ranked_items)} items")
     return ranked_items
 
 def update_leaderboards(mongo, redis_client=None):
