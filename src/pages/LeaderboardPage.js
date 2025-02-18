@@ -12,7 +12,9 @@ import {
   Spinner,
   Center,
   Icon,
-  useToast
+  useToast,
+  Box,
+  ButtonGroup
 } from '@chakra-ui/react';
 import { FaFire } from 'react-icons/fa';
 import Header from '../components/Header';
@@ -27,15 +29,15 @@ const mediaTypeOptions = [
 ];
 
 const timeframeOptions = [
-  { value: 'weekly', label: 'This Week' },
-  { value: 'monthly', label: 'This Month' },
+  { value: 'weekly', label: 'Week' },
+  { value: 'monthly', label: 'Month' },
 ];
 
 const LeaderboardPage = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [mediaTypeIndex, setMediaTypeIndex] = useState(0); // Default to TV Shows
-  const [timeframeIndex, setTimeframeIndex] = useState(0); // Default to Weekly
+  const [mediaTypeIndex, setMediaTypeIndex] = useState(0);
+  const [timeframeIndex, setTimeframeIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [userWatchlist, setUserWatchlist] = useState([]);
@@ -109,68 +111,53 @@ const LeaderboardPage = () => {
   return (
     <>
       <Header />
-      <Container maxW="1200px" mx="auto" p={4} bg="brand.400" borderRadius="xl" boxShadow="md">
+      <Container maxW="1400px" mx="auto" p={{ base: 2, md: 4 }} bg="brand.400" borderRadius="xl" boxShadow="md">
         {/* Header Section */}
-        <HStack justify="space-between" mb={6}>
-          <Heading as="h2" size="xl" color="brand.500">
-            <Icon as={FaFire} color="red.500" mr={2} />
-            Most Anticipated Releases
-          </Heading>
-        </HStack>
+        <Heading as="h2" size="xl" color="brand.500" mb={6}>
+          Most Tracked This {timeframeOptions[timeframeIndex].label}
+        </Heading>
 
         {/* Filters Section */}
-        <VStack spacing={4} mb={6}>
+        <VStack spacing={4} mb={6} align="stretch">
           {/* Timeframe Tabs */}
           <Tabs 
             index={timeframeIndex} 
             onChange={handleTimeframeChange} 
-            variant="soft-rounded" 
-            colorScheme="brand" 
             width="100%"
+            variant="line"
+            colorScheme="brand"
           >
             <TabList>
               {timeframeOptions.map((option) => (
                 <Tab
                   key={option.value}
                   _selected={{
-                    bg: 'brand.100',
-                    color: 'white',
-                  }}
-                  _hover={{
-                    bg: 'brand.200',
+                    color: 'brand.500',
+                    borderColor: 'brand.500'
                   }}
                 >
-                  {option.label}
+                  This {option.label}
                 </Tab>
               ))}
             </TabList>
           </Tabs>
 
-          {/* Media Type Tabs */}
-          <Tabs 
-            index={mediaTypeIndex} 
-            onChange={handleMediaTypeChange} 
-            variant="soft-rounded" 
-            colorScheme="brand" 
-            width="100%"
-          >
-            <TabList>
-              {mediaTypeOptions.map((option) => (
-                <Tab
+          {/* Media Type Pills */}
+          <Box>
+            <ButtonGroup spacing={2} size="md" variant="outline">
+              {mediaTypeOptions.map((option, index) => (
+                <Button
                   key={option.value}
-                  _selected={{
-                    bg: 'brand.100',
-                    color: 'white',
-                  }}
-                  _hover={{
-                    bg: 'brand.200',
-                  }}
+                  onClick={() => handleMediaTypeChange(index)}
+                  colorScheme="brand"
+                  variant={mediaTypeIndex === index ? "solid" : "outline"}
+                  borderRadius="full"
                 >
                   {option.label}
-                </Tab>
+                </Button>
               ))}
-            </TabList>
-          </Tabs>
+            </ButtonGroup>
+          </Box>
         </VStack>
 
         {/* Content Section */}
@@ -179,15 +166,22 @@ const LeaderboardPage = () => {
             <Spinner size="xl" color="brand.100" />
           </Center>
         ) : (
-          <VStack spacing={4} align="stretch">
-            {items.map((item) => (
-              <LeaderboardCard
-                key={`${item.item_id}-${item.rank}`}
-                item={item}
-                userWatchlist={userWatchlist}
-                refetchWatchlist={fetchUserWatchlist}
-              />
-            ))}
+          <>
+            {/* Two-column grid on desktop, single column on mobile */}
+            <Box 
+              display="grid" 
+              gridTemplateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }}
+              gap={{ base: 4, md: 6 }}
+            >
+              {items.map((item) => (
+                <LeaderboardCard
+                  key={`${item.item_id}-${item.rank}`}
+                  item={item}
+                  userWatchlist={userWatchlist}
+                  refetchWatchlist={fetchUserWatchlist}
+                />
+              ))}
+            </Box>
             
             {items.length === 0 && !loading && (
               <Text py={10} textAlign="center" color="brand.500">
@@ -208,7 +202,7 @@ const LeaderboardPage = () => {
                 </Button>
               </Center>
             )}
-          </VStack>
+          </>
         )}
       </Container>
     </>

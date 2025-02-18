@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Box, Text, Spinner, Center } from '@chakra-ui/react';
+import { Box, Text, Spinner, Center, Button, HStack, Spacer, Icon } from '@chakra-ui/react';
+import { FaArrowRight } from 'react-icons/fa';
 import Header from '../components/Header';
 import ContentToggle from '../components/ContentToggle';
 import FeaturedRelease from '../components/FeaturedRelease';
@@ -8,8 +9,10 @@ import Carousel from '../components/Carousel';
 import DetailsModal from '../components/DetailsModal';
 import DismissibleBanner from '../components/DismissibleBanner';
 import { getTrendingMedia, getUpcomingMedia, getUserWatchlist, getFeaturedRelease } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = ({ user }) => {
+  const navigate = useNavigate();
   // Load last selected tab from localStorage
   const getInitialMediaType = () => {
     const storedType = localStorage.getItem('selectedMediaType');
@@ -121,7 +124,7 @@ const HomePage = ({ user }) => {
     return () => clearTimeout(timeoutId);
   }, [mediaType]);
 
-  // ✅ Memoize parsed data so React doesn’t keep recalculating
+  // ✅ Memoize parsed data so React doesn't keep recalculating
   const memoizedTrendingData = useMemo(() => trendingData, [trendingData]);
   const memoizedUpcomingData = useMemo(() => {
     return [...upcomingReleasesData].sort((a, b) => {
@@ -223,10 +226,24 @@ const HomePage = ({ user }) => {
             Upcoming Releases
           </Text>
           {loadingUpcoming ? <Spinner size="xl" /> : <Carousel items={memoizedUpcomingData} userWatchlist={userWatchlist} refetchWatchlist={fetchUserWatchlist}/>}
-          <Text fontSize="2xl" fontWeight="bold" mb={4}>
-            Trending
-          </Text>
-          {loadingTrending ? <Spinner size="xl" /> : <Carousel items={memoizedTrendingData} userWatchlist={userWatchlist}refetchWatchlist={fetchUserWatchlist} />}
+          
+          <HStack justify="space-between" align="center" mb={4}>
+            <Text fontSize="2xl" fontWeight="bold">
+              Trending
+            </Text>
+            <Text
+              color="brand.100"
+              fontSize="md"
+              fontWeight="medium"
+              cursor="pointer"
+              onClick={() => navigate('/leaderboard')}
+              pr={4}
+            >
+              View More
+            </Text>
+          </HStack>
+          
+          {loadingTrending ? <Spinner size="xl" /> : <Carousel items={memoizedTrendingData} userWatchlist={userWatchlist} refetchWatchlist={fetchUserWatchlist} />}
           <WatchlistPreview watchlist={userWatchlist} mediaType={mediaType} userId={user?.uid} />
         </Box>
       </Box>

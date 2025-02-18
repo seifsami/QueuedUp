@@ -1,6 +1,6 @@
 import React from "react";
-import { Box, Text, Icon, Flex } from "@chakra-ui/react";
-import { FaGem, FaBullhorn, FaChartLine, FaRocket, FaFire } from "react-icons/fa";
+import { Box, Text, Icon, Flex, HStack, Tooltip } from "@chakra-ui/react";
+import { FaGem, FaBullhorn, FaChartLine, FaRocket, FaFire, FaInfoCircle } from "react-icons/fa";
 
 // Define the hype level categories
 const hypeLevels = [
@@ -16,15 +16,34 @@ const getHypeLabel = (percentage) => {
   return hypeLevels.find(level => percentage >= level.min && percentage < level.max) || hypeLevels[hypeLevels.length - 1];
 };
 
-const HypeMeter = ({ hypeMeterPercentage }) => {
+const HypeMeter = ({ hypeMeterPercentage, showTooltip = false }) => {
   const hypeInfo = getHypeLabel(hypeMeterPercentage);
 
   return (
     <Box mt={4} textAlign="left">
       {/* Hype Meter Header */}
-      <Text fontSize="xl" fontWeight="bold" mb={2} display="flex" alignItems="center">
-        <Icon as={FaFire} color="red.500" mr={2} /> Hype Meter
-      </Text>
+      <HStack spacing={2} mb={2} align="center">
+        <Icon as={FaFire} color="red.500" />
+        <Text fontSize="xl" fontWeight="bold">Hype Meter</Text>
+        {showTooltip && (
+          <Tooltip 
+            label="Hype Meter is based on lifetime tracking. This week's ranking is based on new watchlist adds."
+            bg="gray.700"
+            color="white"
+            placement="right"
+            hasArrow
+          >
+            <Box display="inline-block">
+              <Icon 
+                as={FaInfoCircle} 
+                color="gray.400" 
+                cursor="pointer"
+                _hover={{ color: "gray.600" }}
+              />
+            </Box>
+          </Tooltip>
+        )}
+      </HStack>
 
       {/* Filled Hype Bar */}
       <Box 

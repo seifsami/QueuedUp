@@ -9,10 +9,9 @@ import {
   useColorModeValue,
   Tooltip,
 } from '@chakra-ui/react';
-import { FaCalendarAlt, FaInfoCircle, FaFire } from 'react-icons/fa';
+import { FaCalendarAlt, FaInfoCircle, FaUser, FaTv, FaFilm } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import NotifyMeButton from './NotifyMeButton';
-import HypeMeter from './HypeMeter';
 
 const defaultImages = {
   books: "https://queuedup-backend-6d9156837adf.herokuapp.com/static/heather-green-iB9YTvq2rZ8-unsplash.jpg",
@@ -33,6 +32,17 @@ const formatReleaseDate = (dateString) => {
   });
 };
 
+const getCreatorIcon = (mediaType) => {
+  switch (mediaType) {
+    case 'movies':
+      return FaFilm;
+    case 'tv_seasons':
+      return FaTv;
+    default:
+      return FaUser;
+  }
+};
+
 const LeaderboardCard = ({ 
   item, 
   userWatchlist, 
@@ -40,23 +50,44 @@ const LeaderboardCard = ({
 }) => {
   const bg = useColorModeValue('white', 'gray.700');
   const hoverBg = useColorModeValue('gray.100', 'gray.600');
-  const rankingColor = useColorModeValue('brand.500', 'brand.300');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const navigate = useNavigate();
 
+  // Get rank color based on position
+  const getRankColor = (rank) => {
+    switch (rank) {
+      case 1:
+        return { color: 'yellow.400', weight: '800' }; // Gold
+      case 2:
+        return { color: 'gray.400', weight: '800' }; // Silver
+      case 3:
+        return { color: 'orange.400', weight: '800' }; // Bronze
+      default:
+        return { color: 'brand.500', weight: 'bold' }; // Default color
+    }
+  };
+
+  const rankStyle = getRankColor(item.rank);
+
   const handleCardClick = (event) => {
+    // Only navigate if the click wasn't on the NotifyMeButton
+    if (!event.defaultPrevented) {
+      if (item.slug) {
+        navigate(`/media/${item.media_type}/${item.slug}`);
+      } else {
+        console.error("Missing slug for item:", item);
+      }
+    }
+  };
+
+  const handleButtonClick = (event) => {
     event.preventDefault();
     event.stopPropagation();
-
-    if (item.slug) {
-      navigate(`/media/${item.media_type}/${item.slug}`);
-    } else {
-      console.error("Missing slug for item:", item);
-    }
   };
 
   const formattedDate = formatReleaseDate(item.release_date);
   const showTBDTooltip = formattedDate === "TBD";
+  const CreatorIcon = getCreatorIcon(item.media_type);
 
   return (
     <Box
@@ -65,103 +96,182 @@ const LeaderboardCard = ({
       onClick={handleCardClick}
       cursor="pointer"
     >
-      <HStack
-        p={{ base: 2, md: 4 }}
+      <Box
+        p={{ base: 3, md: 4 }}
         shadow="md"
         borderWidth="1px"
         borderColor={borderColor}
         borderRadius="lg"
         bg={bg}
-        minHeight="160px"
         _hover={{ bg: hoverBg }}
-        spacing={4}
         position="relative"
+        maxW={{ base: "85%", md: "100%" }}
+        mx="auto"
       >
-        {/* Ranking Number */}
-        <Box
-          position="absolute"
-          top={2}
-          left={2}
-          fontSize="2xl"
-          fontWeight="bold"
-          color={rankingColor}
-          zIndex={1}
-        >
-          #{item.rank}
-        </Box>
-
-        <HStack spacing={4} width="100%" pl={12}>
-          {/* Image */}
-          <Box width="120px" height="160px" flexShrink={0}>
-            <Image
-              src={item.image || defaultImages[item.media_type || "books"]}
-              alt={item.title}
-              width="100%"
-              height="100%"
-              objectFit="cover"
-              borderRadius="md"
-            />
-          </Box>
-
-          {/* Content Section */}
-          <VStack align="start" flex={1} spacing={2} minWidth={0}>
-            {/* Title and Creator */}
+        {/* Desktop Layout */}
+        <Box display={{ base: 'none', md: 'block' }}>
+          <HStack align="start" spacing={3}>
+            {/* Rank Number */}
             <Text 
-              fontWeight="bold" 
-              fontSize="lg"
-              noOfLines={2}
+              fontSize="2xl"
+              fontWeight={rankStyle.weight}
+              color={rankStyle.color}
+              minW="32px"
             >
-              {item.title}
+              #{item.rank}
             </Text>
-            <Text fontSize="sm" color="gray.500">
-              {item.creator || 'N/A'}
-            </Text>
-            
-            {/* Release Date */}
-            {showTBDTooltip ? (
-              <Tooltip 
-                hasArrow 
-                label="No release date yet. Add to your watchlist & we'll notify you the second it's announced!" 
-                bg="gray.700" 
-                color="white"
-                placement="top"
-              >
-                <HStack spacing={2} color="gray.500">
-                  <Icon as={FaCalendarAlt} />
-                  <Text>TBD</Text>
-                  <Icon as={FaInfoCircle} />
-                </HStack>
-              </Tooltip>
-            ) : (
-              <HStack spacing={2} color="gray.500">
-                <Icon as={FaCalendarAlt} />
-                <Text>{formattedDate}</Text>
-              </HStack>
-            )}
 
-            {/* Hype Meter Section */}
-            <Box width="100%" maxW="200px">
-              <HypeMeter 
-                hypeMeterPercentage={item.hype_meter_percentage || 0} 
-                tooltipContent="Hype Score is based on the number of users tracking this item compared to the most-tracked item"
+            {/* Left Column: Image */}
+            <Box width="140px">
+              <Image
+                src={item.image || defaultImages[item.media_type || "books"]}
+                alt={item.title}
+                width="140px"
+                height="180px"
+                objectFit="cover"
+                borderRadius="md"
               />
             </Box>
-          </VStack>
 
-          {/* Notify Me Button */}
-          <Box>
-            <NotifyMeButton
-              item={item}
-              userWatchlist={userWatchlist}
-              refetchWatchlist={refetchWatchlist}
-              buttonProps={{
-                size: 'md',
-                width: '120px'
-              }}
-            />
-          </Box>
-        </HStack>
-      </HStack>
+            {/* Content Column */}
+            <VStack align="start" flex={1} spacing={2}>
+              <Text 
+                fontWeight="bold" 
+                fontSize="xl"
+                noOfLines={2}
+              >
+                {item.title}
+              </Text>
+
+              <HStack spacing={2}>
+                <Icon as={CreatorIcon} color="gray.500" boxSize={5} />
+                <Text fontSize="lg" color="gray.700" fontWeight="medium">
+                  {item.creator || 'N/A'}
+                </Text>
+              </HStack>
+              
+              {showTBDTooltip ? (
+                <Tooltip 
+                  hasArrow 
+                  label="No release date yet. Add to your watchlist & we'll notify you the second it's announced!" 
+                  bg="gray.700" 
+                  color="white"
+                  placement="top"
+                >
+                  <HStack spacing={2} color="gray.600">
+                    <Icon as={FaCalendarAlt} boxSize={5} />
+                    <Text fontSize="lg">TBD</Text>
+                    <Icon as={FaInfoCircle} />
+                  </HStack>
+                </Tooltip>
+              ) : (
+                <HStack spacing={2} color="gray.600">
+                  <Icon as={FaCalendarAlt} boxSize={5} />
+                  <Text fontSize="lg">{formattedDate}</Text>
+                </HStack>
+              )}
+
+              <Box width="180px" onClick={handleButtonClick}>
+                <NotifyMeButton
+                  item={{
+                    ...item,
+                    _id: item.item_id || item._id, // Ensure we have the correct ID format
+                    media_type: item.media_type
+                  }}
+                  userWatchlist={userWatchlist}
+                  refetchWatchlist={refetchWatchlist}
+                  buttonProps={{
+                    size: 'sm',
+                    width: "full"
+                  }}
+                />
+              </Box>
+            </VStack>
+          </HStack>
+        </Box>
+
+        {/* Mobile Layout */}
+        <Box display={{ base: 'block', md: 'none' }}>
+          <HStack align="start" spacing={2}>
+            {/* Rank Number */}
+            <Text 
+              fontSize="xl"
+              fontWeight={rankStyle.weight}
+              color={rankStyle.color}
+              minW="28px"
+            >
+              #{item.rank}
+            </Text>
+
+            {/* Left: Image */}
+            <Box width="120px">
+              <Image
+                src={item.image || defaultImages[item.media_type || "books"]}
+                alt={item.title}
+                width="120px"
+                height="160px"
+                objectFit="cover"
+                borderRadius="md"
+              />
+            </Box>
+
+            {/* Right: Content */}
+            <VStack align="start" flex={1} spacing={2}>
+              <Text 
+                fontWeight="bold" 
+                fontSize="lg"
+                noOfLines={2}
+              >
+                {item.title}
+              </Text>
+
+              <HStack spacing={2}>
+                <Icon as={CreatorIcon} color="gray.500" />
+                <Text fontSize="md" color="gray.700" fontWeight="medium">
+                  {item.creator || 'N/A'}
+                </Text>
+              </HStack>
+              
+              {showTBDTooltip ? (
+                <Tooltip 
+                  hasArrow 
+                  label="No release date yet. Add to your watchlist & we'll notify you the second it's announced!" 
+                  bg="gray.700" 
+                  color="white"
+                  placement="top"
+                >
+                  <HStack spacing={2} color="gray.600">
+                    <Icon as={FaCalendarAlt} />
+                    <Text>TBD</Text>
+                    <Icon as={FaInfoCircle} />
+                  </HStack>
+                </Tooltip>
+              ) : (
+                <HStack spacing={2} color="gray.600">
+                  <Icon as={FaCalendarAlt} />
+                  <Text>{formattedDate}</Text>
+                </HStack>
+              )}
+
+              <Box onClick={handleButtonClick}>
+                <NotifyMeButton
+                  item={{
+                    ...item,
+                    _id: item.item_id || item._id, // Ensure we have the correct ID format
+                    media_type: item.media_type
+                  }}
+                  userWatchlist={userWatchlist}
+                  refetchWatchlist={refetchWatchlist}
+                  buttonProps={{
+                    size: 'md',
+                    width: "full"
+                  }}
+                />
+              </Box>
+            </VStack>
+          </HStack>
+        </Box>
+      </Box>
     </Box>
   );
 };
