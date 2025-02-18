@@ -37,10 +37,7 @@ from blueprints.search import search_blueprint
 from blueprints.emailnotifs import emailnotifs_blueprint
 from blueprints.requests import request_blueprint
 from blueprints.hype import hype_blueprint
-
-
-
-
+from blueprints.leaderboard import leaderboard_blueprint
 
 app.register_blueprint(user_blueprint, url_prefix='/user')
 app.register_blueprint(user_watchlist_blueprint, url_prefix='/watchlist')
@@ -51,7 +48,7 @@ app.register_blueprint(search_blueprint, url_prefix='/api')
 app.register_blueprint(emailnotifs_blueprint, url_prefix='/api')
 app.register_blueprint(request_blueprint, url_prefix='/api')
 app.register_blueprint(hype_blueprint, url_prefix='/hype')
-
+app.register_blueprint(leaderboard_blueprint, url_prefix='/leaderboard')
 
 @app.route('/')
 def hello():
@@ -121,9 +118,6 @@ def proxy_image(image_path):
     except Exception as e:
         print(f"Error proxying image: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
