@@ -86,6 +86,11 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
               const img = new window.Image();
               const proxiedUrl = getProxiedImageUrl(item.image);
               img.crossOrigin = "anonymous";
+              
+              // Set explicit dimensions to help with mobile rendering
+              img.width = 300;
+              img.height = 450;
+              
               img.onload = () => {
                 console.log(`Loaded image: ${item.title}`);
                 loadedImagesMap[item.item_id] = proxiedUrl;
@@ -93,7 +98,8 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
               };
               img.onerror = () => {
                 console.error(`Failed to load image: ${item.title}`);
-                reject(new Error(`Failed to load image: ${item.title}`));
+                loadedImagesMap[item.item_id] = defaultImages[item.media_type];
+                resolve(img); // Resolve with default image instead of rejecting
               };
               img.src = proxiedUrl;
             })
@@ -106,7 +112,13 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
     } catch (error) {
       console.error('Error preloading images:', error);
       setIsLoading(false);
-      throw error;
+      // Don't throw the error, handle it gracefully
+      toast({
+        title: "Warning",
+        description: "Some images may not load properly. You can still try generating the preview.",
+        status: "warning",
+        duration: 5000,
+      });
     }
   };
 
@@ -143,7 +155,20 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
         await preloadImages();
       }
 
-      // Generate the image exactly as it appears
+      // Wait for a brief moment to ensure DOM is fully rendered
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Force all images to be loaded before capture
+      const imageElements = previewRef.current.getElementsByTagName('img');
+      await Promise.all(Array.from(imageElements).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+      }));
+
+      // Generate the image with specific configuration for mobile
       const dataUrl = await domtoimage.toPng(previewRef.current, {
         quality: 1,
         bgcolor: isDark ? '#171923' : '#FFFFFF',
@@ -151,7 +176,9 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
         width: previewRef.current.offsetWidth,
         style: {
           'border-radius': '0.5rem'
-        }
+        },
+        imagePlaceholder: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+        cacheBust: true
       });
       
       setIsGenerating(false);
@@ -166,10 +193,14 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
   const handleDownload = async () => {
     try {
       const image = await generateImage();
+      
+      // Create a temporary link and trigger download
       const link = document.createElement('a');
       link.href = image;
       link.download = 'queuedup-watchlist.png';
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       
       toast({
         title: "Image saved!",
@@ -180,10 +211,10 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
     } catch (error) {
       console.error('Error downloading:', error);
       toast({
-        title: "Error downloading",
-        description: "Please try again",
+        title: "Error generating image",
+        description: "Please try again. If the issue persists, try with fewer items.",
         status: "error",
-        duration: 3000,
+        duration: 5000,
       });
     }
   };
@@ -280,6 +311,10 @@ const SharePreviewModal = ({ isOpen, onClose, selectedItems }) => {
                               onError={(e) => {
                                 console.error(`Error loading image for ${item.title}`);
                                 e.target.src = defaultImages[item.media_type];
+                              }}
+                              style={{
+                                willChange: 'transform',
+                                backfaceVisibility: 'hidden'
                               }}
                             />
                           </Box>
