@@ -104,6 +104,7 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
                 # If not in cache, calculate it
                 if hype_percentage is None:
                     raw_hype_score = item_details.get("hype_score", 0)
+                    print(f"Raw hype score for {item_id}: {raw_hype_score}")
                     if raw_hype_score is None or raw_hype_score == 0:
                         hype_percentage = random.choice([25, 40])
                     elif raw_hype_score >= 0.8:
@@ -134,6 +135,7 @@ def compute_leaderboard(mongo, media_type, timeframe_days):
                     "creator": creator
                 }
                 enriched_items.append(enriched_item)
+                print(f"Enriched item {item_id} with hype percentage: {hype_percentage}")
         except Exception as e:
             print(f"Error enriching item {item_id}: {str(e)}")
             continue

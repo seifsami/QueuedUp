@@ -42,40 +42,52 @@ def get_leaderboard_data():
     - media_type: books, movies, or tv_seasons
     - page: page number (1-based), defaults to 1
     """
-    timeframe = request.args.get('timeframe')
-    media_type = request.args.get('media_type')
-    page = max(1, int(request.args.get('page', 1)))  # Default to page 1, ensure it's at least 1
-    
-    ITEMS_PER_PAGE = 20
-    skip = (page - 1) * ITEMS_PER_PAGE
-    
-    # Validate parameters
-    if timeframe not in ['weekly', 'monthly']:
-        return jsonify({"error": "Invalid timeframe. Use 'weekly' or 'monthly'"}), 400
-    
-    if media_type not in ['books', 'movies', 'tv_seasons']:
-        return jsonify({"error": "Invalid media type"}), 400
-        
-    collection_name = f"leaderboard_{timeframe}_{media_type}"
-    cache_key = f"api_{collection_name}_page_{page}"
-    
     try:
+        timeframe = request.args.get('timeframe')
+        media_type = request.args.get('media_type')
+        page = max(1, int(request.args.get('page', 1)))  # Default to page 1, ensure it's at least 1
+        
+        ITEMS_PER_PAGE = 20
+        skip = (page - 1) * ITEMS_PER_PAGE
+        
+        # Validate parameters
+        if timeframe not in ['weekly', 'monthly']:
+            return jsonify({"error": "Invalid timeframe. Use 'weekly' or 'monthly'"}), 400
+        
+        if media_type not in ['books', 'movies', 'tv_seasons']:
+            return jsonify({"error": "Invalid media type"}), 400
+            
+        collection_name = f"leaderboard_{timeframe}_{media_type}"
+        cache_key = f"api_{collection_name}_page_{page}"
+        
+        print(f"Fetching leaderboard for collection: {collection_name}")
+        
         # Check Redis cache first
         redis_client = current_app.config.get("REDIS_CLIENT")
         if redis_client:
             cached_data = redis_client.get(cache_key)
             if cached_data:
+                print("Using cached data")
                 return jsonify(json.loads(cached_data)), 200
         
         # If no cache or no Redis, get from MongoDB and enrich with item details
         mongo = current_app.extensions['pymongo']
         db = mongo.cx["QueuedUpDBnew"]
         
+        print("Fetching from MongoDB...")
         # Get base leaderboard data
         leaderboard_data = db[collection_name].find_one({"_id": "leaderboard"})
+        print(f"Found leaderboard data: {leaderboard_data is not None}")
+        
         if not leaderboard_data:
-            return jsonify({"error": "Leaderboard not found"}), 404
+            print("No leaderboard data found, computing...")
+            # If leaderboard not found, compute it
+            update_leaderboards(mongo, redis_client)
+            leaderboard_data = db[collection_name].find_one({"_id": "leaderboard"})
+            if not leaderboard_data:
+                return jsonify({"error": "Leaderboard not found"}), 404
 
+        print(f"Total items in leaderboard: {len(leaderboard_data.get('items', []))}")
         total_items = len(leaderboard_data["items"])
         total_pages = (total_items + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
 
@@ -84,38 +96,13 @@ def get_leaderboard_data():
 
         # Get the paginated slice of items
         paginated_items = leaderboard_data["items"][skip:skip + ITEMS_PER_PAGE]
+        print(f"Paginated items: {len(paginated_items)}")
         
-        # Get item details for the paginated items
-        item_ids = [ObjectId(item["_id"]) for item in paginated_items]
-        items_collection = db[media_type]
-        items_details = {
-            str(item["_id"]): item 
-            for item in items_collection.find({"_id": {"$in": item_ids}})
-        }
-
-        # Combine leaderboard data with item details
-        enriched_items = []
-        for item in paginated_items:
-            item_id = str(item["_id"])
-            if item_id in items_details:
-                details = items_details[item_id]
-                enriched_items.append({
-                    "rank": item["rank"],
-                    "item_id": item_id,
-                    "watchlist_count": item["watchlist_count"],
-                    "title": details.get("title"),
-                    "release_date": format_datetime(details.get("release_date")),
-                    "image": details.get("image"),
-                    "hype_score": details.get("hype_meter_percentage", 0),
-                    "slug": details.get("slug"),
-                    "media_type": media_type
-                })
-
         response_data = {
             "timeframe": timeframe,
             "media_type": media_type,
             "last_updated": format_datetime(leaderboard_data["last_updated"]),
-            "items": enriched_items,
+            "items": paginated_items,
             "pagination": {
                 "page": page,
                 "total_pages": total_pages,
@@ -136,8 +123,12 @@ def get_leaderboard_data():
         
         return jsonify(response_data), 200
         
-    except ValueError as e:
-        return jsonify({"error": "Invalid page number"}), 400
     except Exception as e:
-        print(f"Error retrieving leaderboard: {str(e)}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        import traceback
+        error_details = {
+            "status": "error",
+            "message": str(e),
+            "traceback": traceback.format_exc()
+        }
+        print(f"Error retrieving leaderboard: {error_details}")
+        return jsonify(error_details), 500
