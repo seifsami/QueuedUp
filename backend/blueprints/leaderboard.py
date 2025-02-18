@@ -4,6 +4,12 @@ import json
 from datetime import datetime
 from bson import json_util, ObjectId
 
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
+
 leaderboard_blueprint = Blueprint('leaderboard_blueprint', __name__)
 
 def parse_json(data):
@@ -98,6 +104,11 @@ def get_leaderboard_data():
         paginated_items = leaderboard_data["items"][skip:skip + ITEMS_PER_PAGE]
         print(f"Paginated items: {len(paginated_items)}")
         
+        # Convert all datetime objects in paginated items to ISO format strings
+        for item in paginated_items:
+            if 'release_date' in item and isinstance(item['release_date'], datetime):
+                item['release_date'] = item['release_date'].isoformat()
+        
         response_data = {
             "timeframe": timeframe,
             "media_type": media_type,
@@ -118,7 +129,7 @@ def get_leaderboard_data():
             redis_client.setex(
                 cache_key,
                 24 * 60 * 60,  # 24 hours
-                json.dumps(response_data)
+                json.dumps(response_data, cls=DateTimeEncoder)
             )
         
         return jsonify(response_data), 200
