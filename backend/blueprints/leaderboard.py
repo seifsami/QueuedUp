@@ -10,6 +10,12 @@ def parse_json(data):
     """Convert MongoDB BSON to JSON-serializable format"""
     return json.loads(json_util.dumps(data))
 
+def format_datetime(dt):
+    """Format datetime object to ISO format string"""
+    if isinstance(dt, datetime):
+        return dt.isoformat()
+    return dt
+
 @leaderboard_blueprint.route('/update_leaderboards', methods=['POST'])
 def trigger_leaderboard_update():
     """
@@ -83,7 +89,7 @@ def get_leaderboard_data():
                     "item_id": item_id,
                     "watchlist_count": item["watchlist_count"],
                     "title": details.get("title"),
-                    "release_date": details.get("release_date"),
+                    "release_date": format_datetime(details.get("release_date")),
                     "image": details.get("image"),
                     "hype_score": details.get("hype_meter_percentage", 0),
                     "slug": details.get("slug"),
@@ -93,7 +99,7 @@ def get_leaderboard_data():
         response_data = {
             "timeframe": timeframe,
             "media_type": media_type,
-            "last_updated": leaderboard_data["last_updated"],
+            "last_updated": format_datetime(leaderboard_data["last_updated"]),
             "items": enriched_items
         }
         
@@ -102,7 +108,7 @@ def get_leaderboard_data():
             redis_client.setex(
                 f"api_{collection_name}",
                 24 * 60 * 60,  # 24 hours
-                json.dumps(response_data)
+                json.dumps(response_data)  # Now JSON-serializable because we formatted the dates
             )
         
         return jsonify(response_data), 200
