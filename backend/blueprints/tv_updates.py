@@ -7,23 +7,23 @@ tv_updates_blueprint = Blueprint('tv_updates_blueprint', __name__)
 def run_tv_updates():
     """
     Manually trigger TV shows update job.
-    This endpoint will be called by Heroku Scheduler daily, but only runs on Mondays.
+    This endpoint will be called by Heroku Scheduler daily, but only runs on the 1st of each month.
     """
     print("Manually triggering TV updates job")
     try:
         from datetime import datetime
         today = datetime.now()
         
-        # Check if today is Monday before running
-        if today.weekday() != 0:  # Not Monday
-            print(f"📅 Today is {today.strftime('%A')}. TV updates only run on Mondays. Skipping...")
+        # Check if today is the 1st of the month before running
+        if today.day != 1:  # Not the 1st
+            print(f"📅 Today is the {today.day}. TV updates only run on the 1st of each month. Skipping...")
             return jsonify({
                 "status": "skipped", 
-                "message": f"TV updates only run on Mondays. Today is {today.strftime('%A')}"
+                "message": f"TV updates only run on the 1st of each month. Today is the {today.day}"
             }), 200
         
-        # It's Monday, run the updates
-        print("📡 It's Monday! Running TV updates...")
+        # It's the 1st of the month, run the updates
+        print("📡 It's the 1st of the month! Running TV updates...")
         with current_app.app_context():
             update_tv_shows()
             
