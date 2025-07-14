@@ -143,7 +143,22 @@ def sync_to_mongodb(tv_shows_df):
     db = client[DATABASE_NAME]
     collection = db[COLLECTION_NAME]
 
+    # Set title field
     tv_shows_df['title'] = tv_shows_df.apply(lambda x: f"{x['name']} Season {x['upcoming_season']}", axis=1)
+
+    # Parse dates safely
+    def parse_date_safe(val):
+        if pd.isna(val) or not val:
+            return None
+        if isinstance(val, datetime):
+            return val.replace(tzinfo=pytz.UTC)
+        if isinstance(val, pd.Timestamp):
+            return val.to_pydatetime().replace(tzinfo=pytz.UTC)
+        try:
+            return datetime.strptime(val, "%Y-%m-%d").replace(tzinfo=pytz.UTC)
+        except Exception:
+            return None
+
     tv_shows_df['release_date'] = tv_shows_df['release_date'].apply(parse_date_safe)
     tv_shows_df['first_air_date'] = tv_shows_df['first_air_date'].apply(parse_date_safe)
 
@@ -151,11 +166,17 @@ def sync_to_mongodb(tv_shows_df):
 
     for _, row in tv_shows_df.iterrows():
         tmdb_id = row['tmdb_id']
-        update_fields = {
-            field: row[field]
-            for field in FIELDS_TO_UPDATE
-            if field in row and row[field] is not None and not (isinstance(row[field], float) and pd.isna(row[field]))
-        }
+
+        update_fields = {}
+        for field in FIELDS_TO_UPDATE:
+            if field in row:
+                val = row[field]
+                if isinstance(val, float) and pd.isna(val):
+                    continue  # skip NaN
+                update_fields[field] = val
+
+        # DEBUG: Ensure release_date is in update_fields
+        # print(f"➡️ Updating TMDB ID {tmdb_id}, release_date = {update_fields.get('release_date')}")
 
         operations.append(
             UpdateOne(
@@ -173,6 +194,7 @@ def sync_to_mongodb(tv_shows_df):
         print(f"• Upserted: {len(result.upserted_ids)}")
     else:
         print("⚠️ No updates to apply.")
+
 
 # === MAIN SCRIPT ENTRY ===
 
