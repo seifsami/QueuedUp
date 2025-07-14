@@ -38,6 +38,7 @@ from blueprints.emailnotifs import emailnotifs_blueprint
 from blueprints.requests import request_blueprint
 from blueprints.hype import hype_blueprint
 from blueprints.leaderboard import leaderboard_blueprint
+from blueprints.tv_updates import tv_updates_blueprint
 
 app.register_blueprint(user_blueprint, url_prefix='/user')
 app.register_blueprint(user_watchlist_blueprint, url_prefix='/watchlist')
@@ -49,6 +50,7 @@ app.register_blueprint(emailnotifs_blueprint, url_prefix='/api')
 app.register_blueprint(request_blueprint, url_prefix='/api')
 app.register_blueprint(hype_blueprint, url_prefix='/hype')
 app.register_blueprint(leaderboard_blueprint, url_prefix='/leaderboard')
+app.register_blueprint(tv_updates_blueprint, url_prefix='/tv_updates')
 
 @app.route('/')
 def hello():
