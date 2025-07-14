@@ -17,11 +17,17 @@ def get_trending_items(mongo, media_type):
 
     items = [item["_id"] for item in trending_items]
 
-    # If less than 20 trending items found, fill the rest with random items with future release dates
+    # If less than 20 trending items found, fill the rest with random items with future release dates OR null release dates
     if len(items) < 20:
         print(f"Found {len(items)} trending items, fetching additional random items to fill up to 20.")
         additional_items = db[media_type].aggregate([
-            {"$match": {"release_date": {"$gte": datetime.now()}, "_id": {"$nin": items}}},
+            {"$match": {
+                "$or": [
+                    {"release_date": {"$gte": datetime.now()}},
+                    {"release_date": None}
+                ], 
+                "_id": {"$nin": items}
+            }},
             {"$sample": {"size": 20 - len(items)}}
         ])
         items.extend([item["_id"] for item in additional_items])
