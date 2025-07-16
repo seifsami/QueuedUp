@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { ModalProvider } from './ModalContext';
 import firebase from './firebaseConfig';
-import './App.css';
 import OnboardingModal from './components/OnboardingModal';
 import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';

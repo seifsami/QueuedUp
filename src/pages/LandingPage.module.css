@@ -44,3 +44,9 @@
     border-radius: 4px; /* md */
     /* Add other styles if needed */
 }
+
+.gradient-divider {
+    height: 2px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
+    margin: 20px 0;
+}

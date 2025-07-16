@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, Button, Flex, VStack, Box} from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import './LandingPage.css';
+import styles from './LandingPage.module.css';
 import FeaturesSection from '../components/FeaturesSection';
 import TailwindButton from '../components/TailwindButton';
 
@@ -34,7 +34,7 @@ const LandingPage = () => {
                 QueuedUp
             </Text>
         </Box>
-            <Flex className="landing-page-flex" bgImage={`${process.env.PUBLIC_URL}/landing.jpg`} 
+            <Flex className={styles['landing-page-flex']} bgImage={`${process.env.PUBLIC_URL}/landing.jpg`}
              position="relative"
              minHeight={{ base: "80vh", md: "70vh" }}
             
@@ -60,7 +60,7 @@ const LandingPage = () => {
                     Get notified when your favorite books, movies, and TV shows are available.
                     </Text>
                     <MotionButton
-                    className="motion-button"
+                    className={styles['motion-button']}
                     size="lg"
                     initial="hidden"
                     animate="visible"
@@ -80,11 +80,11 @@ const LandingPage = () => {
                 </VStack>
                 </Box>
             </Flex>
-            <div className="gradient-divider"></div> 
+            <div className={styles['gradient-divider']}></div>
             <Box bg="white" py={0} px= {10}>
             <FeaturesSection />
             </Box>
-            <div className="gradient-divider"></div> 
+            <div className={styles['gradient-divider']}></div>
             <Box
             textAlign="center"
             pb={12}
