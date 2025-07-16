@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 import FeaturesSection from '../components/FeaturesSection';
+import TailwindButton from '../components/TailwindButton';
 
 const MotionButton = motion(Button);
 
@@ -96,16 +97,9 @@ const LandingPage = () => {
             <Text fontSize="xl" mb={6}>
                 Let us remind you when your favorite book, movie, or TV series continues.
             </Text>
-            <Button
-                size="lg"
-                px={10} // Larger button
-                bg="brand.100"
-                color="white"
-                fontSize="md" // Bigger font size
-                onClick={navigateToHomePage}
-            >
+            <TailwindButton onClick={navigateToHomePage} className="text-lg px-10">
                 Get Started Now
-            </Button>
+            </TailwindButton>
             </Box>
         </>
     );
